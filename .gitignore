@@ -1,0 +1,13 @@
+.vs
+.idea
+.vscode
+
+build
+out
+
+obj
+bin
+
+*.dll
+*.dylib
+*.so

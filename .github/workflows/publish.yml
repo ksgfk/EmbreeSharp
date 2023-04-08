@@ -1,0 +1,74 @@
+name: 'Publish to NuGet'
+
+on:
+  release:
+    types: [published]
+
+env:
+  NuGetDirectory: ${{github.workspace}}/nuget
+  DownloadName: embree_native
+  EmbreeVersion: 4.0.1
+
+jobs:
+  build:
+    name: Build EmbreeSharp
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Download official release
+      uses: robinraju/release-downloader@v1.7
+      with:
+        repository: "embree/embree"
+        tag: "v${{env.EmbreeVersion}}"
+        fileName: "*"
+        out-file-path: ${{env.DownloadName}}
+    - name: Unzip embree win-x64
+      run: 7z x ${{github.workspace}}/${{env.DownloadName}}/embree-${{env.EmbreeVersion}}.x64.windows.zip -o${{github.workspace}} -aoa
+    - name: Unzip embree linux-x64
+      run: |
+          7z x ${{github.workspace}}/${{env.DownloadName}}/embree-${{env.EmbreeVersion}}.x86_64.linux.tar.gz -o${{github.workspace}} -aoa
+          7z x ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x86_64.linux.tar -o${{github.workspace}} -aoa
+    - name: Unzip embree osx-x64
+      run: 7z x ${{github.workspace}}/${{env.DownloadName}}/embree-${{env.EmbreeVersion}}.x86_64.macosx.zip -o${{github.workspace}} -aoa
+    - name: Copy native lib
+      run: |
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x64.windows/bin/embree4.dll -Destination ${{github.workspace}}/EmbreeSharp/runtimes/win-x64/native/
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x64.windows/bin/tbb12.dll -Destination ${{github.workspace}}/EmbreeSharp/runtimes/win-x64/native/
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x64.windows/bin/tbbmalloc.dll -Destination ${{github.workspace}}/EmbreeSharp/runtimes/win-x64/native/
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x86_64.linux/lib/libembree4.so.4 -Destination ${{github.workspace}}/EmbreeSharp/runtimes/linux-x64/native/libembree4.so
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x86_64.linux/lib/libtbb.so.12.7 -Destination ${{github.workspace}}/EmbreeSharp/runtimes/linux-x64/native/libtbb.so
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x86_64.linux/lib/libtbbmalloc.so.2.7 -Destination ${{github.workspace}}/EmbreeSharp/runtimes/linux-x64/native/libtbbmalloc.so
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x86_64.macosx/lib/libembree4.4.dylib -Destination ${{github.workspace}}/EmbreeSharp/runtimes/osx-x64/native/libembree4.dylib
+          Copy-Item ${{github.workspace}}/embree-${{env.EmbreeVersion}}.x86_64.macosx/lib/libtbb.12.7.dylib -Destination ${{github.workspace}}/EmbreeSharp/runtimes/osx-x64/native/libtbb.dylib
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+    - name: Pack
+      run: dotnet pack --configuration Release --output ${{env.NuGetDirectory}}
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: nupkg
+        if-no-files-found: error
+        path: ${{env.NuGetDirectory}}/*.nupkg
+        retention-days: 1
+
+  publish:
+    name: Publish to nuget
+    runs-on: windows-latest
+    needs: build-tinyexr-net
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: nupkg
+        path: ${{env.NuGetDirectory}}
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+    - name: Publish NuGet package
+      run: |
+          foreach($file in (Get-ChildItem "${{env.NuGetDirectory}}" -Recurse -Include *.nupkg)) {
+              dotnet nuget push $file --api-key "${{secrets.NUGET_APIKEY}}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
