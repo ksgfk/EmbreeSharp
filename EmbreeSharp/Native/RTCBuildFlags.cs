@@ -1,5 +1,8 @@
+using System;
+
 namespace EmbreeSharp.Native;
 
+[Flags]
 public enum RTCBuildFlags
 {
     RTC_BUILD_FLAG_NONE = 0,

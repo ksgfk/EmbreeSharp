@@ -1,6 +1,6 @@
 namespace EmbreeSharp.Native;
 
-public enum RTCFormat
+public enum RTCFormat : int
 {
     RTC_FORMAT_UNDEFINED = 0,
     RTC_FORMAT_UCHAR = 0x1001,

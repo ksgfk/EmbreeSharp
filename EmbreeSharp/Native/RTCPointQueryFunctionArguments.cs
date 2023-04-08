@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native;
 
-[StructLayout(LayoutKind.Sequential, Pack = 16)]
+[StructLayout(LayoutKind.Sequential, Pack = 16, Size = 48)]
 public unsafe partial struct RTCPointQueryFunctionArguments
 {
     [NativeTypeName("struct RTCPointQuery *")]

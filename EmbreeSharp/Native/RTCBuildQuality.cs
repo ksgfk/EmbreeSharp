@@ -1,6 +1,6 @@
 namespace EmbreeSharp.Native;
 
-public enum RTCBuildQuality
+public enum RTCBuildQuality : int
 {
     RTC_BUILD_QUALITY_LOW = 0,
     RTC_BUILD_QUALITY_MEDIUM = 1,

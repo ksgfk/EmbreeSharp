@@ -1,6 +1,6 @@
 namespace EmbreeSharp.Native;
 
-public enum RTCGeometryType
+public enum RTCGeometryType : int
 {
     RTC_GEOMETRY_TYPE_TRIANGLE = 0,
     RTC_GEOMETRY_TYPE_QUAD = 1,

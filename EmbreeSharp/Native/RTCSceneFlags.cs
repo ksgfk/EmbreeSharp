@@ -1,6 +1,9 @@
+using System;
+
 namespace EmbreeSharp.Native;
 
-public enum RTCSceneFlags
+[Flags]
+public enum RTCSceneFlags : int
 {
     RTC_SCENE_FLAG_NONE = 0,
     RTC_SCENE_FLAG_DYNAMIC = (1 << 0),
