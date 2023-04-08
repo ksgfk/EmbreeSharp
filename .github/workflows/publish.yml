@@ -59,7 +59,7 @@ jobs:
   publish:
     name: Publish to nuget
     runs-on: windows-latest
-    needs: build-tinyexr-net
+    needs: build
     steps:
     - uses: actions/download-artifact@v3
       with:
