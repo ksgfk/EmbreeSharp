@@ -136,6 +136,11 @@ public class RtcDevice : IDisposable
         }
     }
 
+    ~RtcDevice()
+    {
+        Dispose(disposing: false);
+    }
+
     public RtcScene NewScene()
     {
         return new RtcScene(this);
@@ -150,21 +155,11 @@ public class RtcDevice : IDisposable
     {
         if (!_disposedValue)
         {
-            if (disposing)
-            {
-                // 释放托管状态(托管对象)
-            }
-
             rtcReleaseDevice(_device);
             _device = default;
 
             _disposedValue = true;
         }
-    }
-
-    ~RtcDevice()
-    {
-        Dispose(disposing: false);
     }
 
     public void Dispose()

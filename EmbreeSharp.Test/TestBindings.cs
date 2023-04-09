@@ -11,6 +11,9 @@ namespace EmbreeSharp.Test
         [TestMethod]
         public void TypeSize()
         {
+            //assume that the runtime environment is 64 bit
+            Assert.AreEqual(8, sizeof(nuint));
+
             Assert.AreEqual(8, sizeof(nuint));
             Assert.AreEqual(8, sizeof(RTCDevice));
             Assert.AreEqual(4, sizeof(RTCGeometryType));

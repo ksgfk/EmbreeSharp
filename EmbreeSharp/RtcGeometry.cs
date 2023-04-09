@@ -20,6 +20,11 @@ public class RtcGeometry : IDisposable
 
     public RtcGeometry(RtcDevice device, RTCGeometryType type) : this(device.NativeHandler, type) { }
 
+    ~RtcGeometry()
+    {
+        Dispose(disposing: false);
+    }
+
     public Span<byte> SetNewBuffer(RTCBufferType type, uint slot, RTCFormat format, int byteStride, int itemCount)
     {
         if (byteStride < 0) { ThrowArgumentOutOfRange(nameof(byteStride)); }
@@ -46,21 +51,11 @@ public class RtcGeometry : IDisposable
     {
         if (!_disposedValue)
         {
-            if (disposing)
-            {
-                // 释放托管状态(托管对象)
-            }
-
             rtcReleaseGeometry(_geometry);
             _geometry = default;
 
             _disposedValue = true;
         }
-    }
-
-    ~RtcGeometry()
-    {
-        Dispose(disposing: false);
     }
 
     public void Dispose()

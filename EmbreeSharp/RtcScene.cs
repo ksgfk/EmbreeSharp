@@ -18,6 +18,11 @@ public class RtcScene : IDisposable
 
     public RtcScene(RtcDevice device) : this(device.NativeHandler) { }
 
+    ~RtcScene()
+    {
+        Dispose(disposing: false);
+    }
+
     public uint AttachGeometry(RTCGeometry geometry)
     {
         return rtcAttachGeometry(_scene, geometry);
@@ -77,21 +82,11 @@ public class RtcScene : IDisposable
     {
         if (!_disposedValue)
         {
-            if (disposing)
-            {
-                // 释放托管状态(托管对象)
-            }
-
             rtcReleaseScene(_scene);
             _scene = default;
 
             _disposedValue = true;
         }
-    }
-
-    ~RtcScene()
-    {
-        Dispose(disposing: false);
     }
 
     public void Dispose()
