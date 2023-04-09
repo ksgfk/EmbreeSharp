@@ -113,6 +113,15 @@ public readonly unsafe ref struct RtcBufferView<T>
         return new Span<T>(_ptr, (int)Length);
     }
 
+    public RtcBufferView<TTo> Cast<TTo>()
+    {
+        int toSize = Unsafe.SizeOf<TTo>();
+        int fromSize = Unsafe.SizeOf<T>();
+        long byteCount = fromSize * Length;
+        long toLength = byteCount / toSize;
+        return new RtcBufferView<TTo>(_ptr, toLength);
+    }
+
     public Enumerator GetEnumerator()
     {
         return new Enumerator(this);

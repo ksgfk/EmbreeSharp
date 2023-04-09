@@ -151,6 +151,11 @@ public class RtcDevice : IDisposable
         return new RtcGeometry(this, type);
     }
 
+    public RtcUniqueBuffer NewBuffer(long byteSize)
+    {
+        return new RtcUniqueBuffer(this, byteSize);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposedValue)
