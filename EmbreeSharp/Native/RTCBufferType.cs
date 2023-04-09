@@ -1,6 +1,6 @@
 namespace EmbreeSharp.Native;
 
-public enum RTCBufferType
+public enum RTCBufferType : int
 {
     RTC_BUFFER_TYPE_INDEX = 0,
     RTC_BUFFER_TYPE_VERTEX = 1,
