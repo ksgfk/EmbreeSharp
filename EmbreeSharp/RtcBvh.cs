@@ -6,7 +6,7 @@ using static EmbreeSharp.Native.EmbreeNative;
 
 namespace EmbreeSharp;
 
-public readonly struct BvhNodeView<TNode>
+public readonly struct BvhNodeRef<TNode>
 {
     readonly unsafe void* _ptr;
 
@@ -23,7 +23,7 @@ public readonly struct BvhNodeView<TNode>
 }
 
 public delegate ref TNode RtcCreateNodeCallback<TNode>(RTCThreadLocalAllocator allocator, uint childCount);
-public delegate void RtcSetNodeChildrenCallback<TNode>(ref TNode node, ReadOnlySpan<BvhNodeView<TNode>> children);
+public delegate void RtcSetNodeChildrenCallback<TNode>(ref TNode node, ReadOnlySpan<BvhNodeRef<TNode>> children);
 public delegate void RtcSetNodeBoundsCallback<TNode>(ref TNode node, ReadOnlySpan<RTCBounds> bounds);
 public delegate ref TLeaf RtcCreateLeafCallback<TLeaf>(RTCThreadLocalAllocator allocator, ReadOnlySpan<RTCBuildPrimitive> primitives);
 public delegate void RtcSplitPrimitiveCallback(in RTCBuildPrimitive primitive, uint dimension, float position, ref RTCBounds leftBounds, ref RTCBounds rightBounds);
@@ -43,11 +43,25 @@ public static class RtcThreadLocalAllocator
             return ref Unsafe.AsRef<T>(ptr);
         }
     }
+
+    public static Span<T> Alloc<T>(RTCThreadLocalAllocator allocator, int count, int align) where T : struct
+    {
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+        {
+            ThrowInvalidOperation($"{typeof(T).FullName} is reference type");
+        }
+        unsafe
+        {
+            void* ptr = rtcThreadLocalAlloc(allocator, (nuint)Unsafe.SizeOf<T>() * (nuint)count, (nuint)align);
+            return new Span<T>(ptr, count);
+        }
+    }
 }
 
 public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf : struct
 {
     RTCBVH _bvh;
+    unsafe void* _buildRoot;
     bool _disposedValue;
 
     public RTCBuildQuality BuildQuality { get; set; } = RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM;
@@ -65,6 +79,21 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
     public RtcCreateLeafCallback<TLeaf>? CreateLeaf { get; set; }
     public RtcSplitPrimitiveCallback? SplitPrimitive { get; set; }
     public RtcProgressMonitorFunCallback? BuildProgress { get; set; }
+
+    public ref TNode Root
+    {
+        get
+        {
+            unsafe
+            {
+                if (_buildRoot == null)
+                {
+                    ThrowInvalidOperation("BVH has not built");
+                }
+                return ref Unsafe.AsRef<TNode>(_buildRoot);
+            }
+        }
+    }
 
     public RtcBvh(RTCDevice device)
     {
@@ -86,7 +115,7 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
         Dispose(disposing: false);
     }
 
-    public ref TLeaf Build(RTCBuildPrimitive[] primitives)
+    public ref TNode Build(RTCBuildPrimitive[] primitives)
     {
         RTCBuildPrimitive[] prims;
         if (BuildQuality == RTCBuildQuality.RTC_BUILD_QUALITY_HIGH)
@@ -118,7 +147,7 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
                     setNdCh = (void* nodePtr, void** children, uint childCount, void* userPtr) =>
                     {
                         ref TNode node = ref Unsafe.AsRef<TNode>(nodePtr);
-                        ReadOnlySpan<BvhNodeView<TNode>> c = new(children, (int)childCount);
+                        ReadOnlySpan<BvhNodeRef<TNode>> c = new(children, (int)childCount);
                         SetNodeChildren(ref node, c);
                     };
                 }
@@ -182,7 +211,8 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
                 args.splitPrimitive = spPrim == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(spPrim);
                 args.buildProgress = progress == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(progress);
                 void* root = rtcBuildBVH(&args);
-                return ref Unsafe.AsRef<TLeaf>(root);
+                _buildRoot = root;
+                return ref Unsafe.AsRef<TNode>(root);
             }
         }
     }
