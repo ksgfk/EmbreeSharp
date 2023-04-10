@@ -11,8 +11,18 @@ public abstract class RtcBuffer : IDisposable
 {
     protected RTCBuffer _buffer;
     protected bool _disposedValue;
+    readonly long _length;
 
-    public abstract long Length { get; }
+    public long Length => _length;
+
+    protected RtcBuffer(long length)
+    {
+        if (length < 0)
+        {
+            ThrowArgumentOutOfRange(nameof(length));
+        }
+        _length = length;
+    }
 
     ~RtcBuffer()
     {
@@ -27,7 +37,7 @@ public abstract class RtcBuffer : IDisposable
         }
     }
 
-    public RtcBufferView<byte> GetDataView()
+    public RtcBufferView<byte> AsView()
     {
         IntPtr data = GetData();
         unsafe
@@ -36,7 +46,7 @@ public abstract class RtcBuffer : IDisposable
         }
     }
 
-    public RtcBufferView<T> GetDataView<T>() where T : struct
+    public RtcBufferView<T> AsView<T>() where T : struct
     {
         IntPtr data = GetData();
         unsafe
@@ -45,7 +55,7 @@ public abstract class RtcBuffer : IDisposable
         }
     }
 
-    public Span<byte> GetSpan()
+    public Span<byte> AsSpan()
     {
         if (Length >= int.MaxValue)
         {
@@ -58,9 +68,9 @@ public abstract class RtcBuffer : IDisposable
         }
     }
 
-    public Span<T> GetSpan<T>() where T : struct
+    public Span<T> AsSpan<T>() where T : struct
     {
-        return MemoryMarshal.Cast<byte, T>(GetSpan());
+        return MemoryMarshal.Cast<byte, T>(AsSpan());
     }
 
     protected abstract void Dispose(bool disposing);
@@ -74,18 +84,9 @@ public abstract class RtcBuffer : IDisposable
 
 public sealed class RtcUniqueBuffer : RtcBuffer
 {
-    long _length;
-
-    public override long Length => _length;
-
-    public RtcUniqueBuffer(RTCDevice device, long byteSize)
+    public RtcUniqueBuffer(RTCDevice device, long byteSize) : base(byteSize)
     {
-        if (byteSize < 0)
-        {
-            ThrowArgumentOutOfRange(nameof(byteSize));
-        }
         _buffer = rtcNewBuffer(device, (nuint)byteSize);
-        _length = byteSize;
     }
 
     public RtcUniqueBuffer(RtcDevice device, long byteSize) : this(device.NativeHandler, byteSize) { }
@@ -96,60 +97,89 @@ public sealed class RtcUniqueBuffer : RtcBuffer
         {
             rtcReleaseBuffer(_buffer);
             _buffer = default;
-            _length = 0;
 
             _disposedValue = true;
         }
     }
 }
 
-//public interface ISharedMemory : IDisposable
-//{
-//    IntPtr Ptr { get; }
-//    long Length { get; }
-//}
-
-/*
- * TODO: ref count? or managed by GC... or, only support managed memory.
- * I believe that almost no one will uses native memory in C#. :)
- * So, if someone want use native memory. The best way is: user make sure that that memory is accessible during the life time of RTCBuffer.
- */
-public sealed class RtcSharedBuffer : RtcBuffer
+public class RtcSharedBuffer : RtcBuffer
 {
-    //ISharedMemory _memory;
+    //users should ensure that ptr is valid in the life time of buffer
+    public RtcSharedBuffer(RTCDevice device, IntPtr ptr, long byteSize) : base(byteSize)
+    {
+        unsafe
+        {
+            _buffer = rtcNewSharedBuffer(device, ptr.ToPointer(), (nuint)byteSize);
+        }
+    }
 
-    //public override long Length => _memory.Length;
+    //DO NOT forget to init _buffer
+    protected RtcSharedBuffer(RTCDevice device, long byteSize) : base(byteSize) { }
 
-    //public RtcSharedBuffer(RTCDevice device, ISharedMemory memory)
-    //{
-    //    _memory = memory ?? throw new ArgumentNullException(nameof(memory));
-    //    unsafe
-    //    {
-    //        _buffer = rtcNewSharedBuffer(device, memory.Ptr.ToPointer(), (nuint)memory.Length);
-    //    }
-    //}
-
-    //public RtcSharedBuffer(RtcDevice device, ISharedMemory memory) : this(device.NativeHandler, memory) { }
-
-    //protected override void Dispose(bool disposing)
-    //{
-    //    if (!_disposedValue)
-    //    {
-    //        if (disposing)
-    //        {
-    //            _memory = null!;
-    //        }
-
-    //        rtcReleaseBuffer(_buffer);
-    //        _buffer = default;
-
-    //        _disposedValue = true;
-    //    }
-    //}
-    public override long Length => throw new NotImplementedException();
+    public RtcSharedBuffer(RtcDevice device, IntPtr ptr, long byteSize) : this(device.NativeHandler, ptr, byteSize) { }
 
     protected override void Dispose(bool disposing)
     {
-        throw new NotImplementedException();
+        if (!_disposedValue)
+        {
+            rtcReleaseBuffer(_buffer);
+            _buffer = default;
+
+            _disposedValue = true;
+        }
+    }
+}
+
+public sealed class ManagedRtcSharedBuffer<T> : RtcSharedBuffer where T : struct
+{
+    T[] _array;
+    MemoryHandle _handle;
+
+    public ManagedRtcSharedBuffer(RTCDevice device, T[] array) : base(device, Unsafe.SizeOf<T>() * array.LongLength)
+    {
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+        {
+            ThrowInvalidOperation($"{typeof(T).FullName} is reference type");
+        }
+        _array = array ?? throw new ArgumentNullException(nameof(array));
+        _handle = _array.AsMemory().Pin();
+        unsafe
+        {
+            _buffer = rtcNewSharedBuffer(device, _handle.Pointer, (nuint)Length);
+        }
+    }
+
+    public ManagedRtcSharedBuffer(RtcDevice device, T[] array) : this(device.NativeHandler, array) { }
+
+    public RtcBufferView<T> AsTypedView()
+    {
+        unsafe
+        {
+            return new RtcBufferView<T>((void*)GetData(), Length / Unsafe.SizeOf<T>());
+        }
+    }
+
+    public Span<T> AsTypedSpan()
+    {
+        return _array;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _array = null!;
+            }
+
+            rtcReleaseBuffer(_buffer);
+            _buffer = default;
+            _handle.Dispose();
+            _handle = default;
+
+            _disposedValue = true;
+        }
     }
 }

@@ -156,6 +156,16 @@ public class RtcDevice : IDisposable
         return new RtcUniqueBuffer(this, byteSize);
     }
 
+    public RtcSharedBuffer NewSharedBuffer(IntPtr ptr, long byteSize)
+    {
+        return new RtcSharedBuffer(this, ptr, byteSize);
+    }
+
+    public ManagedRtcSharedBuffer<T> NewSharedBuffer<T>(T[] array) where T : struct
+    {
+        return new ManagedRtcSharedBuffer<T>(this, array);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposedValue)
