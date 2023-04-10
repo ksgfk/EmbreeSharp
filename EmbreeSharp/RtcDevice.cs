@@ -1,6 +1,7 @@
 ﻿using EmbreeSharp.Native;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using static EmbreeSharp.Native.EmbreeNative;
 
@@ -108,11 +109,12 @@ public class RtcDeviceConfig
 public class RtcDevice : IDisposable
 {
     RTCDevice _device;
+    RTCErrorFunction? _errorFunc;
     bool _disposedValue;
 
     public RTCDevice NativeHandler => _device;
 
-    public RtcDevice(RtcDeviceConfig? config = null)
+    public RtcDevice(RtcDeviceConfig? config = null, RTCErrorFunction? errorFunc = null)
     {
         unsafe
         {
@@ -132,6 +134,11 @@ public class RtcDevice : IDisposable
                 {
                     _device = rtcNewDevice((sbyte*)ptr);
                 }
+            }
+            _errorFunc = errorFunc;
+            if (_errorFunc != null)
+            {
+                rtcSetDeviceErrorFunction(_device, Marshal.GetFunctionPointerForDelegate(_errorFunc), null);
             }
         }
     }
@@ -170,6 +177,11 @@ public class RtcDevice : IDisposable
     {
         if (!_disposedValue)
         {
+            if (disposing)
+            {
+                _errorFunc = null;
+            }
+
             rtcReleaseDevice(_device);
             _device = default;
 
