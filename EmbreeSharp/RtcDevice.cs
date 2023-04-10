@@ -193,6 +193,11 @@ public class RtcDevice : IDisposable
         return new ManagedRtcSharedBuffer<T>(this, array);
     }
 
+    public RtcBvh<TNode, TLeaf> NewBvh<TNode, TLeaf>() where TNode : struct where TLeaf : struct
+    {
+        return new RtcBvh<TNode, TLeaf>(this);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposedValue)

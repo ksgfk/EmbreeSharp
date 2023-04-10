@@ -6,25 +6,48 @@ using static EmbreeSharp.Native.EmbreeNative;
 
 namespace EmbreeSharp;
 
-public readonly struct BvhNodeRef<TNode>
+public readonly struct BvhBoundRef
 {
     readonly unsafe void* _ptr;
-
-    public ref TNode Node
+    public unsafe ref RTCBounds Bound => ref Unsafe.AsRef<RTCBounds>(_ptr);
+    unsafe internal BvhBoundRef(void* ptr)
     {
-        get
+        _ptr = ptr;
+    }
+}
+
+public readonly struct BvhNodeRef
+{
+    readonly unsafe void* _ptr;
+    public unsafe IntPtr Ptr => new(_ptr);
+    unsafe internal BvhNodeRef(void* ptr)
+    {
+        _ptr = ptr;
+    }
+
+    public BvhNodeRef<TNode> Cast<TNode>() where TNode : struct
+    {
+        unsafe
         {
-            unsafe
-            {
-                return ref Unsafe.AsRef<TNode>(_ptr);
-            }
+            return new BvhNodeRef<TNode>(_ptr);
         }
     }
 }
 
+public readonly struct BvhNodeRef<TNode>
+{
+    readonly unsafe void* _ptr;
+    public unsafe ref TNode Node => ref Unsafe.AsRef<TNode>(_ptr);
+
+    unsafe internal BvhNodeRef(void* ptr)
+    {
+        _ptr = ptr;
+    }
+}
+
 public delegate ref TNode RtcCreateNodeCallback<TNode>(RTCThreadLocalAllocator allocator, uint childCount);
-public delegate void RtcSetNodeChildrenCallback<TNode>(ref TNode node, ReadOnlySpan<BvhNodeRef<TNode>> children);
-public delegate void RtcSetNodeBoundsCallback<TNode>(ref TNode node, ReadOnlySpan<RTCBounds> bounds);
+public delegate void RtcSetNodeChildrenCallback<TNode>(ref TNode node, ReadOnlySpan<BvhNodeRef> children);
+public delegate void RtcSetNodeBoundsCallback<TNode>(ref TNode node, ReadOnlySpan<BvhBoundRef> bounds);
 public delegate ref TLeaf RtcCreateLeafCallback<TLeaf>(RTCThreadLocalAllocator allocator, ReadOnlySpan<RTCBuildPrimitive> primitives);
 public delegate void RtcSplitPrimitiveCallback(in RTCBuildPrimitive primitive, uint dimension, float position, ref RTCBounds leftBounds, ref RTCBounds rightBounds);
 public delegate bool RtcProgressMonitorFunCallback(double n);
@@ -61,7 +84,7 @@ public static class RtcThreadLocalAllocator
 public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf : struct
 {
     RTCBVH _bvh;
-    unsafe void* _buildRoot;
+    IntPtr _buildResult;
     bool _disposedValue;
 
     public RTCBuildQuality BuildQuality { get; set; } = RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM;
@@ -84,13 +107,13 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
     {
         get
         {
+            if (_buildResult == IntPtr.Zero)
+            {
+                ThrowInvalidOperation("BVH has not built");
+            }
             unsafe
             {
-                if (_buildRoot == null)
-                {
-                    ThrowInvalidOperation("BVH has not built");
-                }
-                return ref Unsafe.AsRef<TNode>(_buildRoot);
+                return ref Unsafe.AsRef<TNode>(_buildResult.ToPointer());
             }
         }
     }
@@ -147,7 +170,7 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
                     setNdCh = (void* nodePtr, void** children, uint childCount, void* userPtr) =>
                     {
                         ref TNode node = ref Unsafe.AsRef<TNode>(nodePtr);
-                        ReadOnlySpan<BvhNodeRef<TNode>> c = new(children, (int)childCount);
+                        ReadOnlySpan<BvhNodeRef> c = new(children, (int)childCount);
                         SetNodeChildren(ref node, c);
                     };
                 }
@@ -157,7 +180,7 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
                     setNdBd = (void* nodePtr, RTCBounds** bounds, uint childCount, void* userPtr) =>
                     {
                         ref TNode node = ref Unsafe.AsRef<TNode>(nodePtr);
-                        ReadOnlySpan<RTCBounds> b = new(bounds, (int)childCount);
+                        ReadOnlySpan<BvhBoundRef> b = new(bounds, (int)childCount);
                         SetNodeBounds(ref node, b);
                     };
                 }
@@ -211,8 +234,8 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
                 args.splitPrimitive = spPrim == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(spPrim);
                 args.buildProgress = progress == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(progress);
                 void* root = rtcBuildBVH(&args);
-                _buildRoot = root;
-                return ref Unsafe.AsRef<TNode>(root);
+                _buildResult = new IntPtr(root);
+                return ref Root;
             }
         }
     }
