@@ -106,6 +106,8 @@ public class RtcDeviceConfig
     }
 }
 
+public delegate void RtcDeviceErrorCallback(RTCError error, string message);
+
 public class RtcDevice : IDisposable
 {
     RTCDevice _device;
@@ -114,7 +116,7 @@ public class RtcDevice : IDisposable
 
     public RTCDevice NativeHandler => _device;
 
-    public RtcDevice(RtcDeviceConfig? config = null, RTCErrorFunction? errorFunc = null)
+    public RtcDevice(RtcDeviceConfig? config = null, RtcDeviceErrorCallback? errorFunc = null)
     {
         unsafe
         {
@@ -135,9 +137,27 @@ public class RtcDevice : IDisposable
                     _device = rtcNewDevice((sbyte*)ptr);
                 }
             }
-            _errorFunc = errorFunc;
-            if (_errorFunc != null)
+            if (_device.Ptr == IntPtr.Zero)
             {
+                RTCError err = rtcGetDeviceError(new() { Ptr = IntPtr.Zero });
+                ThrowInvalidOperation($"cannot create device, error: {err.ToString()}");
+            }
+            if (errorFunc != null)
+            {
+                _errorFunc = (void* userPtr, RTCError code, sbyte* str) =>
+                {
+                    //simple strlen() :)
+                    int i = 0;
+                    for (; i < 4096; i++)
+                    {
+                        if (str[i] == 0)
+                        {
+                            break;
+                        }
+                    }
+                    string msg = Encoding.UTF8.GetString((byte*)str, i);
+                    errorFunc(code, msg);
+                };
                 rtcSetDeviceErrorFunction(_device, Marshal.GetFunctionPointerForDelegate(_errorFunc), null);
             }
         }
