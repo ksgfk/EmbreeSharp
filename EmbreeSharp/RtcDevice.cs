@@ -107,16 +107,18 @@ public class RtcDeviceConfig
 }
 
 public delegate void RtcDeviceErrorCallback(RTCError error, string message);
+public delegate bool RtcMemoryMonitorCallback(long bytes, bool post);
 
 public class RtcDevice : IDisposable
 {
     RTCDevice _device;
     RTCErrorFunction? _errorFunc;
+    RTCMemoryMonitorFunction? _memoryMoitor;
     bool _disposedValue;
 
     public RTCDevice NativeHandler => _device;
 
-    public RtcDevice(RtcDeviceConfig? config = null, RtcDeviceErrorCallback? errorFunc = null)
+    public RtcDevice(RtcDeviceConfig? config = null)
     {
         unsafe
         {
@@ -141,24 +143,6 @@ public class RtcDevice : IDisposable
             {
                 RTCError err = rtcGetDeviceError(new() { Ptr = IntPtr.Zero });
                 ThrowInvalidOperation($"cannot create device, error: {err.ToString()}");
-            }
-            if (errorFunc != null)
-            {
-                _errorFunc = (void* userPtr, RTCError code, sbyte* str) =>
-                {
-                    //simple strlen() :)
-                    int i = 0;
-                    for (; i < 4096; i++)
-                    {
-                        if (str[i] == 0)
-                        {
-                            break;
-                        }
-                    }
-                    string msg = Encoding.UTF8.GetString((byte*)str, i);
-                    errorFunc(code, msg);
-                };
-                rtcSetDeviceErrorFunction(_device, Marshal.GetFunctionPointerForDelegate(_errorFunc), null);
             }
         }
     }
@@ -196,6 +180,66 @@ public class RtcDevice : IDisposable
     public RtcBvh<TNode, TLeaf> NewBvh<TNode, TLeaf>() where TNode : struct where TLeaf : struct
     {
         return new RtcBvh<TNode, TLeaf>(this);
+    }
+
+    public void SetErrorCallback(RtcDeviceErrorCallback? callback)
+    {
+        unsafe
+        {
+            if (callback == null)
+            {
+                rtcSetDeviceErrorFunction(_device, IntPtr.Zero, null);
+                _errorFunc = null;
+            }
+            else
+            {
+                _errorFunc = (void* userPtr, RTCError code, sbyte* str) =>
+                {
+                    //simple strlen() :)
+                    int i = 0;
+                    for (; i < 4096; i++)
+                    {
+                        if (str[i] == 0)
+                        {
+                            break;
+                        }
+                    }
+                    string msg = Encoding.UTF8.GetString((byte*)str, i);
+                    callback(code, msg);
+                };
+                rtcSetDeviceErrorFunction(_device, Marshal.GetFunctionPointerForDelegate(_errorFunc), null);
+            }
+        }
+    }
+
+    public void SetMemoryMonitorCallback(RtcMemoryMonitorCallback? callback)
+    {
+        unsafe
+        {
+            if (callback == null)
+            {
+                rtcSetDeviceMemoryMonitorFunction(_device, IntPtr.Zero, null);
+                _memoryMoitor = null;
+            }
+            else
+            {
+                _memoryMoitor = (void* ptr, long bytes, bool post) =>
+                {
+                    return callback(bytes, post);
+                };
+                rtcSetDeviceErrorFunction(_device, Marshal.GetFunctionPointerForDelegate(_memoryMoitor), null);
+            }
+        }
+    }
+
+    public long GetProperty(RTCDeviceProperty property)
+    {
+        return rtcGetDeviceProperty(_device, property);
+    }
+
+    public void SetProperty(RTCDeviceProperty property, long value)
+    {
+        rtcSetDeviceProperty(_device, property, value);
     }
 
     protected virtual void Dispose(bool disposing)
