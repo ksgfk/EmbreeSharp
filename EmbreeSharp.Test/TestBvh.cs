@@ -26,7 +26,7 @@ namespace EmbreeSharp.Test
         [TestMethod]
         public void Simple()
         {
-            // FIXME: crash on MacOS. do not know why
+            // FIXME: crash on MacOS. unknown why
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 return;
@@ -65,7 +65,7 @@ namespace EmbreeSharp.Test
             bvh.CreateNode = (RTCThreadLocalAllocator allocator, uint childCount) =>
             {
                 Assert.AreEqual(2u, childCount);
-                ref Node node = ref RtcThreadLocalAllocator.Alloc<Node>(allocator, 16);
+                ref Node node = ref allocator.Alloc<Node>(16);
                 return ref node;
             };
             bvh.SetNodeChildren = (ref Node node, ReadOnlySpan<BvhNodeRef> children) =>
@@ -83,7 +83,7 @@ namespace EmbreeSharp.Test
             bvh.CreateLeaf = (RTCThreadLocalAllocator allocator, ReadOnlySpan<RTCBuildPrimitive> primitives) =>
             {
                 Assert.AreEqual(1, primitives.Length);
-                ref Leaf leaf = ref RtcThreadLocalAllocator.Alloc<Leaf>(allocator, 16);
+                ref Leaf leaf = ref allocator.Alloc<Leaf>(16);
                 ref readonly RTCBuildPrimitive prim = ref primitives[0];
                 leaf.Bound = Unsafe.As<RTCBuildPrimitive, RTCBounds>(ref Unsafe.AsRef(in prim));
                 return ref leaf;

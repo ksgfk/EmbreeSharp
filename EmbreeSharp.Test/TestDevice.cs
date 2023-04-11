@@ -72,7 +72,7 @@ namespace EmbreeSharp.Test
             }
             scene.Commit();
             RTCRayHit rayhit = RayUtility.InitRayHit(0, 1, 0, 0, -1, 0);
-            scene.Intersect(in rayhit);
+            scene.Intersect(ref rayhit);
             Assert.IsTrue(RayUtility.IsHit(in rayhit));
         }
     }

@@ -172,12 +172,12 @@ public class RtcDevice : IDisposable
         return new RtcSharedBuffer(this, ptr, byteSize);
     }
 
-    public ManagedRtcSharedBuffer<T> NewSharedBuffer<T>(T[] array) where T : struct
+    public ManagedRtcSharedBuffer<T> NewSharedBuffer<T>(T[] array) where T : unmanaged
     {
         return new ManagedRtcSharedBuffer<T>(this, array);
     }
 
-    public RtcBvh<TNode, TLeaf> NewBvh<TNode, TLeaf>() where TNode : struct where TLeaf : struct
+    public RtcBvh<TNode, TLeaf> NewBvh<TNode, TLeaf>() where TNode : unmanaged where TLeaf : unmanaged
     {
         return new RtcBvh<TNode, TLeaf>(this);
     }
@@ -195,7 +195,7 @@ public class RtcDevice : IDisposable
             {
                 _errorFunc = (void* userPtr, RTCError code, sbyte* str) =>
                 {
-                    //simple strlen() :)
+                    //simple strlen
                     int i = 0;
                     for (; i < 4096; i++)
                     {

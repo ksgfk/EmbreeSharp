@@ -14,6 +14,7 @@ public abstract class RtcBuffer : IDisposable
     readonly long _length;
 
     public long Length => _length;
+    public RTCBuffer NativeHandler => _buffer;
 
     protected RtcBuffer(long length)
     {
@@ -46,7 +47,7 @@ public abstract class RtcBuffer : IDisposable
         }
     }
 
-    public RtcBufferView<T> AsView<T>() where T : struct
+    public RtcBufferView<T> AsView<T>() where T : unmanaged
     {
         IntPtr data = GetData();
         unsafe
@@ -68,7 +69,7 @@ public abstract class RtcBuffer : IDisposable
         }
     }
 
-    public Span<T> AsSpan<T>() where T : struct
+    public Span<T> AsSpan<T>() where T : unmanaged
     {
         return MemoryMarshal.Cast<byte, T>(AsSpan());
     }
@@ -82,6 +83,7 @@ public abstract class RtcBuffer : IDisposable
     }
 }
 
+// managed by embree. concept similar unique_ptr in C++
 public sealed class RtcUniqueBuffer : RtcBuffer
 {
     public RtcUniqueBuffer(RTCDevice device, long byteSize) : base(byteSize)
@@ -103,9 +105,9 @@ public sealed class RtcUniqueBuffer : RtcBuffer
     }
 }
 
+//user should ensure that ptr is valid in the life time of buffer
 public class RtcSharedBuffer : RtcBuffer
 {
-    //users should ensure that ptr is valid in the life time of buffer
     public RtcSharedBuffer(RTCDevice device, IntPtr ptr, long byteSize) : base(byteSize)
     {
         unsafe
@@ -114,10 +116,10 @@ public class RtcSharedBuffer : RtcBuffer
         }
     }
 
-    //DO NOT forget to init _buffer
-    protected RtcSharedBuffer(RTCDevice device, long byteSize) : base(byteSize) { }
-
     public RtcSharedBuffer(RtcDevice device, IntPtr ptr, long byteSize) : this(device.NativeHandler, ptr, byteSize) { }
+
+    //DO NOT forget to init _buffer
+    protected RtcSharedBuffer(long byteSize) : base(byteSize) { }
 
     protected override void Dispose(bool disposing)
     {
@@ -131,17 +133,14 @@ public class RtcSharedBuffer : RtcBuffer
     }
 }
 
-public sealed class ManagedRtcSharedBuffer<T> : RtcSharedBuffer where T : struct
+// C# array as buffer
+public sealed class ManagedRtcSharedBuffer<T> : RtcSharedBuffer where T : unmanaged
 {
     T[] _array;
     MemoryHandle _handle;
 
-    public ManagedRtcSharedBuffer(RTCDevice device, T[] array) : base(device, Unsafe.SizeOf<T>() * array.LongLength)
+    public ManagedRtcSharedBuffer(RTCDevice device, T[] array) : base(Unsafe.SizeOf<T>() * array.LongLength)
     {
-        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-        {
-            ThrowInvalidOperation($"{typeof(T).FullName} is reference type");
-        }
         _array = array ?? throw new ArgumentNullException(nameof(array));
         _handle = _array.AsMemory().Pin();
         unsafe

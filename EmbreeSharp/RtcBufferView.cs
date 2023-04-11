@@ -3,9 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace EmbreeSharp;
 
-#pragma warning disable CS8500
-
-public readonly unsafe ref struct RtcBufferView<T>
+public readonly unsafe ref struct RtcBufferView<T> where T : unmanaged
 {
     readonly T* _ptr;
     readonly long _length;
@@ -24,20 +22,8 @@ public readonly unsafe ref struct RtcBufferView<T>
     }
     public IntPtr NativePtr => new(_ptr);
 
-    public RtcBufferView()
-    {
-        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-        {
-            ThrowInvalidOperation($"{typeof(T).FullName} is reference type");
-        }
-    }
-
     internal RtcBufferView(void* ptr, long length)
     {
-        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-        {
-            ThrowInvalidOperation($"{typeof(T).FullName} is reference type");
-        }
         if (length < 0)
         {
             ThrowArgumentOutOfRange(nameof(length));
@@ -113,7 +99,7 @@ public readonly unsafe ref struct RtcBufferView<T>
         return new Span<T>(_ptr, (int)Length);
     }
 
-    public RtcBufferView<TTo> Cast<TTo>()
+    public RtcBufferView<TTo> Cast<TTo>() where TTo : unmanaged
     {
         int toSize = Unsafe.SizeOf<TTo>();
         int fromSize = Unsafe.SizeOf<T>();
@@ -158,5 +144,3 @@ public readonly unsafe ref struct RtcBufferView<T>
         }
     }
 }
-
-#pragma warning restore CS8500

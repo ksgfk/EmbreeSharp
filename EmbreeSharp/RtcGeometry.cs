@@ -6,6 +6,7 @@ using static EmbreeSharp.Native.EmbreeNative;
 
 namespace EmbreeSharp;
 
+//TODO: traceing buffer slot info? to avoid out of bounds
 public class RtcGeometry : IDisposable
 {
     RTCGeometry _geometry;
@@ -36,7 +37,7 @@ public class RtcGeometry : IDisposable
         }
     }
 
-    public Span<T> SetNewBuffer<T>(RTCBufferType type, uint slot, RTCFormat format, int itemCount) where T : struct
+    public Span<T> SetNewBuffer<T>(RTCBufferType type, uint slot, RTCFormat format, int itemCount) where T : unmanaged
     {
         Span<byte> data = SetNewBuffer(type, slot, format, Unsafe.SizeOf<T>(), itemCount);
         return MemoryMarshal.Cast<byte, T>(data);
@@ -45,6 +46,78 @@ public class RtcGeometry : IDisposable
     public void Commit()
     {
         rtcCommitGeometry(_geometry);
+    }
+
+    public void Enable()
+    {
+        rtcEnableGeometry(_geometry);
+    }
+
+    public void Disable()
+    {
+        rtcDisableGeometry(_geometry);
+    }
+
+    public void SetTimestepCount(uint timeStepCount)
+    {
+        rtcSetGeometryTimeStepCount(_geometry, timeStepCount);
+    }
+
+    public void SetTimeRange(float startTime, float endTime)
+    {
+        rtcSetGeometryTimeRange(_geometry, startTime, endTime);
+    }
+
+    public void SetVertexAttributeCount(uint vertexAttributeCount)
+    {
+        rtcSetGeometryVertexAttributeCount(_geometry, vertexAttributeCount);
+    }
+
+    public void SetMask(uint mask)
+    {
+        rtcSetGeometryMask(_geometry, mask);
+    }
+
+    public void SetBuildQuality(RTCBuildQuality quality)
+    {
+        rtcSetGeometryBuildQuality(_geometry, quality);
+    }
+
+    public void SetMaxRadiusScale(float maxRadiusScale)
+    {
+        rtcSetGeometryMaxRadiusScale(_geometry, maxRadiusScale);
+    }
+
+    public void SetBuffer(RTCBufferType type, uint slot, RTCFormat format, RTCBuffer buffer, long byteOffset, long byteStride, long itemCount)
+    {
+        rtcSetGeometryBuffer(_geometry, type, slot, format, buffer, (nuint)byteOffset, (nuint)byteStride, (nuint)itemCount);
+    }
+
+    public void SetBuffer(RTCBufferType type, uint slot, RTCFormat format, RtcBuffer buffer, long byteOffset, long byteStride, long itemCount)
+    {
+        SetBuffer(type, slot, format, buffer.NativeHandler, byteOffset, byteStride, itemCount);
+    }
+
+    public void SetSharedBuffer(RTCBufferType type, uint slot, RTCFormat format, IntPtr ptr, long byteOffset, long byteStride, long itemCount)
+    {
+        unsafe
+        {
+            rtcSetSharedGeometryBuffer(_geometry, type, slot, format, ptr.ToPointer(), (nuint)byteOffset, (nuint)byteStride, (nuint)itemCount);
+        }
+    }
+
+    public IntPtr GetBufferData(RTCBufferType type, uint slot)
+    {
+        unsafe
+        {
+            void* data = rtcGetGeometryBufferData(_geometry, type, slot);
+            return new IntPtr(data);
+        }
+    }
+
+    public void UpdateBuffer(RTCBufferType type, uint slot)
+    {
+        rtcUpdateGeometryBuffer(_geometry, type, slot);
     }
 
     protected virtual void Dispose(bool disposing)

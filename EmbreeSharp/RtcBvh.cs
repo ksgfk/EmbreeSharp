@@ -1,7 +1,7 @@
+using EmbreeSharp.Native;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using EmbreeSharp.Native;
 using static EmbreeSharp.Native.EmbreeNative;
 
 namespace EmbreeSharp;
@@ -25,23 +25,12 @@ public readonly struct BvhNodeRef
         _ptr = ptr;
     }
 
-    public BvhNodeRef<TNode> Cast<TNode>() where TNode : struct
+    public ref TNode Read<TNode>() where TNode : unmanaged
     {
         unsafe
         {
-            return new BvhNodeRef<TNode>(_ptr);
+            return ref Unsafe.AsRef<TNode>(_ptr);
         }
-    }
-}
-
-public readonly struct BvhNodeRef<TNode>
-{
-    readonly unsafe void* _ptr;
-    public unsafe ref TNode Node => ref Unsafe.AsRef<TNode>(_ptr);
-
-    unsafe internal BvhNodeRef(void* ptr)
-    {
-        _ptr = ptr;
     }
 }
 
@@ -52,14 +41,10 @@ public delegate ref TLeaf RtcCreateLeafCallback<TLeaf>(RTCThreadLocalAllocator a
 public delegate void RtcSplitPrimitiveCallback(in RTCBuildPrimitive primitive, uint dimension, float position, ref RTCBounds leftBounds, ref RTCBounds rightBounds);
 public delegate bool RtcProgressMonitorFunCallback(double n);
 
-public static class RtcThreadLocalAllocator
+public static class RtcThreadLocalAllocatorExtension
 {
-    public static ref T Alloc<T>(RTCThreadLocalAllocator allocator, int align) where T : struct
+    public static ref T Alloc<T>(this RTCThreadLocalAllocator allocator, int align) where T : unmanaged
     {
-        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-        {
-            ThrowInvalidOperation($"{typeof(T).FullName} is reference type");
-        }
         unsafe
         {
             void* ptr = rtcThreadLocalAlloc(allocator, (nuint)Unsafe.SizeOf<T>(), (nuint)align);
@@ -67,21 +52,26 @@ public static class RtcThreadLocalAllocator
         }
     }
 
-    public static Span<T> Alloc<T>(RTCThreadLocalAllocator allocator, int count, int align) where T : struct
+    public static Span<T> Alloc<T>(this RTCThreadLocalAllocator allocator, int count, int align) where T : unmanaged
     {
-        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-        {
-            ThrowInvalidOperation($"{typeof(T).FullName} is reference type");
-        }
         unsafe
         {
             void* ptr = rtcThreadLocalAlloc(allocator, (nuint)Unsafe.SizeOf<T>() * (nuint)count, (nuint)align);
             return new Span<T>(ptr, count);
         }
     }
+
+    public static Span<byte> Alloc(this RTCThreadLocalAllocator allocator, int size, int align)
+    {
+        unsafe
+        {
+            void* ptr = rtcThreadLocalAlloc(allocator, (nuint)size, (nuint)align);
+            return new Span<byte>(ptr, size);
+        }
+    }
 }
 
-public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf : struct
+public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : unmanaged where TLeaf : unmanaged
 {
     RTCBVH _bvh;
     IntPtr _buildResult;
@@ -103,6 +93,7 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
     public RtcSplitPrimitiveCallback? SplitPrimitive { get; set; }
     public RtcProgressMonitorFunCallback? BuildProgress { get; set; }
 
+    public RTCBVH NativeHandler => _bvh;
     public ref TNode Root
     {
         get
@@ -120,14 +111,6 @@ public class RtcBvh<TNode, TLeaf> : IDisposable where TNode : struct where TLeaf
 
     public RtcBvh(RTCDevice device)
     {
-        if (RuntimeHelpers.IsReferenceOrContainsReferences<TNode>())
-        {
-            ThrowInvalidOperation($"{typeof(TNode).FullName} is reference type");
-        }
-        if (RuntimeHelpers.IsReferenceOrContainsReferences<TLeaf>())
-        {
-            ThrowInvalidOperation($"{typeof(TLeaf).FullName} is reference type");
-        }
         _bvh = rtcNewBVH(device);
     }
 
