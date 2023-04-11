@@ -1,6 +1,6 @@
 namespace EmbreeSharp.Native;
 
-public enum RTCSubdivisionMode
+public enum RTCSubdivisionMode : int
 {
     RTC_SUBDIVISION_MODE_NO_BOUNDARY = 0,
     RTC_SUBDIVISION_MODE_SMOOTH_BOUNDARY = 1,

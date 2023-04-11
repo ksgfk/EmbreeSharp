@@ -1,6 +1,6 @@
 namespace EmbreeSharp.Native;
 
-public enum RTCError
+public enum RTCError : int
 {
     RTC_ERROR_NONE = 0,
     RTC_ERROR_UNKNOWN = 1,

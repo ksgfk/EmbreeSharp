@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native;
 
-[StructLayout(LayoutKind.Sequential, Pack = 16)]
+[StructLayout(LayoutKind.Sequential, Pack = 16, Size = 32)]
 public partial struct RTCPointQuery
 {
     public float x;

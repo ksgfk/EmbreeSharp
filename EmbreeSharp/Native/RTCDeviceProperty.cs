@@ -1,6 +1,6 @@
 namespace EmbreeSharp.Native;
 
-public enum RTCDeviceProperty
+public enum RTCDeviceProperty : int
 {
     RTC_DEVICE_PROPERTY_VERSION = 0,
     RTC_DEVICE_PROPERTY_VERSION_MAJOR = 1,

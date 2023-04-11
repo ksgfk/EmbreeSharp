@@ -43,6 +43,11 @@ public static unsafe partial class EmbreeNative
 
     static EmbreeNative()
     {
+        if (RuntimeInformation.OSArchitecture != Architecture.X64 && RuntimeInformation.OSArchitecture != Architecture.Arm64)
+        {
+            throw new PlatformNotSupportedException("EmbreeSharp can only run on 64-bit systems");
+        }
+
         NativeLibrary.SetDllImportResolver(typeof(EmbreeNative).Assembly, (string libraryName, Assembly assembly, DllImportSearchPath? searchPath) =>
         {
             if (libraryName != "embree4")

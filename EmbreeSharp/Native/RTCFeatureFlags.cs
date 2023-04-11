@@ -1,6 +1,9 @@
+using System;
+
 namespace EmbreeSharp.Native;
 
-public enum RTCFeatureFlags
+[Flags]
+public enum RTCFeatureFlags : int
 {
     RTC_FEATURE_FLAG_NONE = 0,
     RTC_FEATURE_FLAG_MOTION_BLUR = 1 << 0,
