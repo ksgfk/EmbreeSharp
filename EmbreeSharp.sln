@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp", "EmbreeSharp\EmbreeSharp.csproj", "{F85C8CBA-88F2-4B90-B4BE-5FA173CAEAFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp.Test", "EmbreeSharp.Test\EmbreeSharp.Test.csproj", "{06A03D0C-C8AD-4EBD-9578-648748BBC44C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{F85C8CBA-88F2-4B90-B4BE-5FA173CAEAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F85C8CBA-88F2-4B90-B4BE-5FA173CAEAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F85C8CBA-88F2-4B90-B4BE-5FA173CAEAFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06A03D0C-C8AD-4EBD-9578-648748BBC44C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06A03D0C-C8AD-4EBD-9578-648748BBC44C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06A03D0C-C8AD-4EBD-9578-648748BBC44C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06A03D0C-C8AD-4EBD-9578-648748BBC44C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
