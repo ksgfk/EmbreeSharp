@@ -46,11 +46,11 @@ namespace EmbreeSharp.Native
         /// Sets the error callback function.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetDeviceErrorFunction(RTCDevice device, RTCErrorFunction error, void* userPtr);
+        public static extern void rtcSetDeviceErrorFunction(RTCDevice device, [NativeType("RTCErrorFunction")] IntPtr error, void* userPtr);
         /// <summary>
         /// Sets the memory monitor callback function.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetDeviceMemoryMonitorFunction(RTCDevice device, RTCMemoryMonitorFunction memoryMonitor, void* userPtr);
+        public static extern void rtcSetDeviceMemoryMonitorFunction(RTCDevice device, [NativeType("RTCMemoryMonitorFunction")] IntPtr memoryMonitor, void* userPtr);
     }
 }
