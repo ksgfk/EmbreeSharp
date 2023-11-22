@@ -1,65 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>EmbreeSharp</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>0.3</AssemblyVersion>
-    <FileVersion>0.3</FileVersion>
-    <RepositoryType>git</RepositoryType>
-    <Description>Embree C# Low-level binding</Description>
-    <Company>ksgfk</Company>
-    <Authors>ksgfk</Authors>
-    <Copyright>Copyright (c) 2023 ksgfk</Copyright>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/ksgfk/EmbreeSharp</RepositoryUrl>
-    <PackageTags>Embree;wrapper</PackageTags>
-    <PackageReleaseNotes>Safe oop wrappers for subset of embree</PackageReleaseNotes>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.3.0</Version>
-
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <DebugType>embedded</DebugType>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
-
- <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <Deterministic>true</Deterministic>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <EnablePackageValidation>true</EnablePackageValidation>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="./runtimes/**/native/*.dll">
-      <Pack>True</Pack>
-      <PackagePath>runtimes</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="./runtimes/**/native/*.dylib">
-      <Pack>True</Pack>
-      <PackagePath>runtimes</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="./runtimes/**/native/*.so">
-      <Pack>True</Pack>
-      <PackagePath>runtimes</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-  </ItemGroup>
 
 </Project>
