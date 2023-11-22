@@ -1,7 +1,9 @@
+using System;
+
 namespace EmbreeSharp.Native
 {
-    public unsafe readonly struct RTCDevice
+    public struct RTCDevice
     {
-        private readonly void* _ptr;
+        public IntPtr Ptr;
     }
 }
