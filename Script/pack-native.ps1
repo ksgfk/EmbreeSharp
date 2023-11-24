@@ -16,3 +16,5 @@ Else
 Invoke-WebRequest -Uri $NugetUri -OutFile $NugetExe
 
 .\pack-native-win-x64.ps1 $EmbreeVersion $OutputDir $NugetExe
+.\pack-native-linux-x64.ps1 $EmbreeVersion $OutputDir $NugetExe
+# .\pack-native-osx-x64.ps1 $EmbreeVersion $OutputDir $NugetExe
