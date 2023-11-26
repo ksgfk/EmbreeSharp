@@ -12,11 +12,13 @@ Install this package from nuget.
 
 Install the native library package for your platform from nuget.
 
+win-x64 native: [embree-win-x64](https://www.nuget.org/packages/embree-win-x64/)
+
+linux-x64 native: [embree-linux-x64](https://www.nuget.org/packages/embree-linux-x64/)
+
 ## Details
 
 Embree is so massive that I uploaded native library separately.
-
-Now available native library is `embree-win-x64` and `embree-linux-x64`. You can find them on nuget
 
 Only support `win-x64` and `linux-x64` because the official only provides binary files for these platforms.
 
