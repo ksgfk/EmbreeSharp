@@ -10,7 +10,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: run nuget package script
-      run: ./Script/pack-native.ps1
+      run: |
+        cd Scripts
+        ./pack-native.ps1
+        cd ..
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       - name: Publish NuGet package
