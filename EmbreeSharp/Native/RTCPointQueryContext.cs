@@ -2,10 +2,12 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    [RTCAlign(16)]
+    [RTCAlign(Alignment)]
     [StructLayout(LayoutKind.Sequential, Size = 144)]
     public unsafe struct RTCPointQueryContext
     {
+        public const int Alignment = 16;
+
         /// <summary>
         /// accumulated 4x4 column major matrices from world space to instance space.
         /// undefined if size == 0.

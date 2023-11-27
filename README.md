@@ -2,7 +2,7 @@
 
 EmbreeSharp is an unofficial C # low-level binding of [embree](https://github.com/embree/embree)
 
-Target framework is `.NET Standard 2.1`
+Target framework is `net8.0`
 
 This project is still under development. API is not stable.
 

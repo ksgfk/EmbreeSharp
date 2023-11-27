@@ -5,10 +5,12 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Structure of a packet of 4 query points
     /// </summary>
-    [RTCAlign(16)]
+    [RTCAlign(Alignment)]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RTCPointQuery4
     {
+        public const int Alignment = 16;
+
         /// <summary>
         /// x coordinate of the query point
         /// </summary>

@@ -2,10 +2,12 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    [RTCAlign(16)]
+    [RTCAlign(Alignment)]
     [StructLayout(LayoutKind.Sequential, Size = 48)]
     public unsafe struct RTCPointQueryFunctionArguments
     {
+        public const int Alignment = 16;
+
         /// <summary>
         /// The (world space) query object that was passed as an argument of rtcPointQuery. The
         /// radius of the query can be decreased inside the callback to shrink the

@@ -5,10 +5,12 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Point query structure for closest point query
     /// </summary>
-    [RTCAlign(16)]
+    [RTCAlign(Alignment)]
     [StructLayout(LayoutKind.Sequential, Size = 32)]
     public struct RTCPointQuery
     {
+        public const int Alignment = 16;
+        
         /// <summary>
         /// x coordinate of the query point
         /// </summary>
