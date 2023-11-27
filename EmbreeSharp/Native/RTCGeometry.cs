@@ -147,35 +147,31 @@ namespace EmbreeSharp.Native
         RTC_CURVE_FLAG_NEIGHBOR_RIGHT = (1 << 1)
     }
 
-    [RTCAlign(16)]
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RTCBoundsFunctionArguments
     {
-        public const int Alignment = 16;
-
         public void* geometryUserPtr;
         public uint primID;
         public uint timeStep;
-        public RTCBounds* bounds_o;
+        [NativeType("struct RTCBounds*")] public RTCBounds* bounds_o;
     }
 
     /// <summary>
     /// Bounding callback function
     /// </summary>
-    public unsafe delegate void RTCBoundsFunction(RTCBoundsFunctionArguments* args);
+    public unsafe delegate void RTCBoundsFunction([NativeType("const struct RTCBoundsFunctionArguments*")] RTCBoundsFunctionArguments* args);
 
     /// <summary>
     /// Arguments for RTCIntersectFunctionN
     /// </summary>
-    [RTCAlign(16)]
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RTCIntersectFunctionNArguments
     {
-        public const int Alignment = 16;
-
         public int* valid;
         public void* geometryUserPtr;
         public uint primID;
-        public RTCRayQueryContext* context;
-        [NativeType("RTCRayHitN*")] public RTCRayHitN rayhit;
+        [NativeType("struct RTCRayQueryContext*")] public RTCRayQueryContext* context;
+        [NativeType("struct RTCRayHitN*")] public RTCRayHitN rayhit;
         public uint N;
         public uint geomID;
     }
@@ -183,16 +179,14 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Arguments for RTCOccludedFunctionN
     /// </summary>
-    [RTCAlign(16)]
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RTCOccludedFunctionNArguments
     {
-        public const int Alignment = 16;
-
         public int* valid;
         public void* geometryUserPtr;
         public uint primID;
-        public RTCRayQueryContext* context;
-        [NativeType("RTCRayN*")] public RTCRayN ray;
+        [NativeType("struct RTCRayQueryContext*")] public RTCRayQueryContext* context;
+        [NativeType("struct RTCRayN*")] public RTCRayN ray;
         public uint N;
         public uint geomID;
     }
@@ -200,6 +194,7 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Arguments for RTCDisplacementFunctionN
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RTCDisplacementFunctionNArguments
     {
         public void* geometryUserPtr;
@@ -211,13 +206,13 @@ namespace EmbreeSharp.Native
         [NativeType("const float*")] public float* Ng_x;
         [NativeType("const float*")] public float* Ng_y;
         [NativeType("const float*")] public float* Ng_z;
-        [NativeType("const float*")] public float* P_x;
-        [NativeType("const float*")] public float* P_y;
-        [NativeType("const float*")] public float* P_z;
+        public float* P_x;
+        public float* P_y;
+        public float* P_z;
         public uint N;
     }
 
-    public unsafe delegate void RTCDisplacementFunctionN([NativeType("const RTCDisplacementFunctionNArguments*")] RTCDisplacementFunctionNArguments* args);
+    public unsafe delegate void RTCDisplacementFunctionN([NativeType("const struct RTCDisplacementFunctionNArguments*")] RTCDisplacementFunctionNArguments* args);
 
     public static unsafe partial class GlobalFunctions
     {
@@ -364,12 +359,12 @@ namespace EmbreeSharp.Native
         /// Invokes the intersection filter from the intersection callback function.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcInvokeIntersectFilterFromGeometry([NativeType("const RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, [NativeType("const RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
+        public static extern void rtcInvokeIntersectFilterFromGeometry([NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, [NativeType("const struct RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
         /// <summary>
         /// Invokes the occlusion filter from the occlusion callback function.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcInvokeOccludedFilterFromGeometry([NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, [NativeType("const RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
+        public static extern void rtcInvokeOccludedFilterFromGeometry([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, [NativeType("const struct RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
         /// <summary>
         /// Sets the instanced scene of an instance geometry.
         /// </summary>
@@ -389,7 +384,7 @@ namespace EmbreeSharp.Native
         /// Sets the transformation quaternion of an instance for the specified time step.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryTransformQuaternion(RTCGeometry geometry, uint timeStep, RTCQuaternionDecomposition* qd);
+        public static extern void rtcSetGeometryTransformQuaternion(RTCGeometry geometry, uint timeStep, [NativeType("const struct RTCQuaternionDecomposition*")] RTCQuaternionDecomposition* qd);
         /// <summary>
         /// Returns the interpolated transformation of an instance for the specified time.
         /// </summary>
@@ -458,6 +453,7 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Arguments for rtcInterpolate
     /// </summary>
+    [StructLayout(LayoutKind.Sequential, Size = 88)]
     public unsafe struct RTCInterpolateArguments
     {
         public RTCGeometry geometry;
@@ -481,12 +477,13 @@ namespace EmbreeSharp.Native
         /// Interpolates vertex data to some u/v location and optionally calculates all derivatives.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcInterpolate([NativeType("const RTCInterpolateArguments*")] RTCInterpolateArguments* args);
+        public static extern void rtcInterpolate([NativeType("const struct RTCInterpolateArguments*")] RTCInterpolateArguments* args);
     }
 
     /// <summary>
     /// Arguments for rtcInterpolateN
     /// </summary>
+    [StructLayout(LayoutKind.Sequential, Size = 112)]
     public unsafe struct RTCInterpolateNArguments
     {
         public RTCGeometry geometry;
@@ -512,12 +509,13 @@ namespace EmbreeSharp.Native
         /// Interpolates vertex data to an array of u/v locations.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcInterpolateN([NativeType("const RTCInterpolateNArguments*")] RTCInterpolateNArguments* args);
+        public static extern void rtcInterpolateN([NativeType("const struct RTCInterpolateNArguments*")] RTCInterpolateNArguments* args);
     }
 
     /// <summary>
     /// RTCGrid primitive for grid mesh
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct RTCGrid
     {
         public uint startVertexID;

@@ -269,6 +269,7 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Ray query flags
     /// </summary>
+    [Flags]
     public enum RTCRayQueryFlags
     {
         /// <summary>
@@ -307,17 +308,17 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Filter callback function
     /// </summary>
-    public unsafe delegate void RTCFilterFunctionN([NativeType("const RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* args);
+    public unsafe delegate void RTCFilterFunctionN([NativeType("const struct RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* args);
 
     /// <summary>
     /// Intersection callback function
     /// </summary>
-    public unsafe delegate void RTCIntersectFunctionN([NativeType("const RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args);
+    public unsafe delegate void RTCIntersectFunctionN([NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args);
 
     /// <summary>
     /// Occlusion callback function
     /// </summary>
-    public unsafe delegate void RTCOccludedFunctionN([NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args);
+    public unsafe delegate void RTCOccludedFunctionN([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args);
 
     /// <summary>
     /// Ray query context passed to intersect/occluded calls

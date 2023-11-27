@@ -39,15 +39,15 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Callback to set the bounds of all children
     /// </summary>
-    public unsafe delegate void RTCSetNodeBoundsFunction(void* nodePtr, [NativeType("const RTCBounds**")] RTCBounds** bounds, uint childCount, void* userPtr);
+    public unsafe delegate void RTCSetNodeBoundsFunction(void* nodePtr, [NativeType("const struct RTCBounds**")] RTCBounds** bounds, uint childCount, void* userPtr);
     /// <summary>
     /// Callback to create a leaf node
     /// </summary>
-    public unsafe delegate void* RTCCreateLeafFunction(RTCThreadLocalAllocator allocator, [NativeType("const RTCBuildPrimitive*")] RTCBuildPrimitive* primitives, [NativeType("size_t")] nuint primitiveCount, void* userPtr);
+    public unsafe delegate void* RTCCreateLeafFunction(RTCThreadLocalAllocator allocator, [NativeType("const struct RTCBuildPrimitive*")] RTCBuildPrimitive* primitives, [NativeType("size_t")] nuint primitiveCount, void* userPtr);
     /// <summary>
     /// Callback to split a build primitive
     /// </summary>
-    public unsafe delegate void RTCSplitPrimitiveFunction([NativeType("const RTCBuildPrimitive*")] RTCBuildPrimitive* primitive, uint dimension, float position, RTCBounds* leftBounds, RTCBounds* rightBounds, void* userPtr);
+    public unsafe delegate void RTCSplitPrimitiveFunction([NativeType("const struct RTCBuildPrimitive*")] RTCBuildPrimitive* primitive, uint dimension, float position, [NativeType("struct RTCBounds*")] RTCBounds* leftBounds, [NativeType("struct RTCBounds*")] RTCBounds* rightBounds, void* userPtr);
 
 
     /// <summary>
@@ -84,7 +84,7 @@ namespace EmbreeSharp.Native
         public float intersectionCost;
 
         public RTCBVH bvh;
-        public RTCBuildPrimitive* primitives;
+        [NativeType("struct RTCBuildPrimitive*")] public RTCBuildPrimitive* primitives;
         [NativeType("size_t")] public nuint primitiveCount;
         [NativeType("size_t")] public nuint primitiveArrayCapacity;
 
@@ -108,7 +108,7 @@ namespace EmbreeSharp.Native
         /// Builds a BVH.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void* rtcBuildBVH([NativeType("const RTCBuildArguments*")] RTCBuildArguments* args);
+        public static extern void* rtcBuildBVH([NativeType("const struct RTCBuildArguments*")] RTCBuildArguments* args);
         /// <summary>
         /// Allocates memory using the thread local allocator.
         /// </summary>

@@ -19,6 +19,7 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Additional arguments for rtcIntersect1/4/8/16 calls
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RTCIntersectArguments
     {
         /// <summary>
@@ -32,7 +33,7 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// optional pointer to ray query context
         /// </summary>
-        public RTCRayQueryContext* context;
+        [NativeType("struct RTCRayQueryContext*")] public RTCRayQueryContext* context;
         /// <summary>
         /// filter function to execute
         /// </summary>
@@ -46,6 +47,7 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Additional arguments for rtcOccluded1/4/8/16 calls
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RTCOccludedArguments
     {
         /// <summary>
@@ -59,7 +61,7 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// optional pointer to ray query context
         /// </summary>
-        public RTCRayQueryContext* context;
+        [NativeType("struct RTCRayQueryContext*")] public RTCRayQueryContext* context;
         /// <summary>
         /// filter function to execute
         /// </summary>
@@ -173,162 +175,163 @@ namespace EmbreeSharp.Native
         /// Returns the axis-aligned bounds of the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcGetSceneBounds(RTCScene scene, RTCBounds* bounds_o);
+        public static extern void rtcGetSceneBounds(RTCScene scene, [NativeType("struct RTCBounds*")] RTCBounds* bounds_o);
         /// <summary>
         /// Returns the linear axis-aligned bounds of the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcGetSceneLinearBounds(RTCScene scene, RTCLinearBounds* bounds_o);
+        public static extern void rtcGetSceneLinearBounds(RTCScene scene, [NativeType("struct RTCLinearBounds*")] RTCLinearBounds* bounds_o);
 
         /// <summary>
         /// Perform a closest point query of the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern bool rtcPointQuery(RTCScene scene, RTCPointQuery* query, RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void* userPtr);
+        public static extern bool rtcPointQuery(RTCScene scene, [NativeType("struct RTCPointQuery*")] RTCPointQuery* query, [NativeType("struct RTCPointQueryContext*")] RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void* userPtr);
         /// <summary>
         /// Perform a closest point query with a packet of 4 points with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern bool rtcPointQuery4([NativeType("const int*")] int* valid, RTCScene scene, RTCPointQuery4* query, RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void** userPtr);
+        public static extern bool rtcPointQuery4([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCPointQuery4*")] RTCPointQuery4* query, [NativeType("struct RTCPointQueryContext*")] RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void** userPtr);
         /// <summary>
         /// Perform a closest point query with a packet of 8 points with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern bool rtcPointQuery8(int* valid, RTCScene scene, RTCPointQuery8* query, RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void** userPtr);
+        public static extern bool rtcPointQuery8([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCPointQuery8*")] RTCPointQuery8* query, [NativeType("struct RTCPointQueryContext*")] RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void** userPtr);
         /// <summary>
         /// Perform a closest point query with a packet of 16 points with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern bool rtcPointQuery16(int* valid, RTCScene scene, RTCPointQuery16* query, RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void** userPtr);
+        public static extern bool rtcPointQuery16([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCPointQuery16*")] RTCPointQuery16* query, [NativeType("struct RTCPointQueryContext*")] RTCPointQueryContext* context, [NativeType("RTCPointQueryFunction")] IntPtr queryFunc, void** userPtr);
 
         /// <summary>
         /// Intersects a single ray with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcIntersect1(RTCScene scene, RTCRayHit* rayhit, [RTCOptionalArgument] RTCIntersectArguments* args = null);
+        public static extern void rtcIntersect1(RTCScene scene, [NativeType("struct RTCRayHit*")] RTCRayHit* rayhit, [RTCOptionalArgument, NativeType("struct RTCIntersectArguments*")] RTCIntersectArguments* args = null);
         /// <summary>
         /// Intersects a packet of 4 rays with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcIntersect4([NativeType("const int*")] int* valid, RTCScene scene, RTCRayHit4* rayhit, [RTCOptionalArgument] RTCIntersectArguments* args = null);
+        public static extern void rtcIntersect4([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCRayHit4*")] RTCRayHit4* rayhit, [RTCOptionalArgument, NativeType("struct RTCIntersectArguments*")] RTCIntersectArguments* args = null);
         /// <summary>
         /// Intersects a packet of 8 rays with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcIntersect8([NativeType("const int*")] int* valid, RTCScene scene, RTCRayHit8* rayhit, [RTCOptionalArgument] RTCIntersectArguments* args = null);
+        public static extern void rtcIntersect8([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCRayHit8*")] RTCRayHit8* rayhit, [RTCOptionalArgument, NativeType("struct RTCIntersectArguments*")] RTCIntersectArguments* args = null);
         /// <summary>
         /// Intersects a packet of 16 rays with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcIntersect16([NativeType("const int*")] int* valid, RTCScene scene, RTCRayHit16* rayhit, [RTCOptionalArgument] RTCIntersectArguments* args = null);
+        public static extern void rtcIntersect16([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCRayHit16*")] RTCRayHit16* rayhit, [RTCOptionalArgument, NativeType("struct RTCIntersectArguments*")] RTCIntersectArguments* args = null);
 
         /// <summary>
         /// Forwards ray inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect1([NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay* ray, uint instID);
+        public static extern void rtcForwardIntersect1([NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay*")] RTCRay* ray, uint instID);
         /// <summary>
         /// Forwards ray inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect1Ex([NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay* ray, uint instID, uint instPrimID);
+        public static extern void rtcForwardIntersect1Ex([NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay*")] RTCRay* ray, uint instID, uint instPrimID);
         /// <summary>
         /// Forwards ray packet of size 4 inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect4([NativeType("const int*")] int* valid, [NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay4* ray, uint instID);
+        public static extern void rtcForwardIntersect4([NativeType("const int*")] int* valid, [NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay4*")] RTCRay4* ray, uint instID);
         /// <summary>
         /// Forwards ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect4Ex([NativeType("const int*")] int* valid, [NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay4* ray, uint instID, uint primInstID);
+        public static extern void rtcForwardIntersect4Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay4*")] RTCRay4* ray, uint instID, uint primInstID);
         /// <summary>
         /// Forwards ray packet of size 8 inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect8([NativeType("const int*")] int* valid, [NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay8* ray, uint instID);
+        public static extern void rtcForwardIntersect8([NativeType("const int*")] int* valid, [NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay8*")] RTCRay8* ray, uint instID);
         /// <summary>
-        /// Forwards ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// Forwards ray packet of size 8 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect8Ex([NativeType("const int*")] int* valid, [NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay8* ray, uint instID, uint primInstID);
+        public static extern void rtcForwardIntersect8Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay8*")] RTCRay8* ray, uint instID, uint primInstID);
         /// <summary>
         /// Forwards ray packet of size 16 inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect16([NativeType("const int*")] int* valid, [NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay16* ray, uint instID);
+        public static extern void rtcForwardIntersect16([NativeType("const int*")] int* valid, [NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay16*")] RTCRay16* ray, uint instID);
         /// <summary>
-        /// Forwards ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// Forwards ray packet of size 16 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardIntersect16Ex([NativeType("const int*")] int* valid, [NativeType("const RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, RTCRay16* ray, uint instID, uint primInstID);
+        public static extern void rtcForwardIntersect16Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCInstersectfunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay16*")] RTCRay16* ray, uint instID, uint primInstID);
 
         /// <summary>
         /// Tests a single ray for occlusion with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcOccluded1(RTCScene scene, RTCRay* ray, [RTCOptionalArgument] RTCOccludedArguments* args = null);
+        public static extern void rtcOccluded1(RTCScene scene, [NativeType("struct RTCRay*")] RTCRay* ray, [RTCOptionalArgument, NativeType("struct RTCOccludedArguments*")] RTCOccludedArguments* args = null);
         /// <summary>
         /// Tests a packet of 4 rays for occlusion occluded with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcOccluded4([NativeType("const int*")] int* valid, RTCScene scene, RTCRay4* ray, [RTCOptionalArgument] RTCOccludedArguments* args = null);
+        public static extern void rtcOccluded4([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCRay4*")] RTCRay4* ray, [RTCOptionalArgument, NativeType("struct RTCOccludedArguments*")] RTCOccludedArguments* args = null);
         /// <summary>
         /// Tests a packet of 8 rays for occlusion with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcOccluded8([NativeType("const int*")] int* valid, RTCScene scene, RTCRay8* ray, [RTCOptionalArgument] RTCOccludedArguments* args = null);
+        public static extern void rtcOccluded8([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCRay8*")] RTCRay8* ray, [RTCOptionalArgument, NativeType("struct RTCOccludedArguments*")] RTCOccludedArguments* args = null);
         /// <summary>
         /// Tests a packet of 16 rays for occlusion with the scene.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcOccluded16([NativeType("const int*")] int* valid, RTCScene scene, RTCRay16* ray, [RTCOptionalArgument] RTCOccludedArguments* args = null);
+        public static extern void rtcOccluded16([NativeType("const int*")] int* valid, RTCScene scene, [NativeType("struct RTCRay16*")] RTCRay16* ray, [RTCOptionalArgument, NativeType("struct RTCOccludedArguments*")] RTCOccludedArguments* args = null);
 
         /// <summary>
         /// Forwards single occlusion ray inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded1([NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay* ray, uint instID);
+        public static extern void rtcForwardOccluded1([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay*")] RTCRay* ray, uint instID);
         /// <summary>
         /// Forwards single occlusion ray inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded1Ex([NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay* ray, uint instID, uint instPrimID);
+        public static extern void rtcForwardOccluded1Ex([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay*")] RTCRay* ray, uint instID, uint instPrimID);
         /// <summary>
         /// Forwards occlusion ray packet of size 4 inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded4([NativeType("const int*")] int* valid, [NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay4* ray, uint instID);
+        public static extern void rtcForwardOccluded4([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay4*")] RTCRay4* ray, uint instID);
         /// <summary>
         /// Forwards occlusion ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded4Ex([NativeType("const int*")] int* valid, [NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay4* ray, uint instID, uint instPrimID);
+        public static extern void rtcForwardOccluded4Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay4*")] RTCRay4* ray, uint instID, uint instPrimID);
         /// <summary>
         /// Forwards occlusion ray packet of size 8 inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded8([NativeType("const int*")] int* valid, [NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay8* ray, uint instID);
+        public static extern void rtcForwardOccluded8([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay8*")] RTCRay8* ray, uint instID);
         /// <summary>
         /// Forwards occlusion ray packet of size 8 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded8Ex([NativeType("const int*")] int* valid, [NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay8* ray, uint instID, uint instPrimID);
+        public static extern void rtcForwardOccluded8Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay8*")] RTCRay8* ray, uint instID, uint instPrimID);
         /// <summary>
         /// Forwards occlusion ray packet of size 16 inside user geometry callback.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded16([NativeType("const int*")] int* valid, [NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay16* ray, uint instID);
+        public static extern void rtcForwardOccluded16([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay16*")] RTCRay16* ray, uint instID);
         /// <summary>
         /// Forwards occlusion ray packet of size 16 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcForwardOccluded16Ex([NativeType("const int*")] int* valid, [NativeType("const RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, RTCRay16* ray, uint instID, uint instPrimID);
+        public static extern void rtcForwardOccluded16Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay16*")] RTCRay16* ray, uint instID, uint instPrimID);
     }
 
     /// <summary>
     /// collision callback
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct RTCCollision
     {
         public uint geomID0;
@@ -337,7 +340,7 @@ namespace EmbreeSharp.Native
         public uint primID1;
     }
 
-    public unsafe delegate void RTCCollideFunc(void* userPtr, RTCCollision* collisions, uint num_collisions);
+    public unsafe delegate void RTCCollideFunc(void* userPtr, [NativeType("struct RTCCollision*")] RTCCollision* collisions, uint num_collisions);
 
     public static unsafe partial class GlobalFunctions
     {

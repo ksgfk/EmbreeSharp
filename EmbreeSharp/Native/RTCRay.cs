@@ -117,6 +117,7 @@ namespace EmbreeSharp.Native
     /// Combined ray/hit structure for a single ray
     /// </summary>
     [RTCAlign(Alignment)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct RTCRayHit
     {
         public const int Alignment = 16;
@@ -176,6 +177,7 @@ namespace EmbreeSharp.Native
     /// Combined ray/hit structure for a packet of 4 rays
     /// </summary>
     [RTCAlign(Alignment)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct RTCRayHit4
     {
         public const int Alignment = 16;
@@ -235,6 +237,7 @@ namespace EmbreeSharp.Native
     /// Combined ray/hit structure for a packet of 8 rays
     /// </summary>
     [RTCAlign(Alignment)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct RTCRayHit8
     {
         public const int Alignment = 32;
@@ -294,6 +297,7 @@ namespace EmbreeSharp.Native
     /// Combined ray/hit structure for a packet of 16 rays
     /// </summary>
     [RTCAlign(Alignment)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct RTCRayHit16
     {
         public const int Alignment = 64;
