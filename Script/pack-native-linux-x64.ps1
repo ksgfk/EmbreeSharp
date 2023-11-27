@@ -29,7 +29,7 @@ Write-Host "package"
     <metadata>
         <!-- Required elements-->
         <id>embree-$TFM</id>
-        <version>$EmbreeVersion</version>
+        <version>$EmbreeVersion-fix</version>
         <description>unofficial uploaded embree native library</description>
         <authors>ksgfk</authors>
         <tags>native,embree</tags>
