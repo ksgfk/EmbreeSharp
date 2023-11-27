@@ -8,7 +8,7 @@ public class BasicDevice
     [TestMethod]
     public unsafe void StructSize()
     {
-        RTCDevice device = Embree.rtcNewDevice(null);
-        Embree.rtcReleaseDevice(device);
+        RTCDevice device = GlobalFunctions.rtcNewDevice(null);
+        GlobalFunctions.rtcReleaseDevice(device);
     }
 }

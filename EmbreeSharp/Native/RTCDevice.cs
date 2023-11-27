@@ -8,7 +8,7 @@ namespace EmbreeSharp.Native
         public IntPtr Ptr;
     }
 
-    public static unsafe partial class Embree
+    public static unsafe partial class GlobalFunctions
     {
         /// <summary>
         /// Creates a new Embree device.
@@ -25,28 +25,101 @@ namespace EmbreeSharp.Native
         /// </summary>
         [DllImport(DynamicLibraryName)]
         public static extern void rtcReleaseDevice(RTCDevice device);
+    }
 
+    /// <summary>
+    /// Device properties
+    /// </summary>
+    public enum RTCDeviceProperty
+    {
+        RTC_DEVICE_PROPERTY_VERSION = 0,
+        RTC_DEVICE_PROPERTY_VERSION_MAJOR = 1,
+        RTC_DEVICE_PROPERTY_VERSION_MINOR = 2,
+        RTC_DEVICE_PROPERTY_VERSION_PATCH = 3,
+
+        RTC_DEVICE_PROPERTY_NATIVE_RAY4_SUPPORTED = 32,
+        RTC_DEVICE_PROPERTY_NATIVE_RAY8_SUPPORTED = 33,
+        RTC_DEVICE_PROPERTY_NATIVE_RAY16_SUPPORTED = 34,
+
+        RTC_DEVICE_PROPERTY_BACKFACE_CULLING_SPHERES_ENABLED = 62,
+        RTC_DEVICE_PROPERTY_BACKFACE_CULLING_CURVES_ENABLED = 63,
+        RTC_DEVICE_PROPERTY_RAY_MASK_SUPPORTED = 64,
+        RTC_DEVICE_PROPERTY_BACKFACE_CULLING_ENABLED = 65,
+        RTC_DEVICE_PROPERTY_FILTER_FUNCTION_SUPPORTED = 66,
+        RTC_DEVICE_PROPERTY_IGNORE_INVALID_RAYS_ENABLED = 67,
+        RTC_DEVICE_PROPERTY_COMPACT_POLYS_ENABLED = 68,
+
+        RTC_DEVICE_PROPERTY_TRIANGLE_GEOMETRY_SUPPORTED = 96,
+        RTC_DEVICE_PROPERTY_QUAD_GEOMETRY_SUPPORTED = 97,
+        RTC_DEVICE_PROPERTY_SUBDIVISION_GEOMETRY_SUPPORTED = 98,
+        RTC_DEVICE_PROPERTY_CURVE_GEOMETRY_SUPPORTED = 99,
+        RTC_DEVICE_PROPERTY_USER_GEOMETRY_SUPPORTED = 100,
+        RTC_DEVICE_PROPERTY_POINT_GEOMETRY_SUPPORTED = 101,
+
+        RTC_DEVICE_PROPERTY_TASKING_SYSTEM = 128,
+        RTC_DEVICE_PROPERTY_JOIN_COMMIT_SUPPORTED = 129,
+        RTC_DEVICE_PROPERTY_PARALLEL_COMMIT_SUPPORTED = 130
+    }
+
+    public static unsafe partial class GlobalFunctions
+    {
         /// <summary>
         /// Gets a device property.
         /// </summary>
         [DllImport(DynamicLibraryName)]
         [return: NativeType("ssize_t")]
-        public static extern IntPtr rtcGetDeviceProperty(RTCDevice device, RTCDeviceProperty prop);
+        public static extern nint rtcGetDeviceProperty(RTCDevice device, RTCDeviceProperty prop);
         /// <summary>
         /// Sets a device property.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetDeviceProperty(RTCDevice device, RTCDeviceProperty prop, [NativeType("ssize_t")] IntPtr value);
+        public static extern void rtcSetDeviceProperty(RTCDevice device, RTCDeviceProperty prop, [NativeType("ssize_t")] nint value);
+    }
+
+    /// <summary>
+    /// Error codes
+    /// </summary>
+    public enum RTCError
+    {
+        RTC_ERROR_NONE = 0,
+        RTC_ERROR_UNKNOWN = 1,
+        RTC_ERROR_INVALID_ARGUMENT = 2,
+        RTC_ERROR_INVALID_OPERATION = 3,
+        RTC_ERROR_OUT_OF_MEMORY = 4,
+        RTC_ERROR_UNSUPPORTED_CPU = 5,
+        RTC_ERROR_CANCELLED = 6,
+    }
+
+    public static unsafe partial class GlobalFunctions
+    {
         /// <summary>
         /// Returns the error code.
         /// </summary>
         [DllImport(DynamicLibraryName)]
         public static extern RTCError rtcGetDeviceError(RTCDevice device);
+    }
+
+    /// <summary>
+    /// Error callback function
+    /// </summary>
+    public unsafe delegate void RTCErrorFunction(void* userPtr, RTCError code, [NativeType("const char*")] byte* str);
+
+    public static unsafe partial class GlobalFunctions
+    {
         /// <summary>
         /// Sets the error callback function.
         /// </summary>
         [DllImport(DynamicLibraryName)]
         public static extern void rtcSetDeviceErrorFunction(RTCDevice device, [NativeType("RTCErrorFunction")] IntPtr error, void* userPtr);
+    }
+
+    /// <summary>
+    /// Memory monitor callback function
+    /// </summary>
+    public unsafe delegate bool RTCMemoryMonitorFunction(void* ptr, [NativeType("ssize_t")] nint bytes, bool post);
+
+    public static unsafe partial class GlobalFunctions
+    {
         /// <summary>
         /// Sets the memory monitor callback function.
         /// </summary>
