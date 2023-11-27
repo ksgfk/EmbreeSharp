@@ -15,7 +15,7 @@ Write-Host "package"
     <metadata>
         <!-- Required elements-->
         <id>embree-$TFM</id>
-        <version>$EmbreeVersion-fix</version>
+        <version>$EmbreeVersion</version>
         <description>unofficial uploaded embree native library</description>
         <authors>ksgfk</authors>
         <tags>native,embree</tags>

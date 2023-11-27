@@ -8,8 +8,8 @@ namespace EmbreeSharp.Native
         public int* valid;
         public void* geometryUserPtr;
         public RTCRayQueryContext* context;
-        // RTCRayN* ray;
-        // RTCHitN* hit;
+        [NativeType("RTCRayN*")] public RTCRayN ray;
+        [NativeType("RTCHitN*")] public RTCHitN hit;
         public uint N;
     }
 }

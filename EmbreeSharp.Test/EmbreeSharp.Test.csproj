@@ -18,6 +18,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+
+    <PackageReference Include="embree-win-x64" Version="4.3.0" />
+    <PackageReference Include="embree-linux-x64" Version="4.3.0" />
+    <PackageReference Include="embree-osx-x64" Version="4.3.0-fix" />
   </ItemGroup>
 
   <ItemGroup>
