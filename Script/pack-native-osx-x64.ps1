@@ -6,7 +6,7 @@ Write-Host "download embree $TFM v$EmbreeVersion"
 Invoke-WebRequest -Uri "https://github.com/embree/embree/releases/download/v$EmbreeVersion/embree-$EmbreeVersion.x86_64.macosx.zip" -OutFile "$OutputDir/$TFM.zip"
 
 Write-Host "unzip"
-Expand-Archive -Path "$OutputDir/$TFM.zip" -DestinationPath "$OutputDir/$TFM"
+7z x "$OutputDir/$TFM.zip" -o"$OutputDir/$TFM" -aoa
 
 "copy libs"
 If(Test-Path "$OutputDir/$TFM-lib")

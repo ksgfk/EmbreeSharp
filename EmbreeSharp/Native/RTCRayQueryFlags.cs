@@ -3,7 +3,7 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Ray query flags
     /// </summary>
-    enum RTCRayQueryFlags
+    public enum RTCRayQueryFlags
     {
         /// <summary>
         /// matching intel_ray_flags_t layout

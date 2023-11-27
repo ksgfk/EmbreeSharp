@@ -12,9 +12,11 @@ Install this package from nuget.
 
 Install the native library package for your platform from nuget.
 
-win-x64 native: [embree-win-x64](https://www.nuget.org/packages/embree-win-x64/)
-
-linux-x64 native: [embree-linux-x64](https://www.nuget.org/packages/embree-linux-x64/)
+OS    | x64
+--    | --
+win   |[embree-win-x64](https://www.nuget.org/packages/embree-win-x64/)
+linux |[embree-linux-x64](https://www.nuget.org/packages/embree-linux-x64/)
+osx   |[embree-osx-x64](https://www.nuget.org/packages/embree-osx-x64/)
 
 ## Details
 
