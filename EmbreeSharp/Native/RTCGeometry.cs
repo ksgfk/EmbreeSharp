@@ -5,11 +5,15 @@ namespace EmbreeSharp.Native
 {
     public struct RTCScene
     {
+        public static RTCScene Null => new() { Ptr = nint.Zero };
+
         public IntPtr Ptr;
     }
 
     public struct RTCGeometry
     {
+        public static RTCGeometry Null => new() { Ptr = nint.Zero };
+
         public IntPtr Ptr;
     }
 

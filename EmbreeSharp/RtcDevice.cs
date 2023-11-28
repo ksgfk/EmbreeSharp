@@ -18,7 +18,17 @@ namespace EmbreeSharp
         private MemoryMonitorFunction? _managedMemMonitor;
         private bool _disposedValue = false;
 
-        public RTCDevice NativeDevice => _device;
+        public RTCDevice NativeDevice
+        {
+            get
+            {
+                if (IsDisposed)
+                {
+                    ThrowUtility.ObjectDisposed();
+                }
+                return _device;
+            }
+        }
         public bool IsDisposed => _disposedValue;
 
         public unsafe RtcDevice(string? config)
@@ -124,7 +134,7 @@ namespace EmbreeSharp
 
         private static unsafe void ErrorFunctionImpl(void* userPtr, RTCError code, byte* str)
         {
-            long len = InteropUtlity.Strlen(str);
+            long len = InteropUtility.Strlen(str);
             int byteCnt = len <= int.MaxValue ? (int)len : int.MaxValue;
             var mgrStr = Encoding.UTF8.GetString(str, byteCnt);
             GCHandle gcHandle = GCHandle.FromIntPtr(new nint(userPtr));

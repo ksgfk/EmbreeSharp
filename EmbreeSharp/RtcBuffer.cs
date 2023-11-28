@@ -10,7 +10,17 @@ namespace EmbreeSharp
         private readonly long _byteSize;
         private bool _disposedValue = false;
 
-        public RTCBuffer NativeBuffer => _buffer;
+        public RTCBuffer NativeBuffer
+        {
+            get
+            {
+                if (IsDisposed)
+                {
+                    ThrowUtility.ObjectDisposed();
+                }
+                return _buffer;
+            }
+        }
         public long ByteSize => _byteSize;
         public bool IsDisposed => _disposedValue;
 
