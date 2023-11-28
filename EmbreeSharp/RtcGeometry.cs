@@ -22,8 +22,7 @@ namespace EmbreeSharp
             }
         }
         public RTCGeometryType Type => _type;
-        public int Id { get => unchecked((int)_id); internal set => _id = unchecked((uint)value); }
-        internal uint IdInternal { get => _id; set => _id = value; }
+        public uint Id { get => _id; set => _id = value; }
         public bool IsDisposed => _disposedValue;
 
         public RtcGeometry(RtcDevice device, RTCGeometryType type)
@@ -63,6 +62,111 @@ namespace EmbreeSharp
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public void SetBuffer(RTCBufferType type, uint slot, RTCFormat format, RtcBuffer buffer, long byteOffset, long byteStride, long itemCount)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (byteOffset + byteStride * itemCount > buffer.ByteSize)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            GlobalFunctions.rtcSetGeometryBuffer(_geometry, type, slot, format, buffer.NativeBuffer, new((ulong)byteOffset), new((ulong)byteStride), new((ulong)itemCount));
+        }
+
+        public unsafe NativeMemoryView<byte> SetNewBuffer(RTCBufferType type, uint slot, RTCFormat format, long byteStride, long itemCount)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            void* ptr = GlobalFunctions.rtcSetNewGeometryBuffer(_geometry, type, slot, format, new((ulong)byteStride), new((ulong)itemCount));
+            var byteCount = (ulong)byteStride * (ulong)itemCount;
+            return new NativeMemoryView<byte>(ptr, new(byteCount));
+        }
+
+        public void Commit()
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcCommitGeometry(_geometry);
+        }
+
+        public void Enable()
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcEnableGeometry(_geometry);
+        }
+
+        public void Disable()
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcDisableGeometry(_geometry);
+        }
+
+        public void SetTimeStepCount(uint timeStepCount)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcSetGeometryTimeStepCount(_geometry, timeStepCount);
+        }
+
+        public void SetTimeRange(float startTime, float endTime)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcSetGeometryTimeRange(_geometry, startTime, endTime);
+        }
+
+        public void SetVertexAttributeCount(uint vertexAttributeCount)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcSetGeometryVertexAttributeCount(_geometry, vertexAttributeCount);
+        }
+
+        public void SetMask(uint mask)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcSetGeometryMask(_geometry, mask);
+        }
+
+        public void SetBuildQuality(RTCBuildQuality quality)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcSetGeometryBuildQuality(_geometry, quality);
+        }
+
+        public void SetMaxRadiusScale(float maxRadiusScale)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcSetGeometryMaxRadiusScale(_geometry, maxRadiusScale);
         }
     }
 }

@@ -87,16 +87,16 @@ namespace EmbreeSharp
                 ThrowUtility.ObjectDisposed();
             }
             uint id = GlobalFunctions.rtcAttachGeometry(_scene, geometry.NativeGeometry);
-            geometry.IdInternal = id;
+            geometry.Id = id;
         }
 
-        public void AttachGeometry(RtcGeometry geometry, int id)
+        public void AttachGeometry(RtcGeometry geometry, uint id)
         {
             if (IsDisposed)
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcAttachGeometryByID(_scene, geometry.NativeGeometry, unchecked((uint)id));
+            GlobalFunctions.rtcAttachGeometryByID(_scene, geometry.NativeGeometry, id);
             geometry.Id = id;
         }
 
@@ -106,7 +106,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcDetachGeometry(_scene, geometry.IdInternal);
+            GlobalFunctions.rtcDetachGeometry(_scene, geometry.Id);
         }
 
         public void Commit()
