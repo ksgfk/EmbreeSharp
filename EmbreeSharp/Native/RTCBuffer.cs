@@ -5,6 +5,8 @@ namespace EmbreeSharp.Native
 {
     public struct RTCBuffer
     {
+        public static RTCBuffer Null => new() { Ptr = nint.Zero };
+
         public IntPtr Ptr;
     }
 
