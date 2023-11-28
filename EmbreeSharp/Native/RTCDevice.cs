@@ -5,6 +5,8 @@ namespace EmbreeSharp.Native
 {
     public struct RTCDevice
     {
+        public static RTCDevice Null => new() { Ptr = nint.Zero };
+
         public IntPtr Ptr;
     }
 
