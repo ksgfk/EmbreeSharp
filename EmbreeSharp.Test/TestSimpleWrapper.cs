@@ -35,7 +35,7 @@ namespace EmbreeSharp.Test
             RTCRayHit rayHit = RtcRayUtility.CreateRay(0, 1, 0, 0, -1, 0);
             scene.Intersect(ref rayHit);
             Assert.IsTrue(rayHit.IsHit());
-            Assert.AreEqual(rayHit.hit.geomID, geo.Id);
+            Assert.AreEqual(geo.Id, rayHit.hit.geomID);
         }
     }
 }

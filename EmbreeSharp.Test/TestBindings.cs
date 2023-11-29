@@ -54,7 +54,7 @@ namespace EmbreeSharp.Test
             rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
             rtcIntersect1(scene, (RTCRayHit*)Unsafe.AsPointer(ref rayhit));
             Assert.IsTrue(rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID);
-            Assert.AreEqual(rayhit.hit.geomID, geoId);
+            Assert.AreEqual(geoId, rayhit.hit.geomID);
         }
     }
 }

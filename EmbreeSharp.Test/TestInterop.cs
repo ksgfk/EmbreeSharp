@@ -13,7 +13,7 @@ namespace EmbreeSharp.Test
             ref RTCRayHit16 rayHit = ref InteropUtility.StackAllocAligned<RTCRayHit16>(stack, RTCRayHit16.Alignment);
             void* ptr = Unsafe.AsPointer(ref rayHit);
             nint managedPtr = new(ptr);
-            Assert.AreEqual(managedPtr.ToInt64() % RTCRayHit16.Alignment, 0);
+            Assert.AreEqual(0, managedPtr.ToInt64() % RTCRayHit16.Alignment);
         }
     }
 }

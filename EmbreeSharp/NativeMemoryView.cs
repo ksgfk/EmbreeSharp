@@ -4,6 +4,10 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp
 {
+    /// <summary>
+    /// This struct only used for unmanaged memory. Please do not use it in managed memory. This is not safe
+    /// This struct does not manage memory. Only user guarantees that the lifecycle of memory is longer than this view
+    /// </summary>
     public readonly ref struct NativeMemoryView<T> where T : unmanaged
     {
         internal readonly nuint _ptr;
@@ -141,6 +145,33 @@ namespace EmbreeSharp
             }
             return new Span<T>(Unsafe.Add<T>(_ptr.ToPointer(), start), length);
         }
+
+        public ref struct Enumerator
+        {
+            private readonly nuint _end;
+            private nuint _ptr;
+
+            internal unsafe Enumerator(NativeMemoryView<T> view)
+            {
+                _end = (nuint)Unsafe.AsPointer(ref Unsafe.Add(ref Unsafe.AsRef<T>((void*)view._ptr), view._length));
+                _ptr = (nuint)Unsafe.Add<T>((void*)view._ptr, -1);
+            }
+
+            public unsafe bool MoveNext()
+            {
+                nuint index = (nuint)Unsafe.Add<T>((void*)_ptr, 1);
+                if (index < _end)
+                {
+                    _ptr = index;
+                    return true;
+                }
+                return false;
+            }
+
+            public unsafe ref T Current => ref Unsafe.AsRef<T>((void*)_ptr);
+        }
+
+        public Enumerator GetEnumerator() => new Enumerator(this);
     }
 
     public static class NativeMemoryViewExtension
