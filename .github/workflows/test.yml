@@ -5,41 +5,17 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-win-x64:
-    name: Test EmbreeSharp on win-x64
-    runs-on: windows-latest
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-restore
-
-  test-linux-x64:
-    name: Test EmbreeSharp on linux-x64
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-restore
-
-  test-osx-x64:
-    name: Test EmbreeSharp on osx-x64
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.x
     - name: Install dependencies
       run: dotnet restore
     - name: Build
