@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EmbreeSharp
 {
+    [StackTraceHidden]
     internal static class ThrowUtility
     {
         [DoesNotReturn]

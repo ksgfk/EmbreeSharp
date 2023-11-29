@@ -134,7 +134,7 @@ namespace EmbreeSharp
 
         private static unsafe void ErrorFunctionImpl(void* userPtr, RTCError code, byte* str)
         {
-            long len = InteropUtility.Strlen(str);
+            nuint len = InteropUtility.Strlen(str);
             int byteCnt = len <= int.MaxValue ? (int)len : int.MaxValue;
             var mgrStr = Encoding.UTF8.GetString(str, byteCnt);
             GCHandle gcHandle = GCHandle.FromIntPtr(new nint(userPtr));

@@ -32,10 +32,18 @@ namespace EmbreeSharp.Test
             geo.Commit();
             scene.AttachGeometry(geo);
             scene.Commit();
-            RTCRayHit rayHit = RtcRayUtility.CreateRay(0, 1, 0, 0, -1, 0);
-            scene.Intersect(ref rayHit);
-            Assert.IsTrue(rayHit.IsHit());
-            Assert.AreEqual(geo.Id, rayHit.hit.geomID);
+
+            {
+                RTCRayHit rayHit = RtcRayUtility.CreateRay(0, 1, 0, 0, -1, 0);
+                scene.Intersect(ref rayHit);
+                Assert.IsTrue(rayHit.IsHit());
+                Assert.AreEqual(geo.Id, rayHit.hit.geomID);
+            }
+            {
+                RTCRayHit rayHit = RtcRayUtility.CreateRay(0, 1, 0, 1, 0, 0);
+                scene.Intersect(ref rayHit);
+                Assert.IsFalse(rayHit.IsHit());
+            }
         }
     }
 }

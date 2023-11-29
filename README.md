@@ -1,10 +1,12 @@
 # EmbreeSharp
 
-EmbreeSharp is an unofficial C # low-level binding of [embree](https://github.com/embree/embree)
+EmbreeSharp is an unofficial C# low-level binding for [embree](https://github.com/embree/embree)
+
+Provide a tiny safe wrapper in C#
 
 Target framework is `net8.0`
 
-This project is still under development. API is not stable.
+This project is still under development. API are not stable.
 
 ## Use
 
@@ -19,6 +21,14 @@ linux |[embree-linux-x64](https://www.nuget.org/packages/embree-linux-x64/)
 osx   |[embree-osx-x64](https://www.nuget.org/packages/embree-osx-x64/)
 
 *maybe osx-x64 should first install tbb in system. not tested*
+
+## Directory structure
+
+* `EmbreeSharp`: source code, tiny safe wrapper also in this dir
+  * `Native`: low-level bindings
+* `EmbreeSharp.Test`: some tests
+* `Samples`: some simple examples
+* `Script`: some scripts to package the official native libraries
 
 ## Details
 
