@@ -20,7 +20,7 @@ win   |[embree-win-x64](https://www.nuget.org/packages/embree-win-x64/)
 linux |[embree-linux-x64](https://www.nuget.org/packages/embree-linux-x64/)
 osx   |[embree-osx-x64](https://www.nuget.org/packages/embree-osx-x64/)
 
-*maybe osx-x64 should first install tbb in system. not tested*
+osx-x64 should first install tbb in system.
 
 ## Directory structure
 
