@@ -43,12 +43,12 @@ namespace EmbreeSharp.Native
         /// Creates a new buffer.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern RTCBuffer rtcNewBuffer(RTCDevice device, [NativeType("size_t")] IntPtr byteSize);
+        public static extern RTCBuffer rtcNewBuffer(RTCDevice device, [NativeType("size_t")] nuint byteSize);
         /// <summary>
         /// Creates a new shared buffer.
         /// </summary>
         [DllImport(DynamicLibraryName)]
-        public static extern RTCBuffer rtcNewSharedBuffer(RTCDevice device, void* ptr, [NativeType("size_t")] IntPtr byteSize);
+        public static extern RTCBuffer rtcNewSharedBuffer(RTCDevice device, void* ptr, [NativeType("size_t")] nuint byteSize);
         /// <summary>
         /// Returns a pointer to the buffer data.
         /// </summary>

@@ -6,7 +6,7 @@ namespace EmbreeSharp
 {
     public readonly ref struct NativeMemoryView<T> where T : unmanaged
     {
-        private readonly nuint _ptr;
+        internal readonly nuint _ptr;
         private readonly nuint _length;
 
         public nuint Length => _length;
@@ -31,29 +31,142 @@ namespace EmbreeSharp
             _length = length;
         }
 
+        public unsafe NativeMemoryView(ref T ptr, nuint length)
+        {
+            _ptr = new(Unsafe.AsPointer(ref ptr));
+            _length = length;
+        }
+
         public unsafe void Clear()
         {
             NativeMemory.Clear((void*)_ptr, ByteCount);
         }
 
+        public unsafe void Fill(byte value)
+        {
+            NativeMemory.Fill(_ptr.ToPointer(), ByteCount, value);
+        }
+
         public unsafe void CopyTo(NativeMemoryView<T> dst)
         {
-            if (dst.Length < Length)
+            if (_length <= dst._length)
+            {
+                NativeMemory.Copy((void*)_ptr, (void*)dst._ptr, ByteCount);
+            }
+            else
             {
                 ThrowUtility.ArgumentOutOfRange(nameof(dst));
             }
-            NativeMemory.Copy((void*)_ptr, (void*)dst._ptr, ByteCount);
         }
 
-        public unsafe void CopyFrom(Span<T> src)
+        public unsafe bool TryCopyTo(NativeMemoryView<T> dst)
         {
-            if (Length.ToUInt64() < (ulong)src.Length)
+            bool result = false;
+            if (_length <= dst._length)
+            {
+                NativeMemory.Copy((void*)_ptr, (void*)dst._ptr, ByteCount);
+                result = true;
+            }
+            return result;
+        }
+
+        public unsafe void CopyFrom(ReadOnlySpan<T> src)
+        {
+            if ((ulong)src.Length <= _length.ToUInt64())
+            {
+                fixed (T* srcPtr = src)
+                {
+                    NativeMemory.Copy(srcPtr, (void*)_ptr, (nuint)src.Length * (nuint)sizeof(T));
+                }
+            }
+            else
             {
                 ThrowUtility.ArgumentOutOfRange(nameof(src));
             }
-            fixed (T* srcPtr = src)
+        }
+
+        public unsafe NativeMemoryView<T> Slice(nuint start)
+        {
+            if (start > _length)
             {
-                NativeMemory.Copy(srcPtr, (void*)_ptr, (nuint)src.Length * (nuint)sizeof(T));
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            return new NativeMemoryView<T>(ref Unsafe.Add(ref Unsafe.AsRef<T>(_ptr.ToPointer()), start), _length - start);
+        }
+
+        public unsafe NativeMemoryView<T> Slice(nuint start, nuint length)
+        {
+            if ((UInt128)start + length > _length)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            return new NativeMemoryView<T>(ref Unsafe.Add(ref Unsafe.AsRef<T>(_ptr.ToPointer()), start), length);
+        }
+
+        public unsafe Span<T> AsSpan()
+        {
+            if (((ulong)_length) > int.MaxValue)
+            {
+                ThrowUtility.InvalidOperation();
+            }
+            return new Span<T>(_ptr.ToPointer(), (int)_length);
+        }
+
+        public unsafe Span<T> AsSpan(int start)
+        {
+            if (start < 0)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            if ((ulong)start > _length)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            if (_length - (ulong)start > int.MaxValue)
+            {
+                ThrowUtility.InvalidOperation();
+            }
+            return new Span<T>(Unsafe.Add<T>(_ptr.ToPointer(), start), (int)(_length - (ulong)start));
+        }
+
+        public unsafe Span<T> AsSpan(int start, int length)
+        {
+            if (start < 0 || length < 0)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            if ((ulong)start + (ulong)length > _length)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            return new Span<T>(Unsafe.Add<T>(_ptr.ToPointer(), start), length);
+        }
+    }
+
+    public static class NativeMemoryViewExtension
+    {
+        public static NativeMemoryView<TTo> Cast<TFrom, TTo>(this NativeMemoryView<TFrom> from) where TFrom : unmanaged where TTo : unmanaged
+        {
+            nuint fromSize = (nuint)Unsafe.SizeOf<TFrom>();
+            nuint toSize = (nuint)Unsafe.SizeOf<TTo>();
+            nuint fromLength = from.Length;
+            nuint toLength;
+            if (fromSize == toSize)
+            {
+                toLength = fromLength;
+            }
+            else if (fromSize == 1)
+            {
+                toLength = fromLength / toSize;
+            }
+            else
+            {
+                UInt128 toLengthUInt64 = (UInt128)fromLength * (UInt128)fromSize / (UInt128)toSize;
+                toLength = checked((nuint)(ulong)toLengthUInt64);
+            }
+            unsafe
+            {
+                return new NativeMemoryView<TTo>(from._ptr.ToPointer(), toLength);
             }
         }
     }

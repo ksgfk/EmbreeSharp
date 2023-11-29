@@ -31,25 +31,25 @@ namespace EmbreeSharp
         }
         public bool IsDisposed => _disposedValue;
 
-        public unsafe RtcDevice(string? config)
+        public RtcDevice()
         {
             _gcHandle = GCHandle.Alloc(this);
-            RTCDevice result;
-            if (config == null)
+            unsafe
             {
-                result = GlobalFunctions.rtcNewDevice(null);
+                _device = GlobalFunctions.rtcNewDevice(null);
             }
-            else
+        }
+
+        public unsafe RtcDevice(string config)
+        {
+            _gcHandle = GCHandle.Alloc(this);
+            int byteLength = Encoding.UTF8.GetByteCount(config);
+            Span<byte> configBytes = byteLength <= 256 ? stackalloc byte[256] : new byte[byteLength];
+            Encoding.UTF8.GetBytes(config, configBytes);
+            fixed (byte* ptr = configBytes)
             {
-                int byteLength = Encoding.UTF8.GetByteCount(config);
-                Span<byte> configBytes = byteLength <= 256 ? stackalloc byte[256] : new byte[byteLength];
-                Encoding.UTF8.GetBytes(config, configBytes);
-                fixed (byte* ptr = configBytes)
-                {
-                    result = GlobalFunctions.rtcNewDevice(ptr);
-                }
+                _device = GlobalFunctions.rtcNewDevice(ptr);
             }
-            _device = result;
         }
 
         public RtcDevice(RtcDevice other)

@@ -1,10 +1,12 @@
 using System;
+using System.Runtime.InteropServices;
 using EmbreeSharp.Native;
 
 namespace EmbreeSharp
 {
     public class RtcGeometry : IDisposable
     {
+        private GCHandle _gcHandle;
         private RTCGeometry _geometry;
         private uint _id;
         private readonly RTCGeometryType _type;
@@ -27,6 +29,7 @@ namespace EmbreeSharp
 
         public RtcGeometry(RtcDevice device, RTCGeometryType type)
         {
+            _gcHandle = GCHandle.Alloc(this);
             _geometry = GlobalFunctions.rtcNewGeometry(device.NativeDevice, type);
             _type = type;
         }
@@ -37,6 +40,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed(nameof(other));
             }
+            _gcHandle = GCHandle.Alloc(this);
             GlobalFunctions.rtcRetainGeometry(other._geometry);
             _geometry = other._geometry;
             _type = other._type;
@@ -47,13 +51,15 @@ namespace EmbreeSharp
             Dispose(disposing: false);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
                 // if (disposing) { }
                 GlobalFunctions.rtcReleaseGeometry(_geometry);
                 _geometry = RTCGeometry.Null;
+                _gcHandle.Free();
+                _gcHandle = default;
                 _disposedValue = true;
             }
         }
@@ -64,28 +70,37 @@ namespace EmbreeSharp
             GC.SuppressFinalize(this);
         }
 
-        public void SetBuffer(RTCBufferType type, uint slot, RTCFormat format, RtcBuffer buffer, long byteOffset, long byteStride, long itemCount)
+        public void SetBuffer(RTCBufferType type, uint slot, RTCFormat format, RtcBuffer buffer, nuint byteOffset, nuint byteStride, nuint itemCount)
         {
             if (IsDisposed)
             {
                 ThrowUtility.ObjectDisposed();
             }
-            if (byteOffset + byteStride * itemCount > buffer.ByteSize)
+            if (byteStride * itemCount + byteOffset > buffer.ByteSize)
             {
                 ThrowUtility.ArgumentOutOfRange();
             }
-            GlobalFunctions.rtcSetGeometryBuffer(_geometry, type, slot, format, buffer.NativeBuffer, new((ulong)byteOffset), new((ulong)byteStride), new((ulong)itemCount));
+            GlobalFunctions.rtcSetGeometryBuffer(_geometry, type, slot, format, buffer.NativeBuffer, byteOffset, byteStride, itemCount);
         }
 
-        public unsafe NativeMemoryView<byte> SetNewBuffer(RTCBufferType type, uint slot, RTCFormat format, long byteStride, long itemCount)
+        public unsafe NativeMemoryView<byte> SetNewBuffer(RTCBufferType type, uint slot, RTCFormat format, nuint byteStride, nuint itemCount)
         {
             if (IsDisposed)
             {
                 ThrowUtility.ObjectDisposed();
             }
-            void* ptr = GlobalFunctions.rtcSetNewGeometryBuffer(_geometry, type, slot, format, new((ulong)byteStride), new((ulong)itemCount));
-            var byteCount = (ulong)byteStride * (ulong)itemCount;
-            return new NativeMemoryView<byte>(ptr, new(byteCount));
+            void* ptr = GlobalFunctions.rtcSetNewGeometryBuffer(_geometry, type, slot, format, byteStride, itemCount);
+            nuint byteCount = byteStride * itemCount;
+            return new NativeMemoryView<byte>(ptr, byteCount);
+        }
+
+        public void UpdateBuffer(RTCBufferType type, uint slot)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            GlobalFunctions.rtcUpdateGeometryBuffer(_geometry, type, slot);
         }
 
         public void Commit()

@@ -50,7 +50,7 @@ namespace EmbreeSharp
             Dispose(disposing: false);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
@@ -199,6 +199,63 @@ namespace EmbreeSharp
             ref RTCLinearBounds result = ref InteropUtility.StackAllocAligned<RTCLinearBounds>(bounds, RTCLinearBounds.Alignment);
             GlobalFunctions.rtcGetSceneLinearBounds(_scene, (RTCLinearBounds*)Unsafe.AsPointer(ref result));
             return result;
+        }
+
+        public unsafe void Intersect(ref RTCRayHit rayHit)
+        {
+            Span<byte> stack = stackalloc byte[sizeof(RTCRayHit) + RTCRayHit.Alignment];
+            ref RTCRayHit rayHitAligned = ref InteropUtility.StackAllocAligned<RTCRayHit>(stack, RTCRayHit.Alignment);
+            rayHitAligned = rayHit;
+            GlobalFunctions.rtcIntersect1(_scene, (RTCRayHit*)Unsafe.AsPointer(ref rayHitAligned), null);
+            rayHit = rayHitAligned;
+        }
+
+        public unsafe void Intersect(Span<int> valid, ref RTCRayHit4 rayHit)
+        {
+            if (valid.Length != 4)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            Span<byte> stack = stackalloc byte[sizeof(RTCRayHit4) + RTCRayHit4.Alignment];
+            ref RTCRayHit4 rayHitAligned = ref InteropUtility.StackAllocAligned<RTCRayHit4>(stack, RTCRayHit4.Alignment);
+            rayHitAligned = rayHit;
+            fixed (int* validPtr = valid)
+            {
+                GlobalFunctions.rtcIntersect4(validPtr, _scene, (RTCRayHit4*)Unsafe.AsPointer(ref rayHitAligned), null);
+            }
+            rayHit = rayHitAligned;
+        }
+
+        public unsafe void Intersect(Span<int> valid, ref RTCRayHit8 rayHit)
+        {
+            if (valid.Length != 8)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            Span<byte> stack = stackalloc byte[sizeof(RTCRayHit8) + RTCRayHit8.Alignment];
+            ref RTCRayHit8 rayHitAligned = ref InteropUtility.StackAllocAligned<RTCRayHit8>(stack, RTCRayHit8.Alignment);
+            rayHitAligned = rayHit;
+            fixed (int* validPtr = valid)
+            {
+                GlobalFunctions.rtcIntersect8(validPtr, _scene, (RTCRayHit8*)Unsafe.AsPointer(ref rayHitAligned), null);
+            }
+            rayHit = rayHitAligned;
+        }
+
+        public unsafe void Intersect(Span<int> valid, ref RTCRayHit16 rayHit)
+        {
+            if (valid.Length != 16)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            Span<byte> stack = stackalloc byte[sizeof(RTCRayHit16) + RTCRayHit16.Alignment];
+            ref RTCRayHit16 rayHitAligned = ref InteropUtility.StackAllocAligned<RTCRayHit16>(stack, RTCRayHit16.Alignment);
+            rayHitAligned = rayHit;
+            fixed (int* validPtr = valid)
+            {
+                GlobalFunctions.rtcIntersect16(validPtr, _scene, (RTCRayHit16*)Unsafe.AsPointer(ref rayHitAligned), null);
+            }
+            rayHit = rayHitAligned;
         }
     }
 }
