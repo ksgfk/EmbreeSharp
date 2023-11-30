@@ -46,6 +46,54 @@ The `Script` folder contains some help scripts to package the official compiled 
 
 Loading native dynamic library of embree is complicated. Because [official release](https://github.com/embree/embree/releases) depends on TBB. P/Invoke cannot find its path automatically. There is no way to set library search path (as far as I know). So I use `System.Runtime.InteropServices.NativeLibrary.SetDllImportResolver` to custom loading logic.
 
+### 
+
+## Limitation
+
+Cannot use all APIs related to SYCL.
+
+## TODO
+
+I will provide more safe functions for C# wrapper. But limited by language difference, It is almost impossible to have both performance and safety.
+
+If you have any idea, welcome issues and pull requests
+
+### Shared Buffer
+
+The memory for shared buffer is managed by user.
+
+Accouding to the API reference: [rtcSetSharedGeometryBuffer](https://github.com/embree/embree#rtcsetsharedgeometrybuffer)
+
+> The buffer data must remain valid for as long as the buffer may be used, and the user is responsible for freeing the buffer data when no longer required.
+
+This is a lifecycle problem.
+
+I think reference count or reference tracing is the way to solve it. Because memory should know if there is a buffer in use. This can avoid dangling pointer. If the memory is not used. We can free memory proactively and safely.
+
+Or, determined by GC. Yes, we can let buffer reference memory. When all buffers are released. Memory will only be freed when all buffers are released. But I think this is a backup option.
+
+### Geometry User Data
+
+Same problem with shared buffer.
+
+### SetGeometry[Intersect/Occluded/Bounds]Function
+
+Just provide safe API
+
+### BVH Build
+
+TBC...
+
+### MXCSR control and status register
+
+[link](https://github.com/embree/embree#mxcsr-control-and-status-register)
+
+This is x86-64 instruction. C# API does not provide them.
+
+Make a native library and use P/Invoke?
+
+Hmm...maybe we can use OS api. Write binary code to memory and call OS api to set memory as executable such as `VirtualProtectEx` on win32.
+
 ## License
 
 The copyright of Embree belongs to the Embree development team

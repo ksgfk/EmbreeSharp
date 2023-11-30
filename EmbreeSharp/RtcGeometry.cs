@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using EmbreeSharp.Native;
 
@@ -182,6 +183,57 @@ namespace EmbreeSharp
                 ThrowUtility.ObjectDisposed();
             }
             GlobalFunctions.rtcSetGeometryMaxRadiusScale(_geometry, maxRadiusScale);
+        }
+
+        public void SetInstancedScene(RtcScene scene)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            RTCScene s = scene.NativeScene;
+            GlobalFunctions.rtcSetGeometryInstancedScene(_geometry, s);
+        }
+
+        public unsafe Matrix4x4 GetTransform4x4(float time)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            Span<float> mat = stackalloc float[16];
+            fixed (float* ptr = mat)
+            {
+                GlobalFunctions.rtcGetGeometryTransform(_geometry, time, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
+            }
+            // C# matrix is row-major
+            return new Matrix4x4(
+                mat[0], mat[4], mat[8], mat[12],
+                mat[1], mat[5], mat[9], mat[13],
+                mat[2], mat[6], mat[10], mat[14],
+                mat[3], mat[7], mat[11], mat[15]);
+        }
+
+        public unsafe void SetTransform4x4(uint timeStep, Matrix4x4 mat)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            Matrix4x4 column = Matrix4x4.Transpose(mat);
+            GlobalFunctions.rtcSetGeometryTransform(_geometry, timeStep, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &column);
+        }
+
+        public unsafe void SetTransformQuaternion(uint timeStep, ref readonly RTCQuaternionDecomposition quat)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            fixed (RTCQuaternionDecomposition* ptr = &quat)
+            {
+                GlobalFunctions.rtcSetGeometryTransformQuaternion(_geometry, timeStep, ptr);
+            }
         }
     }
 }
