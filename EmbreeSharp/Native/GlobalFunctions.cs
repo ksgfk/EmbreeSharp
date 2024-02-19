@@ -38,6 +38,7 @@ namespace EmbreeSharp.Native
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     var nativeDir = Path.Combine(dir, "runtimes", $"osx-{GetRid()}", "native");
+                    target = NativeLibrary.Load(Path.Combine(nativeDir, "libtbb.dylib"), assembly, searchPath);
                     target = NativeLibrary.Load(Path.Combine(nativeDir, "libembree4.dylib"), assembly, searchPath);
                 }
                 else
