@@ -18,6 +18,7 @@ Else
     New-Item -ItemType Directory -Force -Path "$OutputDir/$TFM-lib"
 }
 Copy-Item "$OutputDir/$TFM/lib/libembree4.dylib" -Destination "$OutputDir/$TFM-lib"
+Copy-Item "$OutputDir/$TFM/lib/libtbb.dylib" -Destination "$OutputDir/$TFM-lib"
 
 Write-Host "package"
 @"

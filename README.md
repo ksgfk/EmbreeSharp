@@ -10,6 +10,8 @@ This project is still under development. API are not stable.
 
 ## Use
 
+Now target embree version is `v4.3.1`
+
 Install this package from nuget.
 
 Install the native library package for your platform from nuget. Or, compile embree by yourself and put native library into `runtimes/${rid}/native`
@@ -20,7 +22,7 @@ win   |[embree-win-x64](https://www.nuget.org/packages/embree-win-x64/)
 linux |[embree-linux-x64](https://www.nuget.org/packages/embree-linux-x64/)
 osx   |[embree-osx-x64](https://www.nuget.org/packages/embree-osx-x64/)
 
-osx-x64 should first install tbb in system.
+If you are using version `4.3.0`. osx-x64 should first install tbb in system.
 
 ## Directory structure
 
