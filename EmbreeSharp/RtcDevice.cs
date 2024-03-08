@@ -42,7 +42,7 @@ namespace EmbreeSharp
 
         public unsafe RtcDevice(string config)
         {
-            _gcHandle = GCHandle.Alloc(this);
+            _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             int byteLength = Encoding.UTF8.GetByteCount(config);
             Span<byte> configBytes = byteLength <= 256 ? stackalloc byte[256] : new byte[byteLength];
             Encoding.UTF8.GetBytes(config, configBytes);
@@ -138,6 +138,10 @@ namespace EmbreeSharp
             int byteCnt = len <= int.MaxValue ? (int)len : int.MaxValue;
             var mgrStr = Encoding.UTF8.GetString(str, byteCnt);
             GCHandle gcHandle = GCHandle.FromIntPtr(new nint(userPtr));
+            if (!gcHandle.IsAllocated)
+            {
+                return;
+            }
             RtcDevice device = (RtcDevice)gcHandle.Target!;
             device._managedErrorFunc?.Invoke(code, mgrStr);
         }

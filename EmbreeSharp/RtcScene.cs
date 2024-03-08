@@ -31,7 +31,7 @@ namespace EmbreeSharp
 
         public RtcScene(RtcDevice device)
         {
-            _gcHandle = GCHandle.Alloc(this);
+            _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             _scene = GlobalFunctions.rtcNewScene(device.NativeDevice);
         }
 
@@ -41,7 +41,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed(nameof(other));
             }
-            _gcHandle = GCHandle.Alloc(this);
+            _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             GlobalFunctions.rtcRetainScene(other._scene);
             _scene = other._scene;
         }
@@ -131,6 +131,10 @@ namespace EmbreeSharp
         private static unsafe bool ProgressMonitorFunctionImpl(void* ptr, double n)
         {
             GCHandle gcHandle = GCHandle.FromIntPtr(new nint(ptr));
+            if (!gcHandle.IsAllocated)
+            {
+                return true;
+            }
             RtcScene scene = (RtcScene)gcHandle.Target!;
             return scene._managedProgMonitor?.Invoke(n) ?? true;
         }
