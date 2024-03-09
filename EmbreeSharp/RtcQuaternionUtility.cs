@@ -2,7 +2,11 @@ using EmbreeSharp.Native;
 
 namespace EmbreeSharp
 {
-    public static class RtcQuaternionUtility
+    public static partial class RtcQuaternionUtility
+    {
+    }
+
+    public static class RtcQuaternionExtension
     {
         public static void Init(ref this RTCQuaternionDecomposition qdecomp)
         {

@@ -1,6 +1,6 @@
+using EmbreeSharp.Native;
 using System;
 using System.Runtime.CompilerServices;
-using EmbreeSharp.Native;
 
 namespace EmbreeSharp
 {

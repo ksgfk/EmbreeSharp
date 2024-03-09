@@ -1,5 +1,5 @@
-using System.Runtime.CompilerServices;
 using EmbreeSharp.Native;
+using System.Runtime.CompilerServices;
 
 namespace EmbreeSharp.Test
 {

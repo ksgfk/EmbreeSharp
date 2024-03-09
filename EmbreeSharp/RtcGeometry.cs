@@ -1,7 +1,6 @@
+using EmbreeSharp.Native;
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using EmbreeSharp.Native;
 
 namespace EmbreeSharp
 {

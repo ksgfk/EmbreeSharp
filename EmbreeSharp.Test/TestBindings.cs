@@ -1,7 +1,7 @@
+using EmbreeSharp.Native;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using EmbreeSharp.Native;
 using static EmbreeSharp.Native.GlobalFunctions;
 
 namespace EmbreeSharp.Test

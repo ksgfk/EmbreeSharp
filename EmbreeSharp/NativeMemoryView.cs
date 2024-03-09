@@ -168,10 +168,10 @@ namespace EmbreeSharp
                 return false;
             }
 
-            public unsafe ref T Current => ref Unsafe.AsRef<T>((void*)_ptr);
+            public readonly unsafe ref T Current => ref Unsafe.AsRef<T>((void*)_ptr);
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        public Enumerator GetEnumerator() => new(this);
     }
 
     public static class NativeMemoryViewExtension

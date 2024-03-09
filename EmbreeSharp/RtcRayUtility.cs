@@ -25,7 +25,10 @@ namespace EmbreeSharp
             }
             return rayhit;
         }
+    }
 
+    public static class RtcRayExtension
+    {
         public static bool IsHit(ref readonly this RTCRayHit rayhit)
         {
             return rayhit.hit.geomID != GlobalFunctions.RTC_INVALID_GEOMETRY_ID;
