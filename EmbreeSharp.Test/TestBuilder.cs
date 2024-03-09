@@ -225,7 +225,7 @@ public class TestBuilder
             return true;
         });
         builder.Build();
-        ref Node res = ref builder.Result.Ref<Node>();
+        ref Node res = ref builder.Result;
         Assert.AreEqual(minX, Math.Min(res.LeftBound.lower_x, res.RightBound.lower_x));
         Assert.AreEqual(minY, Math.Min(res.LeftBound.lower_y, res.RightBound.lower_y));
         Assert.AreEqual(minZ, Math.Min(res.LeftBound.lower_z, res.RightBound.lower_z));

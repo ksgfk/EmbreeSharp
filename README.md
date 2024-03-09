@@ -1,5 +1,7 @@
 # EmbreeSharp
 
+[![NuGet](https://img.shields.io/nuget/v/EmbreeSharp)](https://www.nuget.org/packages/EmbreeSharp)
+
 EmbreeSharp is an unofficial C# low-level binding for [embree](https://github.com/embree/embree)
 
 Provide a tiny safe wrapper in C#
@@ -18,9 +20,9 @@ Install the native library package for your platform from nuget. Or, compile emb
 
 OS    | x64
 --    | --
-win   |[embree-win-x64](https://www.nuget.org/packages/embree-win-x64/)
-linux |[embree-linux-x64](https://www.nuget.org/packages/embree-linux-x64/)
-osx   |[embree-osx-x64](https://www.nuget.org/packages/embree-osx-x64/)
+win   |[![NuGet](https://img.shields.io/nuget/v/embree-win-x64)](https://www.nuget.org/packages/embree-win-x64)
+linux |[![NuGet](https://img.shields.io/nuget/v/embree-linux-x64)](https://www.nuget.org/packages/embree-linux-x64)
+osx   |[![NuGet](https://img.shields.io/nuget/v/embree-osx-x64)](https://www.nuget.org/packages/embree-osx-x64)
 
 If you are using version `4.3.0`. osx-x64 should first install tbb in system.
 
