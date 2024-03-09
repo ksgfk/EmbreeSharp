@@ -82,10 +82,6 @@ Same problem with shared buffer.
 
 Just provide safe API
 
-### BVH Build
-
-TBC...
-
 ### MXCSR control and status register
 
 [link](https://github.com/embree/embree#mxcsr-control-and-status-register)

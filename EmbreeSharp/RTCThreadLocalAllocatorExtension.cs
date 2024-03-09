@@ -52,5 +52,15 @@ namespace EmbreeSharp
                 return new RtcThreadLocalAllocation(p);
             }
         }
+
+        public static ref T Allocate<T>(this RTCThreadLocalAllocator alloc, nuint align) where T : unmanaged
+        {
+            unsafe
+            {
+                nuint size = (nuint)sizeof(T);
+                void* p = GlobalFunctions.rtcThreadLocalAlloc(alloc, size, align);
+                return ref Unsafe.AsRef<T>(p);
+            }
+        }
     }
 }
