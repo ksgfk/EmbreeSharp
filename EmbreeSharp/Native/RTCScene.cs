@@ -72,7 +72,7 @@ namespace EmbreeSharp.Native
         [NativeType("RTCOccludedFunctionN")] public IntPtr occluded;
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Creates a new scene.
@@ -149,7 +149,7 @@ namespace EmbreeSharp.Native
     /// </summary>
     public unsafe delegate bool RTCProgressMonitorFunction(void* ptr, double n);
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Sets the progress monitor callback function of the scene.
@@ -342,7 +342,7 @@ namespace EmbreeSharp.Native
 
     public unsafe delegate void RTCCollideFunc(void* userPtr, [NativeType("struct RTCCollision*")] RTCCollision* collisions, uint num_collisions);
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Performs collision detection of two scenes

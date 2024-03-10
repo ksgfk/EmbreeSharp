@@ -17,11 +17,11 @@ namespace EmbreeSharp
             rayhit.ray.tfar = tfar;
             rayhit.ray.mask = unchecked((uint)-1);
             rayhit.ray.flags = 0;
-            rayhit.hit.geomID = GlobalFunctions.RTC_INVALID_GEOMETRY_ID;
+            rayhit.hit.geomID = EmbreeNative.RTC_INVALID_GEOMETRY_ID;
             unsafe
             {
-                rayhit.hit.instID[0] = GlobalFunctions.RTC_INVALID_GEOMETRY_ID;
-                rayhit.hit.instPrimID[0] = GlobalFunctions.RTC_INVALID_GEOMETRY_ID;
+                rayhit.hit.instID[0] = EmbreeNative.RTC_INVALID_GEOMETRY_ID;
+                rayhit.hit.instPrimID[0] = EmbreeNative.RTC_INVALID_GEOMETRY_ID;
             }
             return rayhit;
         }
@@ -31,7 +31,7 @@ namespace EmbreeSharp
     {
         public static bool IsHit(ref readonly this RTCRayHit rayhit)
         {
-            return rayhit.hit.geomID != GlobalFunctions.RTC_INVALID_GEOMETRY_ID;
+            return rayhit.hit.geomID != EmbreeNative.RTC_INVALID_GEOMETRY_ID;
         }
     }
 }

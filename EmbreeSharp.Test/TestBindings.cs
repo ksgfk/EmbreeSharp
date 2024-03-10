@@ -2,7 +2,7 @@ using EmbreeSharp.Native;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using static EmbreeSharp.Native.GlobalFunctions;
+using static EmbreeSharp.Native.EmbreeNative;
 
 namespace EmbreeSharp.Test
 {
@@ -22,7 +22,7 @@ namespace EmbreeSharp.Test
         {
             RTCDevice device = rtcNewDevice(null);
             RTCErrorFunction errFunc = ErrorFunctionImpl;
-            rtcSetDeviceErrorFunction(device, Marshal.GetFunctionPointerForDelegate(errFunc), null);
+            rtcSetDeviceErrorFunction(device, errFunc, null);
             RTCScene scene = rtcNewScene(device);
             RTCGeometry geo = rtcNewGeometry(device, RTCGeometryType.RTC_GEOMETRY_TYPE_TRIANGLE);
             float* vertices = (float*)rtcSetNewGeometryBuffer(geo, RTCBufferType.RTC_BUFFER_TYPE_VERTEX, 0, RTCFormat.RTC_FORMAT_FLOAT3, (nuint)sizeof(float) * 3, 4);

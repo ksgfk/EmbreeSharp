@@ -37,7 +37,7 @@ namespace EmbreeSharp.Native
         RTC_BUFFER_TYPE_FLAGS = 32
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Creates a new buffer.

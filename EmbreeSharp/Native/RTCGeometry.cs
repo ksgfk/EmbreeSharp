@@ -218,7 +218,7 @@ namespace EmbreeSharp.Native
 
     public unsafe delegate void RTCDisplacementFunctionN([NativeType("const struct RTCDisplacementFunctionNArguments*")] RTCDisplacementFunctionNArguments* args);
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Creates a new geometry of specified type.
@@ -475,7 +475,7 @@ namespace EmbreeSharp.Native
         public uint valueCount;
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Interpolates vertex data to some u/v location and optionally calculates all derivatives.
@@ -507,7 +507,7 @@ namespace EmbreeSharp.Native
         public uint valueCount;
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Interpolates vertex data to an array of u/v locations.

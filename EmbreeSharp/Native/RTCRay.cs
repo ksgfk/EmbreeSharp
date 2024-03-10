@@ -106,11 +106,11 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// instance ID
         /// </summary>
-        public fixed uint instID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT];
+        public fixed uint instID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT];
         /// <summary>
         /// instance primitive ID
         /// </summary>
-        public fixed uint instPrimID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT];
+        public fixed uint instPrimID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT];
     }
 
     /// <summary>
@@ -169,8 +169,8 @@ namespace EmbreeSharp.Native
 
         public fixed uint primID[4];
         public fixed uint geomID[4];
-        public fixed uint instID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 4];
-        public fixed uint instPrimID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 4];
+        public fixed uint instID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 4];
+        public fixed uint instPrimID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 4];
     }
 
     /// <summary>
@@ -229,8 +229,8 @@ namespace EmbreeSharp.Native
 
         public fixed uint primID[8];
         public fixed uint geomID[8];
-        public fixed uint instID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 8];
-        public fixed uint instPrimID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 8];
+        public fixed uint instID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 8];
+        public fixed uint instPrimID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 8];
     }
 
     /// <summary>
@@ -289,8 +289,8 @@ namespace EmbreeSharp.Native
 
         public fixed uint primID[16];
         public fixed uint geomID[16];
-        public fixed uint instID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
-        public fixed uint instPrimID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
+        public fixed uint instID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
+        public fixed uint instPrimID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
     }
 
     /// <summary>

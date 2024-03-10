@@ -5,15 +5,15 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         public const int RTC_MAX_INSTANCE_LEVEL_COUNT = 1;
         public const uint RTC_INVALID_GEOMETRY_ID = unchecked((uint)-1);
         public const string DynamicLibraryName = "embree4";
 
-        static GlobalFunctions()
+        static EmbreeNative()
         {
-            NativeLibrary.SetDllImportResolver(typeof(GlobalFunctions).Assembly, (string libraryName, Assembly assembly, DllImportSearchPath? searchPath) =>
+            NativeLibrary.SetDllImportResolver(typeof(EmbreeNative).Assembly, (string libraryName, Assembly assembly, DllImportSearchPath? searchPath) =>
             {
                 if (libraryName != DynamicLibraryName)
                 {

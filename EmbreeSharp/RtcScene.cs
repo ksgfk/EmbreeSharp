@@ -29,10 +29,10 @@ namespace EmbreeSharp
         }
         public bool IsDisposed => _disposedValue;
 
-        public RtcScene(RtcDevice device)
+        public RtcScene(EmbreeDevice device)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            _scene = GlobalFunctions.rtcNewScene(device.NativeDevice);
+            _scene = EmbreeNative.rtcNewScene(device.NativeDevice);
         }
 
         public RtcScene(RtcScene other)
@@ -42,7 +42,7 @@ namespace EmbreeSharp
                 ThrowUtility.ObjectDisposed(nameof(other));
             }
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            GlobalFunctions.rtcRetainScene(other._scene);
+            EmbreeNative.rtcRetainScene(other._scene);
             _scene = other._scene;
         }
 
@@ -63,11 +63,11 @@ namespace EmbreeSharp
                 {
                     if (_nativeProgMonitor != null)
                     {
-                        GlobalFunctions.rtcSetSceneProgressMonitorFunction(_scene, nint.Zero, null);
+                        EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, nint.Zero, null);
                     }
                     _nativeProgMonitor = null;
                 }
-                GlobalFunctions.rtcReleaseScene(_scene);
+                EmbreeNative.rtcReleaseScene(_scene);
                 _scene = RTCScene.Null;
                 _gcHandle.Free();
                 _gcHandle = default;
@@ -87,7 +87,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            uint id = GlobalFunctions.rtcAttachGeometry(_scene, geometry.NativeGeometry);
+            uint id = EmbreeNative.rtcAttachGeometry(_scene, geometry.NativeGeometry);
             geometry.Id = id;
         }
 
@@ -97,7 +97,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcAttachGeometryByID(_scene, geometry.NativeGeometry, id);
+            EmbreeNative.rtcAttachGeometryByID(_scene, geometry.NativeGeometry, id);
             geometry.Id = id;
         }
 
@@ -107,7 +107,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcDetachGeometry(_scene, geometry.Id);
+            EmbreeNative.rtcDetachGeometry(_scene, geometry.Id);
         }
 
         public void Commit()
@@ -116,7 +116,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcCommitScene(_scene);
+            EmbreeNative.rtcCommitScene(_scene);
         }
 
         public void JoinCommit()
@@ -125,7 +125,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcJoinCommitScene(_scene);
+            EmbreeNative.rtcJoinCommitScene(_scene);
         }
 
         private static unsafe bool ProgressMonitorFunctionImpl(void* ptr, double n)
@@ -147,7 +147,7 @@ namespace EmbreeSharp
             }
             if (_nativeProgMonitor != null)
             {
-                GlobalFunctions.rtcSetSceneProgressMonitorFunction(_scene, nint.Zero, null);
+                EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, nint.Zero, null);
             }
             if (func == null)
             {
@@ -159,7 +159,7 @@ namespace EmbreeSharp
                 _managedProgMonitor = func;
                 _nativeProgMonitor = ProgressMonitorFunctionImpl;
                 var ptr = Marshal.GetFunctionPointerForDelegate(_nativeProgMonitor);
-                GlobalFunctions.rtcSetSceneProgressMonitorFunction(_scene, ptr, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+                EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, ptr, GCHandle.ToIntPtr(_gcHandle).ToPointer());
             }
         }
 
@@ -169,7 +169,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcSetSceneBuildQuality(_scene, quality);
+            EmbreeNative.rtcSetSceneBuildQuality(_scene, quality);
         }
 
         public void SetFlags(RTCSceneFlags flags)
@@ -178,7 +178,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcSetSceneFlags(_scene, flags);
+            EmbreeNative.rtcSetSceneFlags(_scene, flags);
         }
 
         public RTCSceneFlags GetFlags()
@@ -187,7 +187,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            return GlobalFunctions.rtcGetSceneFlags(_scene);
+            return EmbreeNative.rtcGetSceneFlags(_scene);
         }
 
         public unsafe RTCBounds GetBounds()
@@ -198,7 +198,7 @@ namespace EmbreeSharp
             }
             Span<byte> bounds = stackalloc byte[sizeof(RTCBounds) + RTCBounds.Alignment];
             ref RTCBounds result = ref InteropUtility.StackAllocAligned<RTCBounds>(bounds, RTCBounds.Alignment);
-            GlobalFunctions.rtcGetSceneBounds(_scene, (RTCBounds*)Unsafe.AsPointer(ref result));
+            EmbreeNative.rtcGetSceneBounds(_scene, (RTCBounds*)Unsafe.AsPointer(ref result));
             return result;
         }
 
@@ -210,7 +210,7 @@ namespace EmbreeSharp
             }
             Span<byte> bounds = stackalloc byte[sizeof(RTCLinearBounds) + RTCLinearBounds.Alignment];
             ref RTCLinearBounds result = ref InteropUtility.StackAllocAligned<RTCLinearBounds>(bounds, RTCLinearBounds.Alignment);
-            GlobalFunctions.rtcGetSceneLinearBounds(_scene, (RTCLinearBounds*)Unsafe.AsPointer(ref result));
+            EmbreeNative.rtcGetSceneLinearBounds(_scene, (RTCLinearBounds*)Unsafe.AsPointer(ref result));
             return result;
         }
 
@@ -223,7 +223,7 @@ namespace EmbreeSharp
             Span<byte> stack = stackalloc byte[sizeof(RTCRayHit) + RTCRayHit.Alignment];
             ref RTCRayHit rayHitAligned = ref InteropUtility.StackAllocAligned<RTCRayHit>(stack, RTCRayHit.Alignment);
             rayHitAligned = rayHit;
-            GlobalFunctions.rtcIntersect1(_scene, (RTCRayHit*)Unsafe.AsPointer(ref rayHitAligned), null);
+            EmbreeNative.rtcIntersect1(_scene, (RTCRayHit*)Unsafe.AsPointer(ref rayHitAligned), null);
             rayHit = rayHitAligned;
         }
 
@@ -242,7 +242,7 @@ namespace EmbreeSharp
             rayHitAligned = rayHit;
             fixed (int* validPtr = valid)
             {
-                GlobalFunctions.rtcIntersect4(validPtr, _scene, (RTCRayHit4*)Unsafe.AsPointer(ref rayHitAligned), null);
+                EmbreeNative.rtcIntersect4(validPtr, _scene, (RTCRayHit4*)Unsafe.AsPointer(ref rayHitAligned), null);
             }
             rayHit = rayHitAligned;
         }
@@ -262,7 +262,7 @@ namespace EmbreeSharp
             rayHitAligned = rayHit;
             fixed (int* validPtr = valid)
             {
-                GlobalFunctions.rtcIntersect8(validPtr, _scene, (RTCRayHit8*)Unsafe.AsPointer(ref rayHitAligned), null);
+                EmbreeNative.rtcIntersect8(validPtr, _scene, (RTCRayHit8*)Unsafe.AsPointer(ref rayHitAligned), null);
             }
             rayHit = rayHitAligned;
         }
@@ -282,7 +282,7 @@ namespace EmbreeSharp
             rayHitAligned = rayHit;
             fixed (int* validPtr = valid)
             {
-                GlobalFunctions.rtcIntersect16(validPtr, _scene, (RTCRayHit16*)Unsafe.AsPointer(ref rayHitAligned), null);
+                EmbreeNative.rtcIntersect16(validPtr, _scene, (RTCRayHit16*)Unsafe.AsPointer(ref rayHitAligned), null);
             }
             rayHit = rayHitAligned;
         }
@@ -296,7 +296,7 @@ namespace EmbreeSharp
             Span<float> mat = stackalloc float[16];
             fixed (float* ptr = mat)
             {
-                GlobalFunctions.rtcGetGeometryTransformFromScene(_scene, geomID, time, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
+                EmbreeNative.rtcGetGeometryTransformFromScene(_scene, geomID, time, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
             }
             // C# matrix is row-major
             return new Matrix4x4(

@@ -48,7 +48,7 @@ namespace EmbreeSharp
         {
             unsafe
             {
-                void* p = GlobalFunctions.rtcThreadLocalAlloc(alloc, bytes, align);
+                void* p = EmbreeNative.rtcThreadLocalAlloc(alloc, bytes, align);
                 return new RtcThreadLocalAllocation(p);
             }
         }
@@ -58,7 +58,7 @@ namespace EmbreeSharp
             unsafe
             {
                 nuint size = (nuint)sizeof(T);
-                void* p = GlobalFunctions.rtcThreadLocalAlloc(alloc, size, align);
+                void* p = EmbreeNative.rtcThreadLocalAlloc(alloc, size, align);
                 return ref Unsafe.AsRef<T>(p);
             }
         }

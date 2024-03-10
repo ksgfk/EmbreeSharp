@@ -8,14 +8,12 @@ namespace EmbreeSharp
     public delegate void ErrorFunction(RTCError code, string str);
     public delegate bool MemoryMonitorFunction(long bytes, bool post);
 
-    public class RtcDevice : IDisposable
+    public class EmbreeDevice : IDisposable
     {
         private GCHandle _gcHandle;
         private RTCDevice _device;
-        private RTCErrorFunction? _nativeErrorFunc;
-        private ErrorFunction? _managedErrorFunc;
-        private RTCMemoryMonitorFunction? _nativeMemMonitor;
-        private MemoryMonitorFunction? _managedMemMonitor;
+        private ErrorFunction? _errorFunc;
+        private MemoryMonitorFunction? _memMonitor;
         private bool _disposedValue = false;
 
         public RTCDevice NativeDevice
@@ -31,16 +29,16 @@ namespace EmbreeSharp
         }
         public bool IsDisposed => _disposedValue;
 
-        public RtcDevice()
+        public EmbreeDevice()
         {
             _gcHandle = GCHandle.Alloc(this);
             unsafe
             {
-                _device = GlobalFunctions.rtcNewDevice(null);
+                _device = EmbreeNative.rtcNewDevice(null);
             }
         }
 
-        public unsafe RtcDevice(string config)
+        public unsafe EmbreeDevice(string config)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             int byteLength = Encoding.UTF8.GetByteCount(config);
@@ -48,22 +46,11 @@ namespace EmbreeSharp
             Encoding.UTF8.GetBytes(config, configBytes);
             fixed (byte* ptr = configBytes)
             {
-                _device = GlobalFunctions.rtcNewDevice(ptr);
+                _device = EmbreeNative.rtcNewDevice(ptr);
             }
         }
 
-        public RtcDevice(RtcDevice other)
-        {
-            if (other.IsDisposed)
-            {
-                ThrowUtility.ObjectDisposed(nameof(other));
-            }
-            _gcHandle = GCHandle.Alloc(this);
-            GlobalFunctions.rtcRetainDevice(_device);
-            _device = other._device;
-        }
-
-        ~RtcDevice()
+        ~EmbreeDevice()
         {
             Dispose(disposing: false);
         }
@@ -74,26 +61,18 @@ namespace EmbreeSharp
             {
                 if (disposing)
                 {
-                    _managedErrorFunc = null;
-                    _managedMemMonitor = null;
+                    _errorFunc = null;
+                    _memMonitor = null;
                 }
                 unsafe
                 {
-                    if (_nativeErrorFunc != null)
-                    {
-                        GlobalFunctions.rtcSetDeviceErrorFunction(_device, nint.Zero, null);
-                    }
-                    _nativeErrorFunc = null;
-                    if (_nativeMemMonitor != null)
-                    {
-                        GlobalFunctions.rtcSetDeviceMemoryMonitorFunction(_device, nint.Zero, null);
-                    }
-                    _nativeMemMonitor = null;
+                    EmbreeNative.rtcSetDeviceErrorFunction(_device, null, null);
+                    EmbreeNative.rtcSetDeviceMemoryMonitorFunction(_device, null, null);
                 }
-                GlobalFunctions.rtcReleaseDevice(_device);
-                _device = RTCDevice.Null;
                 _gcHandle.Free();
                 _gcHandle = default;
+                _device.Dispose();
+                _device = null!;
                 _disposedValue = true;
             }
         }
@@ -110,7 +89,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            var result = GlobalFunctions.rtcGetDeviceProperty(_device, prop);
+            var result = EmbreeNative.rtcGetDeviceProperty(_device, prop);
             return result.ToInt64();
         }
 
@@ -120,7 +99,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            GlobalFunctions.rtcSetDeviceProperty(_device, prop, new nint(value));
+            EmbreeNative.rtcSetDeviceProperty(_device, prop, new nint(value));
         }
 
         public RTCError GetError()
@@ -129,7 +108,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            return GlobalFunctions.rtcGetDeviceError(_device);
+            return EmbreeNative.rtcGetDeviceError(_device);
         }
 
         private static unsafe void ErrorFunctionImpl(void* userPtr, RTCError code, byte* str)
@@ -142,8 +121,8 @@ namespace EmbreeSharp
             {
                 return;
             }
-            RtcDevice device = (RtcDevice)gcHandle.Target!;
-            device._managedErrorFunc?.Invoke(code, mgrStr);
+            EmbreeDevice device = (EmbreeDevice)gcHandle.Target!;
+            device._errorFunc?.Invoke(code, mgrStr);
         }
 
         public unsafe void SetErrorFunction(ErrorFunction? func)
@@ -152,52 +131,38 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            if (_nativeErrorFunc != null)
-            {
-                GlobalFunctions.rtcSetDeviceErrorFunction(_device, nint.Zero, null);
-            }
+            _errorFunc = func;
             if (func == null)
             {
-                _nativeErrorFunc = null;
-                _managedErrorFunc = null;
+                EmbreeNative.rtcSetDeviceErrorFunction(_device, null, null);
             }
             else
             {
-                _managedErrorFunc = func;
-                _nativeErrorFunc = ErrorFunctionImpl;
-                var ptr = Marshal.GetFunctionPointerForDelegate(_nativeErrorFunc);
-                GlobalFunctions.rtcSetDeviceErrorFunction(_device, ptr, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+                EmbreeNative.rtcSetDeviceErrorFunction(_device, ErrorFunctionImpl, GCHandle.ToIntPtr(_gcHandle).ToPointer());
             }
         }
 
         private static unsafe bool MemoryMonitorFunctionImpl(void* ptr, nint bytes, bool post)
         {
             GCHandle gcHandle = GCHandle.FromIntPtr(new nint(ptr));
-            RtcDevice device = (RtcDevice)gcHandle.Target!;
-            return device._managedMemMonitor?.Invoke(bytes.ToInt64(), post) ?? true;
+            EmbreeDevice device = (EmbreeDevice)gcHandle.Target!;
+            return device._memMonitor?.Invoke(bytes.ToInt64(), post) ?? true;
         }
 
-        public unsafe void SetMemoryMonitorFunction(RTCDevice device, MemoryMonitorFunction? func)
+        public unsafe void SetMemoryMonitorFunction(MemoryMonitorFunction? func)
         {
             if (IsDisposed)
             {
                 ThrowUtility.ObjectDisposed();
             }
-            if (_nativeMemMonitor != null)
-            {
-                GlobalFunctions.rtcSetDeviceMemoryMonitorFunction(device, nint.Zero, null);
-            }
+            _memMonitor = func;
             if (func == null)
             {
-                _nativeMemMonitor = null;
-                _managedMemMonitor = null;
+                EmbreeNative.rtcSetDeviceMemoryMonitorFunction(_device, null, null);
             }
             else
             {
-                _managedMemMonitor = func;
-                _nativeMemMonitor = MemoryMonitorFunctionImpl;
-                var ptr = Marshal.GetFunctionPointerForDelegate(_nativeMemMonitor);
-                GlobalFunctions.rtcSetDeviceMemoryMonitorFunction(device, ptr, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+                EmbreeNative.rtcSetDeviceMemoryMonitorFunction(_device, MemoryMonitorFunctionImpl, GCHandle.ToIntPtr(_gcHandle).ToPointer());
             }
         }
     }

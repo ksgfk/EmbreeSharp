@@ -3,30 +3,42 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public struct RTCDevice
+    public class RTCDevice : SafeHandle
     {
-        public static RTCDevice Null => new() { Ptr = nint.Zero };
+        public override bool IsInvalid => handle == nint.Zero;
+        public RTCDevice() : base(0, true) { }
 
-        public IntPtr Ptr;
+        protected override bool ReleaseHandle()
+        {
+            try
+            {
+                EmbreeNative.rtcReleaseDevice(this);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Creates a new Embree device.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern RTCDevice rtcNewDevice([NativeType("const char*")] byte* config);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial RTCDevice rtcNewDevice([NativeType("const char*")] byte* config);
         /// <summary>
         /// Retains the Embree device (increments the reference count).
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcRetainDevice(RTCDevice device);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcRetainDevice(RTCDevice device);
         /// <summary>
         /// Releases an Embree device (decrements the reference count).
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcReleaseDevice(RTCDevice device);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcReleaseDevice(RTCDevice device);
     }
 
     /// <summary>
@@ -63,19 +75,19 @@ namespace EmbreeSharp.Native
         RTC_DEVICE_PROPERTY_PARALLEL_COMMIT_SUPPORTED = 130
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Gets a device property.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
+        [LibraryImport(DynamicLibraryName)]
         [return: NativeType("ssize_t")]
-        public static extern nint rtcGetDeviceProperty(RTCDevice device, RTCDeviceProperty prop);
+        public static partial nint rtcGetDeviceProperty(RTCDevice device, RTCDeviceProperty prop);
         /// <summary>
         /// Sets a device property.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetDeviceProperty(RTCDevice device, RTCDeviceProperty prop, [NativeType("ssize_t")] nint value);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetDeviceProperty(RTCDevice device, RTCDeviceProperty prop, [NativeType("ssize_t")] nint value);
     }
 
     /// <summary>
@@ -92,13 +104,13 @@ namespace EmbreeSharp.Native
         RTC_ERROR_CANCELLED = 6,
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Returns the error code.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern RTCError rtcGetDeviceError(RTCDevice device);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial RTCError rtcGetDeviceError(RTCDevice device);
     }
 
     /// <summary>
@@ -106,13 +118,13 @@ namespace EmbreeSharp.Native
     /// </summary>
     public unsafe delegate void RTCErrorFunction(void* userPtr, RTCError code, [NativeType("const char*")] byte* str);
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Sets the error callback function.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetDeviceErrorFunction(RTCDevice device, [NativeType("RTCErrorFunction")] IntPtr error, void* userPtr);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetDeviceErrorFunction(RTCDevice device, RTCErrorFunction? error, void* userPtr);
     }
 
     /// <summary>
@@ -120,12 +132,12 @@ namespace EmbreeSharp.Native
     /// </summary>
     public unsafe delegate bool RTCMemoryMonitorFunction(void* ptr, [NativeType("ssize_t")] nint bytes, bool post);
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Sets the memory monitor callback function.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetDeviceMemoryMonitorFunction(RTCDevice device, [NativeType("RTCMemoryMonitorFunction")] IntPtr memoryMonitor, void* userPtr);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetDeviceMemoryMonitorFunction(RTCDevice device, RTCMemoryMonitorFunction? memoryMonitor, void* userPtr);
     }
 }

@@ -48,10 +48,10 @@ namespace EmbreeSharp
         public RTCBVH NativeBVH => _bvh;
         internal GCHandle Gc => _gcHandle;
 
-        public RtcBuilderBase(RtcDevice device)
+        public RtcBuilderBase(EmbreeDevice device)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            _bvh = GlobalFunctions.rtcNewBVH(device.NativeDevice);
+            _bvh = EmbreeNative.rtcNewBVH(device.NativeDevice);
             _buildQuality = RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM;
             _buildFlags = RTCBuildFlags.RTC_BUILD_FLAG_NONE;
             _maxBranchingFactor = 2;
@@ -70,7 +70,7 @@ namespace EmbreeSharp
                 ThrowUtility.ObjectDisposed(nameof(other));
             }
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            GlobalFunctions.rtcRetainBVH(other._bvh);
+            EmbreeNative.rtcRetainBVH(other._bvh);
             _bvh = other._bvh;
             _buildQuality = other._buildQuality;
             _buildFlags = other._buildFlags;
@@ -105,7 +105,7 @@ namespace EmbreeSharp
                 }
                 _gcHandle.Free();
                 _gcHandle = default;
-                GlobalFunctions.rtcReleaseBVH(_bvh);
+                EmbreeNative.rtcReleaseBVH(_bvh);
                 _bvh = default;
                 _disposedValue = true;
             }
@@ -241,7 +241,7 @@ namespace EmbreeSharp
 
         public RtcThreadLocalAllocation Result => _result;
 
-        public RtcBuilder(RtcDevice device) : base(device) { }
+        public RtcBuilder(EmbreeDevice device) : base(device) { }
 
         public RtcBuilder(RtcBuilder other) : base(other)
         {
@@ -454,7 +454,7 @@ namespace EmbreeSharp
                     buildProgress = _progressMonitor == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeProgressMonitor),
                     userPtr = GCHandle.ToIntPtr(Gc).ToPointer()
                 };
-                void* root = GlobalFunctions.rtcBuildBVH(&args);
+                void* root = EmbreeNative.rtcBuildBVH(&args);
                 _result = new RtcThreadLocalAllocation(root);
                 return _result;
             }
@@ -481,7 +481,7 @@ namespace EmbreeSharp
 
         public ref TNode Result => ref _result.Value;
 
-        public RtcBuilder(RtcDevice device) : base(device) { }
+        public RtcBuilder(EmbreeDevice device) : base(device) { }
 
         public RtcBuilder(RtcBuilder<TNode, TLeaf> other) : base(other)
         {
@@ -694,7 +694,7 @@ namespace EmbreeSharp
                     buildProgress = _progressMonitor == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeProgressMonitor),
                     userPtr = GCHandle.ToIntPtr(Gc).ToPointer()
                 };
-                void* root = GlobalFunctions.rtcBuildBVH(&args);
+                void* root = EmbreeNative.rtcBuildBVH(&args);
                 _result = new Ref<TNode>(root);
                 return ref _result.Value;
             }

@@ -46,7 +46,7 @@ public class TestBuilder
             maxZ = Math.Max(maxZ, p.upper_z);
         }
         string config = "verbose=3";
-        using RtcDevice device = new(config);
+        using EmbreeDevice device = new(config);
         device.SetErrorFunction((code, str) =>
         {
             Console.WriteLine($"error {code}, {str}");
@@ -156,7 +156,7 @@ public class TestBuilder
             maxZ = Math.Max(maxZ, p.upper_z);
         }
         string config = "verbose=3";
-        using RtcDevice device = new(config);
+        using EmbreeDevice device = new(config);
         device.SetErrorFunction((code, str) =>
         {
             Console.WriteLine($"error {code}, {str}");

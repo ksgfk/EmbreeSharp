@@ -99,7 +99,7 @@ namespace EmbreeSharp.Native
         public void* userPtr;
     }
 
-    public static unsafe partial class GlobalFunctions
+    public static unsafe partial class EmbreeNative
     {
         /// <summary>
         /// Creates a new BVH.

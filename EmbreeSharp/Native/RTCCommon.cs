@@ -329,12 +329,12 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// The current stack of instance ids.
         /// </summary>
-        public fixed uint instID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT];
+        public fixed uint instID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT];
 
         /// <summary>
         /// The current stack of instance primitive ids.
         /// </summary>
-        public fixed uint instPrimID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT];
+        public fixed uint instPrimID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT];
     }
 
     /// <summary>
@@ -476,20 +476,20 @@ namespace EmbreeSharp.Native
         /// accumulated 4x4 column major matrices from world space to instance space.
         /// undefined if size == 0.
         /// </summary>
-        public fixed float world2inst[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
+        public fixed float world2inst[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
         /// <summary>
         /// accumulated 4x4 column major matrices from instance space to world space.
         /// undefined if size == 0.
         /// </summary>
-        public fixed float inst2world[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
+        public fixed float inst2world[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT * 16];
         /// <summary>
         /// instance ids.
         /// </summary>
-        public fixed uint instID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT];
+        public fixed uint instID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT];
         /// <summary>
         /// instance prim ids.
         /// </summary>
-        public fixed uint instPrimID[GlobalFunctions.RTC_MAX_INSTANCE_LEVEL_COUNT];
+        public fixed uint instPrimID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT];
         /// <summary>
         /// number of instances currently on the stack.
         /// </summary>

@@ -24,9 +24,9 @@ namespace EmbreeSharp
         public nuint ByteSize => _byteSize;
         public bool IsDisposed => _disposedValue;
 
-        public RtcBuffer(RtcDevice device, nuint byteSize)
+        public RtcBuffer(EmbreeDevice device, nuint byteSize)
         {
-            _buffer = GlobalFunctions.rtcNewBuffer(device.NativeDevice, byteSize);
+            _buffer = EmbreeNative.rtcNewBuffer(device.NativeDevice, byteSize);
             _byteSize = byteSize;
         }
 
@@ -36,7 +36,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed(nameof(other));
             }
-            GlobalFunctions.rtcRetainBuffer(other._buffer);
+            EmbreeNative.rtcRetainBuffer(other._buffer);
             _buffer = other._buffer;
             _byteSize = other._byteSize;
         }
@@ -51,7 +51,7 @@ namespace EmbreeSharp
             if (!_disposedValue)
             {
                 // if (disposing) { }
-                GlobalFunctions.rtcReleaseBuffer(_buffer);
+                EmbreeNative.rtcReleaseBuffer(_buffer);
                 _buffer = RTCBuffer.Null;
                 _disposedValue = true;
             }
@@ -71,7 +71,7 @@ namespace EmbreeSharp
             }
             unsafe
             {
-                void* dst = GlobalFunctions.rtcGetBufferData(_buffer);
+                void* dst = EmbreeNative.rtcGetBufferData(_buffer);
                 return new NativeMemoryView<byte>(dst, _byteSize);
             }
         }
@@ -85,7 +85,7 @@ namespace EmbreeSharp
             var count = _byteSize / (nuint)Unsafe.SizeOf<T>();
             unsafe
             {
-                void* dst = GlobalFunctions.rtcGetBufferData(_buffer);
+                void* dst = EmbreeNative.rtcGetBufferData(_buffer);
                 return new NativeMemoryView<T>(dst, count);
             }
         }
