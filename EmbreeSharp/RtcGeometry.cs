@@ -1,11 +1,13 @@
 using EmbreeSharp.Native;
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace EmbreeSharp
 {
     public class RtcGeometry : IDisposable
     {
+        private GCHandle _gcHandle;
         private RTCGeometry _geometry;
         private uint _id;
         private readonly RTCGeometryType _type;
@@ -28,8 +30,13 @@ namespace EmbreeSharp
 
         public RtcGeometry(RtcDevice device, RTCGeometryType type)
         {
+            _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             _geometry = GlobalFunctions.rtcNewGeometry(device.NativeDevice, type);
             _type = type;
+            unsafe
+            {
+                GlobalFunctions.rtcSetGeometryUserData(_geometry, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+            }
         }
 
         public RtcGeometry(RtcGeometry other)
@@ -38,9 +45,14 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed(nameof(other));
             }
+            _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             GlobalFunctions.rtcRetainGeometry(other._geometry);
             _geometry = other._geometry;
             _type = other._type;
+            unsafe
+            {
+                GlobalFunctions.rtcSetGeometryUserData(_geometry, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+            }
         }
 
         ~RtcGeometry()
@@ -53,6 +65,12 @@ namespace EmbreeSharp
             if (!_disposedValue)
             {
                 // if (disposing) { }
+                unsafe
+                {
+                    GlobalFunctions.rtcSetGeometryUserData(_geometry, null);
+                }
+                _gcHandle.Free();
+                _gcHandle = default;
                 GlobalFunctions.rtcReleaseGeometry(_geometry);
                 _geometry = RTCGeometry.Null;
                 _disposedValue = true;

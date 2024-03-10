@@ -76,10 +76,6 @@ I think reference count or reference tracing is the way to solve it. Because mem
 
 Or, determined by GC. Yes, we can let buffer reference memory. When all buffers are released. Memory will only be freed when all buffers are released. But I think this is a backup option.
 
-### Geometry User Data
-
-Same problem with shared buffer.
-
 ### SetGeometry[Intersect/Occluded/Bounds]Function
 
 Just provide safe API
