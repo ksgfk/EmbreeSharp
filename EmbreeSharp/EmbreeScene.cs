@@ -8,12 +8,11 @@ namespace EmbreeSharp
 {
     public delegate bool ProgressMonitorFunction(double n);
 
-    public class RtcScene : IDisposable
+    public class EmbreeScene : IDisposable
     {
         private GCHandle _gcHandle;
-        private RTCScene _scene;
-        private RTCProgressMonitorFunction? _nativeProgMonitor;
-        private ProgressMonitorFunction? _managedProgMonitor;
+        private readonly RTCScene _scene;
+        private ProgressMonitorFunction? _progMonitor;
         private bool _disposedValue;
 
         public RTCScene NativeScene
@@ -29,13 +28,13 @@ namespace EmbreeSharp
         }
         public bool IsDisposed => _disposedValue;
 
-        public RtcScene(EmbreeDevice device)
+        public EmbreeScene(EmbreeDevice device)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             _scene = EmbreeNative.rtcNewScene(device.NativeDevice);
         }
 
-        public RtcScene(RtcScene other)
+        public EmbreeScene(EmbreeScene other)
         {
             if (other.IsDisposed)
             {
@@ -46,7 +45,7 @@ namespace EmbreeSharp
             _scene = other._scene;
         }
 
-        ~RtcScene()
+        ~EmbreeScene()
         {
             Dispose(disposing: false);
         }
@@ -57,18 +56,13 @@ namespace EmbreeSharp
             {
                 if (disposing)
                 {
-                    _managedProgMonitor = null;
+                    _progMonitor = null;
                 }
                 unsafe
                 {
-                    if (_nativeProgMonitor != null)
-                    {
-                        EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, nint.Zero, null);
-                    }
-                    _nativeProgMonitor = null;
+                    EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, null, null);
                 }
-                EmbreeNative.rtcReleaseScene(_scene);
-                _scene = RTCScene.Null;
+                _scene.Dispose();
                 _gcHandle.Free();
                 _gcHandle = default;
                 _disposedValue = true;
@@ -81,7 +75,7 @@ namespace EmbreeSharp
             GC.SuppressFinalize(this);
         }
 
-        public void AttachGeometry(RtcGeometry geometry)
+        public void AttachGeometry(EmbreeGeometry geometry)
         {
             if (IsDisposed)
             {
@@ -91,7 +85,7 @@ namespace EmbreeSharp
             geometry.Id = id;
         }
 
-        public void AttachGeometry(RtcGeometry geometry, uint id)
+        public void AttachGeometry(EmbreeGeometry geometry, uint id)
         {
             if (IsDisposed)
             {
@@ -101,7 +95,7 @@ namespace EmbreeSharp
             geometry.Id = id;
         }
 
-        public void DetachGeometry(RtcGeometry geometry)
+        public void DetachGeometry(EmbreeGeometry geometry)
         {
             if (IsDisposed)
             {
@@ -135,8 +129,8 @@ namespace EmbreeSharp
             {
                 return true;
             }
-            RtcScene scene = (RtcScene)gcHandle.Target!;
-            return scene._managedProgMonitor?.Invoke(n) ?? true;
+            EmbreeScene scene = (EmbreeScene)gcHandle.Target!;
+            return scene._progMonitor?.Invoke(n) ?? true;
         }
 
         public unsafe void SetProgressMonitorFunction(ProgressMonitorFunction? func)
@@ -145,21 +139,14 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            if (_nativeProgMonitor != null)
-            {
-                EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, nint.Zero, null);
-            }
+            _progMonitor = func;
             if (func == null)
             {
-                _nativeProgMonitor = null;
-                _managedProgMonitor = null;
+                EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, null, null);
             }
             else
             {
-                _managedProgMonitor = func;
-                _nativeProgMonitor = ProgressMonitorFunctionImpl;
-                var ptr = Marshal.GetFunctionPointerForDelegate(_nativeProgMonitor);
-                EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, ptr, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+                EmbreeNative.rtcSetSceneProgressMonitorFunction(_scene, ProgressMonitorFunctionImpl, GCHandle.ToIntPtr(_gcHandle).ToPointer());
             }
         }
 

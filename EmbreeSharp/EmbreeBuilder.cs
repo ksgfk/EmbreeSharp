@@ -5,26 +5,26 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp
 {
-    public delegate RtcThreadLocalAllocation CreateNodeFunction(RTCThreadLocalAllocator allocator, uint childCount);
+    public delegate RTCThreadLocalAllocation CreateNodeFunction(RTCThreadLocalAllocator allocator, uint childCount);
     public delegate ref T CreateNodeFunction<T>(RTCThreadLocalAllocator allocator, uint childCount) where T : unmanaged;
 
-    public delegate void SetNodeChildrenFunction(RtcThreadLocalAllocation node, NativeMemoryView<RtcThreadLocalAllocation> children);
+    public delegate void SetNodeChildrenFunction(RTCThreadLocalAllocation node, NativeMemoryView<RTCThreadLocalAllocation> children);
     public delegate void SetNodeChildrenFunction<T>(ref T node, NativeMemoryView<Ref<T>> children) where T : unmanaged;
 
-    public delegate void SetNodeBoundsFunction(RtcThreadLocalAllocation node, NativeMemoryView<Ref<RTCBounds>> bounds);
+    public delegate void SetNodeBoundsFunction(RTCThreadLocalAllocation node, NativeMemoryView<Ref<RTCBounds>> bounds);
     public delegate void SetNodeBoundsFunction<T>(ref T node, NativeMemoryView<Ref<RTCBounds>> bounds) where T : unmanaged;
 
-    public delegate RtcThreadLocalAllocation CreateLeafFunction(RTCThreadLocalAllocator allocator, NativeMemoryView<RTCBuildPrimitive> primitives);
+    public delegate RTCThreadLocalAllocation CreateLeafFunction(RTCThreadLocalAllocator allocator, NativeMemoryView<RTCBuildPrimitive> primitives);
     public delegate ref T CreateLeafFunction<T>(RTCThreadLocalAllocator allocator, NativeMemoryView<RTCBuildPrimitive> primitives) where T : unmanaged;
 
     public delegate void SplitPrimitiveFunction(ref readonly RTCBuildPrimitive primitive, uint dimension, float position, ref RTCBounds leftBounds, ref RTCBounds rightBounds);
 
-    public abstract class RtcBuilderBase<T> : IDisposable where T : RtcBuilderBase<T>
+    public abstract class EmbreeBuilder<T> : IDisposable where T : EmbreeBuilder<T>
     {
         private bool _disposedValue;
 
         private GCHandle _gcHandle;
-        private RTCBVH _bvh;
+        private readonly RTCBVH _bvh;
 
         protected RTCBuildQuality _buildQuality;
         protected RTCBuildFlags _buildFlags;
@@ -37,18 +37,11 @@ namespace EmbreeSharp
         protected float _intersectionCost;
         protected RTCBuildPrimitive[]? _prims;
 
-        protected RTCCreateNodeFunction? _nativeCreateNode;
-        protected RTCSetNodeChildrenFunction? _nativeSetNodeChildren;
-        protected RTCSetNodeBoundsFunction? _nativeSetNodeBounds;
-        protected RTCCreateLeafFunction? _nativeCreateLeaf;
-        protected RTCSplitPrimitiveFunction? _nativeSplitPrimitive;
-        protected RTCProgressMonitorFunction? _nativeProgressMonitor;
-
         public bool IsDisposed => _disposedValue;
         public RTCBVH NativeBVH => _bvh;
         internal GCHandle Gc => _gcHandle;
 
-        public RtcBuilderBase(EmbreeDevice device)
+        public EmbreeBuilder(EmbreeDevice device)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             _bvh = EmbreeNative.rtcNewBVH(device.NativeDevice);
@@ -63,28 +56,7 @@ namespace EmbreeSharp
             _intersectionCost = 1.0f;
         }
 
-        public RtcBuilderBase(T other)
-        {
-            if (other.IsDisposed)
-            {
-                ThrowUtility.ObjectDisposed(nameof(other));
-            }
-            _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            EmbreeNative.rtcRetainBVH(other._bvh);
-            _bvh = other._bvh;
-            _buildQuality = other._buildQuality;
-            _buildFlags = other._buildFlags;
-            _maxBranchingFactor = other._maxBranchingFactor;
-            _maxDepth = other._maxDepth;
-            _sahBlockSize = other._sahBlockSize;
-            _minLeafSize = other._minLeafSize;
-            _maxLeafSize = other._maxLeafSize;
-            _traversalCost = other._traversalCost;
-            _intersectionCost = other._intersectionCost;
-            _prims = other._prims;
-        }
-
-        ~RtcBuilderBase()
+        ~EmbreeBuilder()
         {
             Dispose(disposing: false);
         }
@@ -96,17 +68,10 @@ namespace EmbreeSharp
                 if (disposing)
                 {
                     _prims = null;
-                    _nativeCreateNode = null;
-                    _nativeSetNodeChildren = null;
-                    _nativeSetNodeBounds = null;
-                    _nativeCreateLeaf = null;
-                    _nativeSplitPrimitive = null;
-                    _nativeProgressMonitor = null;
                 }
                 _gcHandle.Free();
                 _gcHandle = default;
-                EmbreeNative.rtcReleaseBVH(_bvh);
-                _bvh = default;
+                _bvh.Dispose();
                 _disposedValue = true;
             }
         }
@@ -229,9 +194,9 @@ namespace EmbreeSharp
         }
     }
 
-    public class RtcBuilder : RtcBuilderBase<RtcBuilder>
+    public class EmbreeBuilder : EmbreeBuilder<EmbreeBuilder>
     {
-        private RtcThreadLocalAllocation _result;
+        private RTCThreadLocalAllocation _result;
         private CreateNodeFunction? _createNode;
         private SetNodeChildrenFunction? _setNodeChildren;
         private SetNodeBoundsFunction? _setNodeBounds;
@@ -239,20 +204,9 @@ namespace EmbreeSharp
         private SplitPrimitiveFunction? _splitPrimitive;
         private ProgressMonitorFunction? _progressMonitor;
 
-        public RtcThreadLocalAllocation Result => _result;
+        public RTCThreadLocalAllocation Result => _result;
 
-        public RtcBuilder(EmbreeDevice device) : base(device) { }
-
-        public RtcBuilder(RtcBuilder other) : base(other)
-        {
-            _result = other._result;
-            _createNode = other._createNode;
-            _setNodeChildren = other._setNodeChildren;
-            _setNodeBounds = other._setNodeBounds;
-            _createLeaf = other._createLeaf;
-            _splitPrimitive = other._splitPrimitive;
-            _progressMonitor = other._progressMonitor;
-        }
+        public EmbreeBuilder(EmbreeDevice device) : base(device) { }
 
         protected override void Dispose(bool disposing)
         {
@@ -272,7 +226,7 @@ namespace EmbreeSharp
             base.Dispose(disposing);
         }
 
-        public RtcBuilder SetCreateNodeFunction(CreateNodeFunction func)
+        public EmbreeBuilder SetCreateNodeFunction(CreateNodeFunction func)
         {
             if (IsDisposed)
             {
@@ -282,7 +236,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder SetSetNodeChildrenFunction(SetNodeChildrenFunction func)
+        public EmbreeBuilder SetSetNodeChildrenFunction(SetNodeChildrenFunction func)
         {
             if (IsDisposed)
             {
@@ -292,7 +246,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder SetSetNodeBoundsFunction(SetNodeBoundsFunction func)
+        public EmbreeBuilder SetSetNodeBoundsFunction(SetNodeBoundsFunction func)
         {
             if (IsDisposed)
             {
@@ -302,7 +256,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder SetCreateLeafFunction(CreateLeafFunction func)
+        public EmbreeBuilder SetCreateLeafFunction(CreateLeafFunction func)
         {
             if (IsDisposed)
             {
@@ -312,7 +266,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder SetSplitPrimitiveFunction(SplitPrimitiveFunction func)
+        public EmbreeBuilder SetSplitPrimitiveFunction(SplitPrimitiveFunction func)
         {
             if (IsDisposed)
             {
@@ -322,7 +276,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder SetProgressMonitorFunction(ProgressMonitorFunction func)
+        public EmbreeBuilder SetProgressMonitorFunction(ProgressMonitorFunction func)
         {
             if (IsDisposed)
             {
@@ -332,67 +286,67 @@ namespace EmbreeSharp
             return this;
         }
 
-        private static unsafe RtcBuilder? GetThisFromUserPtr(void* userPtr)
+        private static unsafe EmbreeBuilder? GetThisFromUserPtr(void* userPtr)
         {
             GCHandle gcHandle = GCHandle.FromIntPtr(new nint(userPtr));
             if (!gcHandle.IsAllocated)
             {
                 return null;
             }
-            RtcBuilder builder = (RtcBuilder)gcHandle.Target!;
+            EmbreeBuilder builder = (EmbreeBuilder)gcHandle.Target!;
             return builder;
         }
 
         private static unsafe void* CreateNodeFunctionImpl(RTCThreadLocalAllocator allocator, uint childCount, void* userPtr)
         {
-            RtcBuilder? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return null;
             }
-            RtcThreadLocalAllocation allocation = builder._createNode?.Invoke(allocator, childCount) ?? default;
+            RTCThreadLocalAllocation allocation = builder._createNode?.Invoke(allocator, childCount) ?? default;
             return allocation.Ptr;
         }
 
         private static unsafe void SetNodeChildrenImpl(void* nodePtr, void** children, uint childCount, void* userPtr)
         {
-            RtcBuilder? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return;
             }
-            RtcThreadLocalAllocation node = new(nodePtr);
-            NativeMemoryView<RtcThreadLocalAllocation> childs = new(children, childCount);
+            RTCThreadLocalAllocation node = new(nodePtr);
+            NativeMemoryView<RTCThreadLocalAllocation> childs = new(children, childCount);
             builder._setNodeChildren?.Invoke(node, childs);
         }
 
         private static unsafe void SetNodeBoundsImpl(void* nodePtr, RTCBounds** bounds, uint childCount, void* userPtr)
         {
-            RtcBuilder? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return;
             }
-            RtcThreadLocalAllocation node = new(nodePtr);
+            RTCThreadLocalAllocation node = new(nodePtr);
             NativeMemoryView<Ref<RTCBounds>> bound = new(bounds, childCount);
             builder._setNodeBounds?.Invoke(node, bound);
         }
 
         private static unsafe void* CreateLeafImpl(RTCThreadLocalAllocator allocator, RTCBuildPrimitive* primitives, nuint primitiveCount, void* userPtr)
         {
-            RtcBuilder? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return null;
             }
             NativeMemoryView<RTCBuildPrimitive> prims = new(primitives, primitiveCount);
-            RtcThreadLocalAllocation leaf = builder._createLeaf?.Invoke(allocator, prims) ?? default;
+            RTCThreadLocalAllocation leaf = builder._createLeaf?.Invoke(allocator, prims) ?? default;
             return leaf.Ptr;
         }
 
         private static unsafe void SplitPrimitiveImpl(RTCBuildPrimitive* primitive, uint dimension, float position, RTCBounds* leftBounds, RTCBounds* rightBounds, void* userPtr)
         {
-            RtcBuilder? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return;
@@ -402,7 +356,7 @@ namespace EmbreeSharp
 
         private static unsafe bool ProgressMonitorImpl(void* ptr, double n)
         {
-            RtcBuilder? builder = GetThisFromUserPtr(ptr);
+            EmbreeBuilder? builder = GetThisFromUserPtr(ptr);
             if (builder == null)
             {
                 return true;
@@ -410,16 +364,28 @@ namespace EmbreeSharp
             return builder._progressMonitor?.Invoke(n) ?? true;
         }
 
-        public unsafe RtcThreadLocalAllocation Build()
+        public unsafe RTCThreadLocalAllocation Build()
         {
             if (IsDisposed) { ThrowUtility.ObjectDisposed(); }
             if (_prims == null) { ThrowUtility.InvalidOperation("primitives cannot be null"); }
-            _nativeCreateNode ??= CreateNodeFunctionImpl;
-            _nativeSetNodeChildren ??= SetNodeChildrenImpl;
-            _nativeSetNodeBounds ??= SetNodeBoundsImpl;
-            _nativeCreateLeaf ??= CreateLeafImpl;
-            _nativeSplitPrimitive ??= SplitPrimitiveImpl;
-            _nativeProgressMonitor ??= ProgressMonitorImpl;
+            nint createNode = 0;
+            nint setNodeChildren = 0;
+            nint setNodeBounds = 0;
+            nint createLeaf = 0;
+            nint splitPrim = 0;
+            nint progMonitor = 0;
+            RTCCreateNodeFunction nCreateNode = CreateNodeFunctionImpl;
+            RTCSetNodeChildrenFunction nSetNodeChildren = SetNodeChildrenImpl;
+            RTCSetNodeBoundsFunction nSetNodeBounds = SetNodeBoundsImpl;
+            RTCCreateLeafFunction nCreateLeaf = CreateLeafImpl;
+            RTCSplitPrimitiveFunction nSplitPrim = SplitPrimitiveImpl;
+            RTCProgressMonitorFunction nProgMonitor = ProgressMonitorImpl;
+            createNode = _createNode == null ? 0 : Marshal.GetFunctionPointerForDelegate(nCreateNode);
+            setNodeChildren = _setNodeChildren == null ? 0 : Marshal.GetFunctionPointerForDelegate(nSetNodeChildren);
+            setNodeBounds = _setNodeBounds == null ? 0 : Marshal.GetFunctionPointerForDelegate(nSetNodeBounds);
+            createLeaf = _createLeaf == null ? 0 : Marshal.GetFunctionPointerForDelegate(nCreateLeaf);
+            splitPrim = _splitPrimitive == null ? 0 : Marshal.GetFunctionPointerForDelegate(nSplitPrim);
+            progMonitor = _progressMonitor == null ? 0 : Marshal.GetFunctionPointerForDelegate(nProgMonitor);
             RTCBuildPrimitive* primitives = null;
             nuint primitiveCount = (nuint)_prims.Length;
             nuint primitiveArrayCapacity = _buildQuality == RTCBuildQuality.RTC_BUILD_QUALITY_HIGH ? primitiveCount * 2 : primitiveCount;
@@ -442,20 +408,26 @@ namespace EmbreeSharp
                     maxLeafSize = _maxLeafSize,
                     traversalCost = _traversalCost,
                     intersectionCost = _intersectionCost,
-                    bvh = NativeBVH,
+                    bvh = NativeBVH.DangerousGetHandle(),
                     primitives = primitives,
                     primitiveCount = primitiveCount,
                     primitiveArrayCapacity = primitiveArrayCapacity,
-                    createNode = _createNode == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeCreateNode),
-                    setNodeChildren = _setNodeChildren == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeSetNodeChildren),
-                    setNodeBounds = _setNodeBounds == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeSetNodeBounds),
-                    createLeaf = _createLeaf == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeCreateLeaf),
-                    splitPrimitive = _splitPrimitive == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeSplitPrimitive),
-                    buildProgress = _progressMonitor == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeProgressMonitor),
+                    createNode = createNode,
+                    setNodeChildren = setNodeChildren,
+                    setNodeBounds = setNodeBounds,
+                    createLeaf = createLeaf,
+                    splitPrimitive = splitPrim,
+                    buildProgress = progMonitor,
                     userPtr = GCHandle.ToIntPtr(Gc).ToPointer()
                 };
-                void* root = EmbreeNative.rtcBuildBVH(&args);
-                _result = new RtcThreadLocalAllocation(root);
+                void* root = EmbreeNative.rtcBuildBVH(ref args);
+                GC.KeepAlive(nCreateNode);
+                GC.KeepAlive(nSetNodeChildren);
+                GC.KeepAlive(nSetNodeBounds);
+                GC.KeepAlive(nCreateLeaf);
+                GC.KeepAlive(nSplitPrim);
+                GC.KeepAlive(nProgMonitor);
+                _result = new RTCThreadLocalAllocation(root);
                 return _result;
             }
             finally
@@ -469,7 +441,7 @@ namespace EmbreeSharp
         }
     }
 
-    public class RtcBuilder<TNode, TLeaf> : RtcBuilderBase<RtcBuilder<TNode, TLeaf>> where TNode : unmanaged where TLeaf : unmanaged
+    public class EmbreeBuilder<TNode, TLeaf> : EmbreeBuilder<EmbreeBuilder<TNode, TLeaf>> where TNode : unmanaged where TLeaf : unmanaged
     {
         private Ref<TNode> _result;
         private CreateNodeFunction<TNode>? _createNode;
@@ -481,18 +453,7 @@ namespace EmbreeSharp
 
         public ref TNode Result => ref _result.Value;
 
-        public RtcBuilder(EmbreeDevice device) : base(device) { }
-
-        public RtcBuilder(RtcBuilder<TNode, TLeaf> other) : base(other)
-        {
-            _result = other._result;
-            _createNode = other._createNode;
-            _setNodeChildren = other._setNodeChildren;
-            _setNodeBounds = other._setNodeBounds;
-            _createLeaf = other._createLeaf;
-            _splitPrimitive = other._splitPrimitive;
-            _progressMonitor = other._progressMonitor;
-        }
+        public EmbreeBuilder(EmbreeDevice device) : base(device) { }
 
         protected override void Dispose(bool disposing)
         {
@@ -512,7 +473,7 @@ namespace EmbreeSharp
             base.Dispose(disposing);
         }
 
-        public RtcBuilder<TNode, TLeaf> SetCreateNodeFunction(CreateNodeFunction<TNode> func)
+        public EmbreeBuilder<TNode, TLeaf> SetCreateNodeFunction(CreateNodeFunction<TNode> func)
         {
             if (IsDisposed)
             {
@@ -522,7 +483,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder<TNode, TLeaf> SetSetNodeChildrenFunction(SetNodeChildrenFunction<TNode> func)
+        public EmbreeBuilder<TNode, TLeaf> SetSetNodeChildrenFunction(SetNodeChildrenFunction<TNode> func)
         {
             if (IsDisposed)
             {
@@ -532,7 +493,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder<TNode, TLeaf> SetSetNodeBoundsFunction(SetNodeBoundsFunction<TNode> func)
+        public EmbreeBuilder<TNode, TLeaf> SetSetNodeBoundsFunction(SetNodeBoundsFunction<TNode> func)
         {
             if (IsDisposed)
             {
@@ -542,7 +503,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder<TNode, TLeaf> SetCreateLeafFunction(CreateLeafFunction<TLeaf> func)
+        public EmbreeBuilder<TNode, TLeaf> SetCreateLeafFunction(CreateLeafFunction<TLeaf> func)
         {
             if (IsDisposed)
             {
@@ -552,7 +513,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder<TNode, TLeaf> SetSplitPrimitiveFunction(SplitPrimitiveFunction func)
+        public EmbreeBuilder<TNode, TLeaf> SetSplitPrimitiveFunction(SplitPrimitiveFunction func)
         {
             if (IsDisposed)
             {
@@ -562,7 +523,7 @@ namespace EmbreeSharp
             return this;
         }
 
-        public RtcBuilder<TNode, TLeaf> SetProgressMonitorFunction(ProgressMonitorFunction func)
+        public EmbreeBuilder<TNode, TLeaf> SetProgressMonitorFunction(ProgressMonitorFunction func)
         {
             if (IsDisposed)
             {
@@ -572,20 +533,20 @@ namespace EmbreeSharp
             return this;
         }
 
-        private static unsafe RtcBuilder<TNode, TLeaf>? GetThisFromUserPtr(void* userPtr)
+        private static unsafe EmbreeBuilder<TNode, TLeaf>? GetThisFromUserPtr(void* userPtr)
         {
             GCHandle gcHandle = GCHandle.FromIntPtr(new nint(userPtr));
             if (!gcHandle.IsAllocated)
             {
                 return null;
             }
-            RtcBuilder<TNode, TLeaf> builder = (RtcBuilder<TNode, TLeaf>)gcHandle.Target!;
+            EmbreeBuilder<TNode, TLeaf> builder = (EmbreeBuilder<TNode, TLeaf>)gcHandle.Target!;
             return builder;
         }
 
         private static unsafe void* CreateNodeFunctionImpl(RTCThreadLocalAllocator allocator, uint childCount, void* userPtr)
         {
-            RtcBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
             if (builder == null || builder._createNode == null)
             {
                 return null;
@@ -596,7 +557,7 @@ namespace EmbreeSharp
 
         private static unsafe void SetNodeChildrenImpl(void* nodePtr, void** children, uint childCount, void* userPtr)
         {
-            RtcBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return;
@@ -608,7 +569,7 @@ namespace EmbreeSharp
 
         private static unsafe void SetNodeBoundsImpl(void* nodePtr, RTCBounds** bounds, uint childCount, void* userPtr)
         {
-            RtcBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return;
@@ -620,7 +581,7 @@ namespace EmbreeSharp
 
         private static unsafe void* CreateLeafImpl(RTCThreadLocalAllocator allocator, RTCBuildPrimitive* primitives, nuint primitiveCount, void* userPtr)
         {
-            RtcBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
             if (builder == null || builder._createLeaf == null)
             {
                 return null;
@@ -632,7 +593,7 @@ namespace EmbreeSharp
 
         private static unsafe void SplitPrimitiveImpl(RTCBuildPrimitive* primitive, uint dimension, float position, RTCBounds* leftBounds, RTCBounds* rightBounds, void* userPtr)
         {
-            RtcBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
+            EmbreeBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(userPtr);
             if (builder == null)
             {
                 return;
@@ -642,7 +603,7 @@ namespace EmbreeSharp
 
         private static unsafe bool ProgressMonitorImpl(void* ptr, double n)
         {
-            RtcBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(ptr);
+            EmbreeBuilder<TNode, TLeaf>? builder = GetThisFromUserPtr(ptr);
             if (builder == null)
             {
                 return true;
@@ -654,12 +615,24 @@ namespace EmbreeSharp
         {
             if (IsDisposed) { ThrowUtility.ObjectDisposed(); }
             if (_prims == null) { ThrowUtility.InvalidOperation("primitives cannot be null"); }
-            _nativeCreateNode ??= CreateNodeFunctionImpl;
-            _nativeSetNodeChildren ??= SetNodeChildrenImpl;
-            _nativeSetNodeBounds ??= SetNodeBoundsImpl;
-            _nativeCreateLeaf ??= CreateLeafImpl;
-            _nativeSplitPrimitive ??= SplitPrimitiveImpl;
-            _nativeProgressMonitor ??= ProgressMonitorImpl;
+            nint createNode = 0;
+            nint setNodeChildren = 0;
+            nint setNodeBounds = 0;
+            nint createLeaf = 0;
+            nint splitPrim = 0;
+            nint progMonitor = 0;
+            RTCCreateNodeFunction nCreateNode = CreateNodeFunctionImpl;
+            RTCSetNodeChildrenFunction nSetNodeChildren = SetNodeChildrenImpl;
+            RTCSetNodeBoundsFunction nSetNodeBounds = SetNodeBoundsImpl;
+            RTCCreateLeafFunction nCreateLeaf = CreateLeafImpl;
+            RTCSplitPrimitiveFunction nSplitPrim = SplitPrimitiveImpl;
+            RTCProgressMonitorFunction nProgMonitor = ProgressMonitorImpl;
+            createNode = _createNode == null ? 0 : Marshal.GetFunctionPointerForDelegate(nCreateNode);
+            setNodeChildren = _setNodeChildren == null ? 0 : Marshal.GetFunctionPointerForDelegate(nSetNodeChildren);
+            setNodeBounds = _setNodeBounds == null ? 0 : Marshal.GetFunctionPointerForDelegate(nSetNodeBounds);
+            createLeaf = _createLeaf == null ? 0 : Marshal.GetFunctionPointerForDelegate(nCreateLeaf);
+            splitPrim = _splitPrimitive == null ? 0 : Marshal.GetFunctionPointerForDelegate(nSplitPrim);
+            progMonitor = _progressMonitor == null ? 0 : Marshal.GetFunctionPointerForDelegate(nProgMonitor);
             RTCBuildPrimitive* primitives = null;
             nuint primitiveCount = (nuint)_prims.Length;
             nuint primitiveArrayCapacity = _buildQuality == RTCBuildQuality.RTC_BUILD_QUALITY_HIGH ? primitiveCount * 2 : primitiveCount;
@@ -682,20 +655,26 @@ namespace EmbreeSharp
                     maxLeafSize = _maxLeafSize,
                     traversalCost = _traversalCost,
                     intersectionCost = _intersectionCost,
-                    bvh = NativeBVH,
+                    bvh = NativeBVH.DangerousGetHandle(),
                     primitives = primitives,
                     primitiveCount = primitiveCount,
                     primitiveArrayCapacity = primitiveArrayCapacity,
-                    createNode = _createNode == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeCreateNode),
-                    setNodeChildren = _setNodeChildren == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeSetNodeChildren),
-                    setNodeBounds = _setNodeBounds == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeSetNodeBounds),
-                    createLeaf = _createLeaf == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeCreateLeaf),
-                    splitPrimitive = _splitPrimitive == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeSplitPrimitive),
-                    buildProgress = _progressMonitor == null ? 0 : Marshal.GetFunctionPointerForDelegate(_nativeProgressMonitor),
+                    createNode = createNode,
+                    setNodeChildren = setNodeChildren,
+                    setNodeBounds = setNodeBounds,
+                    createLeaf = createLeaf,
+                    splitPrimitive = splitPrim,
+                    buildProgress = progMonitor,
                     userPtr = GCHandle.ToIntPtr(Gc).ToPointer()
                 };
-                void* root = EmbreeNative.rtcBuildBVH(&args);
+                void* root = EmbreeNative.rtcBuildBVH(ref args);
                 _result = new Ref<TNode>(root);
+                GC.KeepAlive(nCreateNode);
+                GC.KeepAlive(nSetNodeChildren);
+                GC.KeepAlive(nSetNodeBounds);
+                GC.KeepAlive(nCreateLeaf);
+                GC.KeepAlive(nSplitPrim);
+                GC.KeepAlive(nProgMonitor);
                 return ref _result.Value;
             }
             finally

@@ -3,11 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public struct RTCBVH
+    public class RTCBVH : SafeHandle
     {
-        public static RTCBVH Null => new() { Ptr = nint.Zero };
+        public override bool IsInvalid => handle == nint.Zero;
+        public RTCBVH() : base(0, true) { }
 
-        public IntPtr Ptr;
+        protected override bool ReleaseHandle()
+        {
+            try
+            {
+                EmbreeNative.rtcReleaseBVH(this);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 
     /// <summary>
@@ -85,7 +97,7 @@ namespace EmbreeSharp.Native
         public float traversalCost;
         public float intersectionCost;
 
-        public RTCBVH bvh;
+        [NativeType("RTCBVH")] public IntPtr bvh;
         [NativeType("struct RTCBuildPrimitive*")] public RTCBuildPrimitive* primitives;
         [NativeType("size_t")] public nuint primitiveCount;
         [NativeType("size_t")] public nuint primitiveArrayCapacity;
@@ -104,27 +116,27 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// Creates a new BVH.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern RTCBVH rtcNewBVH(RTCDevice device);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial RTCBVH rtcNewBVH(RTCDevice device);
         /// <summary>
         /// Builds a BVH.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void* rtcBuildBVH([NativeType("const struct RTCBuildArguments*")] RTCBuildArguments* args);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcBuildBVH([NativeType("const struct RTCBuildArguments*")] ref RTCBuildArguments args);
         /// <summary>
         /// Allocates memory using the thread local allocator.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void* rtcThreadLocalAlloc(RTCThreadLocalAllocator allocator, [NativeType("size_t")] nuint bytes, [NativeType("size_t")] nuint align);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcThreadLocalAlloc(RTCThreadLocalAllocator allocator, [NativeType("size_t")] nuint bytes, [NativeType("size_t")] nuint align);
         /// <summary>
         /// Retains the BVH (increments reference count).
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcRetainBVH(RTCBVH bvh);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcRetainBVH(RTCBVH bvh);
         /// <summary>
         /// Releases the BVH (decrements reference count).
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcReleaseBVH(RTCBVH bvh);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcReleaseBVH(RTCBVH bvh);
     }
 }

@@ -11,7 +11,7 @@ namespace EmbreeSharp
     public class EmbreeDevice : IDisposable
     {
         private GCHandle _gcHandle;
-        private RTCDevice _device;
+        private readonly RTCDevice _device;
         private ErrorFunction? _errorFunc;
         private MemoryMonitorFunction? _memMonitor;
         private bool _disposedValue = false;
@@ -72,7 +72,6 @@ namespace EmbreeSharp
                 _gcHandle.Free();
                 _gcHandle = default;
                 _device.Dispose();
-                _device = null!;
                 _disposedValue = true;
             }
         }

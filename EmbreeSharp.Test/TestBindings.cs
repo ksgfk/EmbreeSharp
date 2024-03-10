@@ -1,6 +1,5 @@
 using EmbreeSharp.Native;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using static EmbreeSharp.Native.EmbreeNative;
 
@@ -20,11 +19,11 @@ namespace EmbreeSharp.Test
         [TestMethod]
         public unsafe void SimpleIntersect()
         {
-            RTCDevice device = rtcNewDevice(null);
+            using RTCDevice device = rtcNewDevice(null);
             RTCErrorFunction errFunc = ErrorFunctionImpl;
             rtcSetDeviceErrorFunction(device, errFunc, null);
-            RTCScene scene = rtcNewScene(device);
-            RTCGeometry geo = rtcNewGeometry(device, RTCGeometryType.RTC_GEOMETRY_TYPE_TRIANGLE);
+            using RTCScene scene = rtcNewScene(device);
+            using RTCGeometry geo = rtcNewGeometry(device, RTCGeometryType.RTC_GEOMETRY_TYPE_TRIANGLE);
             float* vertices = (float*)rtcSetNewGeometryBuffer(geo, RTCBufferType.RTC_BUFFER_TYPE_VERTEX, 0, RTCFormat.RTC_FORMAT_FLOAT3, (nuint)sizeof(float) * 3, 4);
             uint* indices = (uint*)rtcSetNewGeometryBuffer(geo, RTCBufferType.RTC_BUFFER_TYPE_INDEX, 0, RTCFormat.RTC_FORMAT_UINT3, (nuint)sizeof(uint) * 3, 2);
             vertices[0] = -1f; vertices[1] = 0; vertices[2] = 1;

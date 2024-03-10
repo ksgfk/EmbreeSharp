@@ -4,9 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace EmbreeSharp
 {
-    public class RtcBuffer : IDisposable
+    public class EmbreeBuffer : IDisposable
     {
-        private RTCBuffer _buffer;
+        private readonly RTCBuffer _buffer;
         private readonly nuint _byteSize;
         private bool _disposedValue = false;
 
@@ -24,24 +24,13 @@ namespace EmbreeSharp
         public nuint ByteSize => _byteSize;
         public bool IsDisposed => _disposedValue;
 
-        public RtcBuffer(EmbreeDevice device, nuint byteSize)
+        public EmbreeBuffer(EmbreeDevice device, nuint byteSize)
         {
             _buffer = EmbreeNative.rtcNewBuffer(device.NativeDevice, byteSize);
             _byteSize = byteSize;
         }
 
-        public RtcBuffer(RtcBuffer other)
-        {
-            if (other.IsDisposed)
-            {
-                ThrowUtility.ObjectDisposed(nameof(other));
-            }
-            EmbreeNative.rtcRetainBuffer(other._buffer);
-            _buffer = other._buffer;
-            _byteSize = other._byteSize;
-        }
-
-        ~RtcBuffer()
+        ~EmbreeBuffer()
         {
             Dispose(disposing: false);
         }
@@ -51,8 +40,7 @@ namespace EmbreeSharp
             if (!_disposedValue)
             {
                 // if (disposing) { }
-                EmbreeNative.rtcReleaseBuffer(_buffer);
-                _buffer = RTCBuffer.Null;
+                _buffer.Dispose();
                 _disposedValue = true;
             }
         }

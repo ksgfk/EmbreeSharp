@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp
 {
-    public class RtcGeometry : IDisposable
+    public class EmbreeGeometry : IDisposable
     {
         private GCHandle _gcHandle;
-        private RTCGeometry _geometry;
+        private readonly RTCGeometry _geometry;
         private uint _id;
         private readonly RTCGeometryType _type;
         private bool _disposedValue;
@@ -28,7 +28,7 @@ namespace EmbreeSharp
         public uint Id { get => _id; set => _id = value; }
         public bool IsDisposed => _disposedValue;
 
-        public RtcGeometry(EmbreeDevice device, RTCGeometryType type)
+        public EmbreeGeometry(EmbreeDevice device, RTCGeometryType type)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             _geometry = EmbreeNative.rtcNewGeometry(device.NativeDevice, type);
@@ -39,23 +39,7 @@ namespace EmbreeSharp
             }
         }
 
-        public RtcGeometry(RtcGeometry other)
-        {
-            if (other.IsDisposed)
-            {
-                ThrowUtility.ObjectDisposed(nameof(other));
-            }
-            _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            EmbreeNative.rtcRetainGeometry(other._geometry);
-            _geometry = other._geometry;
-            _type = other._type;
-            unsafe
-            {
-                EmbreeNative.rtcSetGeometryUserData(_geometry, GCHandle.ToIntPtr(_gcHandle).ToPointer());
-            }
-        }
-
-        ~RtcGeometry()
+        ~EmbreeGeometry()
         {
             Dispose(disposing: false);
         }
@@ -71,8 +55,7 @@ namespace EmbreeSharp
                 }
                 _gcHandle.Free();
                 _gcHandle = default;
-                EmbreeNative.rtcReleaseGeometry(_geometry);
-                _geometry = RTCGeometry.Null;
+                _geometry.Dispose();
                 _disposedValue = true;
             }
         }
@@ -83,7 +66,7 @@ namespace EmbreeSharp
             GC.SuppressFinalize(this);
         }
 
-        public void SetBuffer(RTCBufferType type, uint slot, RTCFormat format, RtcBuffer buffer, nuint byteOffset, nuint byteStride, nuint itemCount)
+        public void SetBuffer(RTCBufferType type, uint slot, RTCFormat format, EmbreeBuffer buffer, nuint byteOffset, nuint byteStride, nuint itemCount)
         {
             if (IsDisposed)
             {
@@ -197,7 +180,7 @@ namespace EmbreeSharp
             EmbreeNative.rtcSetGeometryMaxRadiusScale(_geometry, maxRadiusScale);
         }
 
-        public void SetInstancedScene(RtcScene scene)
+        public void SetInstancedScene(EmbreeScene scene)
         {
             if (IsDisposed)
             {

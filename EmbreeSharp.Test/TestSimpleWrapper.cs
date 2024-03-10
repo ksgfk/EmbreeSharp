@@ -14,8 +14,8 @@ namespace EmbreeSharp.Test
                 Console.WriteLine($"error {code}, {str}");
                 Assert.Fail();
             });
-            using RtcScene scene = new(device);
-            using RtcGeometry geo = new(device, RTCGeometryType.RTC_GEOMETRY_TYPE_TRIANGLE);
+            using EmbreeScene scene = new(device);
+            using EmbreeGeometry geo = new(device, RTCGeometryType.RTC_GEOMETRY_TYPE_TRIANGLE);
 
             NativeMemoryView<byte> verticesData = geo.SetNewBuffer(RTCBufferType.RTC_BUFFER_TYPE_VERTEX, 0, RTCFormat.RTC_FORMAT_FLOAT3, (nuint)sizeof(float) * 3, 4);
             NativeMemoryView<float> vertices = verticesData.Cast<byte, float>();
@@ -34,13 +34,13 @@ namespace EmbreeSharp.Test
             scene.Commit();
 
             {
-                RTCRayHit rayHit = RtcRayUtility.CreateRay(0, 1, 0, 0, -1, 0);
+                RTCRayHit rayHit = RTCRayHitUtility.CreateRay(0, 1, 0, 0, -1, 0);
                 scene.Intersect(ref rayHit);
                 Assert.IsTrue(rayHit.IsHit());
                 Assert.AreEqual(geo.Id, rayHit.hit.geomID);
             }
             {
-                RTCRayHit rayHit = RtcRayUtility.CreateRay(0, 1, 0, 1, 0, 0);
+                RTCRayHit rayHit = RTCRayHitUtility.CreateRay(0, 1, 0, 1, 0, 0);
                 scene.Intersect(ref rayHit);
                 Assert.IsFalse(rayHit.IsHit());
             }

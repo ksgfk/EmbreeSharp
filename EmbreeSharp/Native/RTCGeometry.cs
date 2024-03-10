@@ -3,18 +3,42 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public struct RTCScene
+    public class RTCScene : SafeHandle
     {
-        public static RTCScene Null => new() { Ptr = nint.Zero };
+        public override bool IsInvalid => handle == nint.Zero;
+        public RTCScene() : base(0, true) { }
 
-        public IntPtr Ptr;
+        protected override bool ReleaseHandle()
+        {
+            try
+            {
+                EmbreeNative.rtcReleaseScene(this);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 
-    public struct RTCGeometry
+    public class RTCGeometry : SafeHandle
     {
-        public static RTCGeometry Null => new() { Ptr = nint.Zero };
+        public override bool IsInvalid => handle == nint.Zero;
+        public RTCGeometry() : base(0, true) { }
 
-        public IntPtr Ptr;
+        protected override bool ReleaseHandle()
+        {
+            try
+            {
+                EmbreeNative.rtcReleaseGeometry(this);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 
     /// <summary>
@@ -202,7 +226,7 @@ namespace EmbreeSharp.Native
     public unsafe struct RTCDisplacementFunctionNArguments
     {
         public void* geometryUserPtr;
-        public RTCGeometry geometry;
+        [NativeType("RTCGeometry")] public nint geometry;
         public uint primID;
         public uint timeStep;
         [NativeType("const float*")] public float* u;
@@ -223,235 +247,235 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// Creates a new geometry of specified type.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern RTCGeometry rtcNewGeometry(RTCDevice device, RTCGeometryType type);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial RTCGeometry rtcNewGeometry(RTCDevice device, RTCGeometryType type);
         /// <summary>
         /// Retains the geometry (increments the reference count).
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcRetainGeometry(RTCGeometry geometry);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcRetainGeometry(RTCGeometry geometry);
         /// <summary>
         /// Releases the geometry (decrements the reference count)
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcReleaseGeometry(RTCGeometry geometry);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcReleaseGeometry(RTCGeometry geometry);
         /// <summary>
         /// Commits the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcCommitGeometry(RTCGeometry geometry);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcCommitGeometry(RTCGeometry geometry);
 
         /// <summary>
         /// Enables the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcEnableGeometry(RTCGeometry geometry);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcEnableGeometry(RTCGeometry geometry);
         /// <summary>
         /// Disables the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcDisableGeometry(RTCGeometry geometry);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcDisableGeometry(RTCGeometry geometry);
 
         /// <summary>
         /// Sets the number of motion blur time steps of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryTimeStepCount(RTCGeometry geometry, uint timeStepCount);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryTimeStepCount(RTCGeometry geometry, uint timeStepCount);
         /// <summary>
         /// Sets the motion blur time range of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryTimeRange(RTCGeometry geometry, float startTime, float endTime);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryTimeRange(RTCGeometry geometry, float startTime, float endTime);
         /// <summary>
         /// Sets the number of vertex attributes of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryVertexAttributeCount(RTCGeometry geometry, uint vertexAttributeCount);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryVertexAttributeCount(RTCGeometry geometry, uint vertexAttributeCount);
         /// <summary>
         /// Sets the ray mask of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryMask(RTCGeometry geometry, uint mask);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryMask(RTCGeometry geometry, uint mask);
         /// <summary>
         /// Sets the build quality of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryBuildQuality(RTCGeometry geometry, RTCBuildQuality quality);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryBuildQuality(RTCGeometry geometry, RTCBuildQuality quality);
         /// <summary>
         /// Sets the maximal curve or point radius scale allowed by min-width feature.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryMaxRadiusScale(RTCGeometry geometry, float maxRadiusScale);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryMaxRadiusScale(RTCGeometry geometry, float maxRadiusScale);
 
         /// <summary>
         /// Sets a geometry buffer.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, RTCBuffer buffer, [NativeType("size_t")] nuint byteOffset, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, RTCBuffer buffer, [NativeType("size_t")] nuint byteOffset, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
         /// <summary>
         /// Sets a shared geometry buffer.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetSharedGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, [NativeType("const void*")] void* ptr, [NativeType("size_t")] nuint byteOffset, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetSharedGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, [NativeType("const void*")] void* ptr, [NativeType("size_t")] nuint byteOffset, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
         /// <summary>
         /// Creates and sets a new geometry buffer.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void* rtcSetNewGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcSetNewGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
         /// <summary>
         /// Returns the pointer to the data of a buffer.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void* rtcGetGeometryBufferData(RTCGeometry geometry, RTCBufferType type, uint slot);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcGetGeometryBufferData(RTCGeometry geometry, RTCBufferType type, uint slot);
         /// <summary>
         /// Updates a geometry buffer.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcUpdateGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcUpdateGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot);
 
         /// <summary>
         /// Sets the intersection filter callback function of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryIntersectFilterFunction(RTCGeometry geometry, [NativeType("RTCFilterFunctionN")] IntPtr filter);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryIntersectFilterFunction(RTCGeometry geometry, RTCFilterFunctionN filter);
         /// <summary>
         /// Sets the occlusion filter callback function of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryOccludedFilterFunction(RTCGeometry geometry, [NativeType("RTCFilterFunctionN")] IntPtr filter);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryOccludedFilterFunction(RTCGeometry geometry, RTCFilterFunctionN filter);
         /// <summary>
         /// Enables argument version of intersection or occlusion filter function.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryEnableFilterFunctionFromArguments(RTCGeometry geometry, bool enable);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryEnableFilterFunctionFromArguments(RTCGeometry geometry, [MarshalAs(UnmanagedType.Bool)] bool enable);
         /// <summary>
         /// Sets the user-defined data pointer of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryUserData(RTCGeometry geometry, void* ptr);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryUserData(RTCGeometry geometry, void* ptr);
         /// <summary>
         /// Gets the user-defined data pointer of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void* rtcGetGeometryUserData(RTCGeometry geometry);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcGetGeometryUserData(RTCGeometry geometry);
         /// <summary>
         /// Set the point query callback function of a geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryPointQueryFunction(RTCGeometry geometry, [NativeType("RTCPointQueryFunction")] IntPtr pointQuery);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryPointQueryFunction(RTCGeometry geometry, RTCPointQueryFunction pointQuery);
         /// <summary>
         /// Sets the number of primitives of a user geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryUserPrimitiveCount(RTCGeometry geometry, uint userPrimitiveCount);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryUserPrimitiveCount(RTCGeometry geometry, uint userPrimitiveCount);
         /// <summary>
         /// Sets the bounding callback function to calculate bounding boxes for user primitives.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryBoundsFunction(RTCGeometry geometry, [NativeType("RTCBoundsFunction")] IntPtr bounds, void* userPtr);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryBoundsFunction(RTCGeometry geometry, RTCBoundsFunction bounds, void* userPtr);
         /// <summary>
         /// Set the intersect callback function of a user geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryIntersectFunction(RTCGeometry geometry, [NativeType("RTCIntersectFunctionN")] IntPtr intersect);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryIntersectFunction(RTCGeometry geometry, RTCIntersectFunctionN intersect);
         /// <summary>
         /// Set the occlusion callback function of a user geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryOccludedFunction(RTCGeometry geometry, [NativeType("RTCOccludedFunctionN")] IntPtr occluded);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryOccludedFunction(RTCGeometry geometry, RTCOccludedFunctionN occluded);
         /// <summary>
         /// Invokes the intersection filter from the intersection callback function.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcInvokeIntersectFilterFromGeometry([NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, [NativeType("const struct RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcInvokeIntersectFilterFromGeometry([NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, [NativeType("const struct RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
         /// <summary>
         /// Invokes the occlusion filter from the occlusion callback function.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcInvokeOccludedFilterFromGeometry([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, [NativeType("const struct RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcInvokeOccludedFilterFromGeometry([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, [NativeType("const struct RTCFilterFunctionNArguments*")] RTCFilterFunctionNArguments* filterArgs);
         /// <summary>
         /// Sets the instanced scene of an instance geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryInstancedScene(RTCGeometry geometry, RTCScene scene);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryInstancedScene(RTCGeometry geometry, RTCScene scene);
         /// <summary>
         /// Sets the instanced scenes of an instance array geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryInstancedScenes(RTCGeometry geometry, RTCScene* scenes, [NativeType("size_t")] nuint numScenes);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryInstancedScenes(RTCGeometry geometry, [NativeType("RTCScene*")] nint* scenes, [NativeType("size_t")] nuint numScenes);
         /// <summary>
         /// Sets the transformation of an instance for the specified time step.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryTransform(RTCGeometry geometry, uint timeStep, RTCFormat format, [NativeType("const void*")] void* xfm);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryTransform(RTCGeometry geometry, uint timeStep, RTCFormat format, [NativeType("const void*")] void* xfm);
         /// <summary>
         /// Sets the transformation quaternion of an instance for the specified time step.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryTransformQuaternion(RTCGeometry geometry, uint timeStep, [NativeType("const struct RTCQuaternionDecomposition*")] RTCQuaternionDecomposition* qd);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryTransformQuaternion(RTCGeometry geometry, uint timeStep, [NativeType("const struct RTCQuaternionDecomposition*")] RTCQuaternionDecomposition* qd);
         /// <summary>
         /// Returns the interpolated transformation of an instance for the specified time.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcGetGeometryTransform(RTCGeometry geometry, float time, RTCFormat format, void* xfm);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcGetGeometryTransform(RTCGeometry geometry, float time, RTCFormat format, void* xfm);
 
         /// <summary>
         /// Returns the interpolated transformation of the instPrimID'th instance of an
         /// instance array for the specified time. If geometry is an regular instance,
         /// instPrimID must be 0.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcGetGeometryTransformEx(RTCGeometry geometry, uint instPrimID, float time, RTCFormat format, void* xfm);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcGetGeometryTransformEx(RTCGeometry geometry, uint instPrimID, float time, RTCFormat format, void* xfm);
         /// <summary>
         /// Sets the uniform tessellation rate of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryTessellationRate(RTCGeometry geometry, float tessellationRate);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryTessellationRate(RTCGeometry geometry, float tessellationRate);
         /// <summary>
         /// Sets the number of topologies of a subdivision surface.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryTopologyCount(RTCGeometry geometry, uint topologyCount);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryTopologyCount(RTCGeometry geometry, uint topologyCount);
         /// <summary>
         /// Sets the subdivision interpolation mode.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometrySubdivisionMode(RTCGeometry geometry, uint topologyID, RTCSubdivisionMode mode);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometrySubdivisionMode(RTCGeometry geometry, uint topologyID, RTCSubdivisionMode mode);
         /// <summary>
         /// Binds a vertex attribute to a topology of the geometry.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryVertexAttributeTopology(RTCGeometry geometry, uint vertexAttributeID, uint topologyID);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryVertexAttributeTopology(RTCGeometry geometry, uint vertexAttributeID, uint topologyID);
         /// <summary>
         /// Sets the displacement callback function of a subdivision surface.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcSetGeometryDisplacementFunction(RTCGeometry geometry, [NativeType("RTCDisplacementFunctionN")] IntPtr displacement);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetGeometryDisplacementFunction(RTCGeometry geometry, RTCDisplacementFunctionN displacement);
         /// <summary>
         /// Returns the first half edge of a face.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern uint rtcGetGeometryFirstHalfEdge(RTCGeometry geometry, uint faceID);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial uint rtcGetGeometryFirstHalfEdge(RTCGeometry geometry, uint faceID);
         /// <summary>
         /// Returns the face the half edge belongs to.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern uint rtcGetGeometryFace(RTCGeometry geometry, uint edgeID);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial uint rtcGetGeometryFace(RTCGeometry geometry, uint edgeID);
         /// <summary>
         /// Returns next half edge.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern uint rtcGetGeometryNextHalfEdge(RTCGeometry geometry, uint edgeID);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial uint rtcGetGeometryNextHalfEdge(RTCGeometry geometry, uint edgeID);
         /// <summary>
         /// Returns previous half edge.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern uint rtcGetGeometryPreviousHalfEdge(RTCGeometry geometry, uint edgeID);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial uint rtcGetGeometryPreviousHalfEdge(RTCGeometry geometry, uint edgeID);
         /// <summary>
         /// Returns opposite half edge.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern uint rtcGetGeometryOppositeHalfEdge(RTCGeometry geometry, uint topologyID, uint edgeID);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial uint rtcGetGeometryOppositeHalfEdge(RTCGeometry geometry, uint topologyID, uint edgeID);
     }
 
     /// <summary>
@@ -460,7 +484,7 @@ namespace EmbreeSharp.Native
     [StructLayout(LayoutKind.Sequential, Size = 88)]
     public unsafe struct RTCInterpolateArguments
     {
-        public RTCGeometry geometry;
+        [NativeType("RTCGeometry")] public nint geometry;
         public uint primID;
         public float u;
         public float v;
@@ -480,8 +504,8 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// Interpolates vertex data to some u/v location and optionally calculates all derivatives.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcInterpolate([NativeType("const struct RTCInterpolateArguments*")] RTCInterpolateArguments* args);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcInterpolate([NativeType("const struct RTCInterpolateArguments*")] RTCInterpolateArguments* args);
     }
 
     /// <summary>
@@ -490,7 +514,7 @@ namespace EmbreeSharp.Native
     [StructLayout(LayoutKind.Sequential, Size = 112)]
     public unsafe struct RTCInterpolateNArguments
     {
-        public RTCGeometry geometry;
+        [NativeType("RTCGeometry")] public nint geometry;
         [NativeType("const void*")] public void* valid;
         [NativeType("const unsigned int*")] public uint* primIDs;
         [NativeType("const float*")] public float* u;
@@ -512,8 +536,8 @@ namespace EmbreeSharp.Native
         /// <summary>
         /// Interpolates vertex data to an array of u/v locations.
         /// </summary>
-        [DllImport(DynamicLibraryName)]
-        public static extern void rtcInterpolateN([NativeType("const struct RTCInterpolateNArguments*")] RTCInterpolateNArguments* args);
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcInterpolateN([NativeType("const struct RTCInterpolateNArguments*")] RTCInterpolateNArguments* args);
     }
 
     /// <summary>

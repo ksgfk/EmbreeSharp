@@ -2,7 +2,7 @@ using EmbreeSharp.Native;
 
 namespace EmbreeSharp
 {
-    public static class RtcRayUtility
+    public static class RTCRayHitUtility
     {
         public static RTCRayHit CreateRay(float ox, float oy, float oz, float dx, float dy, float dz, float tnear = 0, float tfar = float.PositiveInfinity)
         {
@@ -24,14 +24,6 @@ namespace EmbreeSharp
                 rayhit.hit.instPrimID[0] = EmbreeNative.RTC_INVALID_GEOMETRY_ID;
             }
             return rayhit;
-        }
-    }
-
-    public static class RtcRayExtension
-    {
-        public static bool IsHit(ref readonly this RTCRayHit rayhit)
-        {
-            return rayhit.hit.geomID != EmbreeNative.RTC_INVALID_GEOMETRY_ID;
         }
     }
 }
