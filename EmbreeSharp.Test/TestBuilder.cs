@@ -163,7 +163,7 @@ public class TestBuilder
             Console.WriteLine($"error {code}, {str}");
             Assert.Fail();
         });
-        using EmbreeBuilder<Node, Node> builder = new(device);
+        using EmbreeBuilder<Node, Node, Node> builder = new(device);
         builder.SetBuildQuality(RTCBuildQuality.RTC_BUILD_QUALITY_HIGH);
         builder.SetMaxDepth(1024);
         builder.SetMaxLeafSize(1);

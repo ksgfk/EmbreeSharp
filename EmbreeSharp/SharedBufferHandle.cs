@@ -20,10 +20,10 @@ namespace EmbreeSharp
         {
             try
             {
-                handle = 0;
                 var alloc = _allocation.Allocator;
                 alloc.Free(_allocation);
                 _allocation = null!;
+                handle = 0;
                 return true;
             }
             catch (Exception)

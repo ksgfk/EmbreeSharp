@@ -11,28 +11,14 @@ internal class Program
     {
         public bool IsLeaf;
 
-        public int NodeCount()
+        public long NodeCount()
         {
-            if (IsLeaf)
-            {
-                return Unsafe.As<NodeHeader, LeafNode>(ref this).NodeCount();
-            }
-            else
-            {
-                return Unsafe.As<NodeHeader, InnerNode>(ref this).NodeCount();
-            }
+            return IsLeaf ? Unsafe.As<NodeHeader, LeafNode>(ref this).NodeCount() : Unsafe.As<NodeHeader, InnerNode>(ref this).NodeCount();
         }
 
         public float Sah()
         {
-            if (IsLeaf)
-            {
-                return Unsafe.As<NodeHeader, LeafNode>(ref this).Sah();
-            }
-            else
-            {
-                return Unsafe.As<NodeHeader, InnerNode>(ref this).Sah();
-            }
+            return IsLeaf ? Unsafe.As<NodeHeader, LeafNode>(ref this).Sah() : Unsafe.As<NodeHeader, InnerNode>(ref this).Sah();
         }
     }
 
@@ -45,14 +31,14 @@ internal class Program
         public Ref<NodeHeader> LeftNode;
         public Ref<NodeHeader> RightNode;
 
-        public readonly int NodeCount()
+        public readonly long NodeCount()
         {
-            int leftCnt = 0;
+            long leftCnt = 0;
             if (!LeftNode.IsNull)
             {
                 leftCnt = LeftNode.Value.IsLeaf ? LeftNode.Cast<LeafNode>().Value.NodeCount() : LeftNode.Cast<InnerNode>().Value.NodeCount();
             }
-            int rightCnt = 0;
+            long rightCnt = 0;
             if (!RightNode.IsNull)
             {
                 rightCnt = RightNode.Value.IsLeaf ? RightNode.Cast<LeafNode>().Value.NodeCount() : RightNode.Cast<InnerNode>().Value.NodeCount();
@@ -87,20 +73,13 @@ internal class Program
         public RTCBounds Bounds;
         public uint PrimId;
 
-        public int NodeCount()
-        {
-            return 1;
-        }
-
-        public float Sah()
-        {
-            return 1;
-        }
+        public long NodeCount() => 1;
+        public float Sah() => 1;
     }
 
     private static void Main(string[] args)
     {
-        const int N = 5000000;
+        const int N = 10000;
         RTCBuildPrimitive[] prims = new RTCBuildPrimitive[N];
         Random rand = new();
         float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
@@ -126,38 +105,50 @@ internal class Program
             maxY = Math.Max(maxY, p.upper_y);
             maxZ = Math.Max(maxZ, p.upper_z);
         }
-        for (int i = 0; i < 100; i++)
-        {
-            Build(RTCBuildQuality.RTC_BUILD_QUALITY_LOW, prims);
-            Build(RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM, prims);
-            Build(RTCBuildQuality.RTC_BUILD_QUALITY_HIGH, prims);
-        }
-    }
-
-    static void Build(RTCBuildQuality quality, RTCBuildPrimitive[] prims)
-    {
-        Stopwatch sw = Stopwatch.StartNew();
         string config = "verbose=3";
         using EmbreeDevice device = new(config);
         device.SetErrorFunction((code, str) => Console.WriteLine($"error {code}, {str}"));
-        using EmbreeBuilder<InnerNode, LeafNode> builder = new(device);
+        for (int i = 0; i < 1; i++)
+        {
+            Build(device, RTCBuildQuality.RTC_BUILD_QUALITY_LOW, prims);
+            Build(device, RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM, prims);
+            Build(device, RTCBuildQuality.RTC_BUILD_QUALITY_HIGH, prims);
+        }
+    }
+
+    static void Build(EmbreeDevice device, RTCBuildQuality quality, RTCBuildPrimitive[] prims)
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+        using EmbreeBuilder<NodeHeader, InnerNode, LeafNode> builder = new(device);
         builder.SetBuildQuality(quality);
         builder.SetMaxDepth(1024);
         builder.SetMaxLeafSize(1);
         builder.SetBuildPrimitive(prims);
         builder.SetCreateNodeFunction((allocator, childCount) =>
         {
+            if (childCount != 2)
+            {
+                Console.WriteLine($"invlid childCount {childCount}");
+            }
             ref InnerNode node = ref allocator.Allocate<InnerNode>(32);
             node.Header.IsLeaf = false;
             return ref node;
         });
-        builder.SetSetNodeChildrenFunction((ref InnerNode n, NativeMemoryView<Ref<InnerNode>> children) =>
+        builder.SetSetNodeChildrenFunction((ref InnerNode n, NativeMemoryView<Ref<NodeHeader>> children) =>
         {
-            n.LeftNode = children[0].Cast<NodeHeader>();
-            n.RightNode = children[1].Cast<NodeHeader>();
+            if (children.Length != 2)
+            {
+                Console.WriteLine($"invlid children.Length {children.Length}");
+            }
+            n.LeftNode = children[0];
+            n.RightNode = children[1];
         });
         builder.SetSetNodeBoundsFunction((ref InnerNode n, NativeMemoryView<Ref<RTCBounds>> bounds) =>
         {
+            if (bounds.Length != 2)
+            {
+                Console.WriteLine($"invlid bounds.Length {bounds.Length}");
+            }
             n.LeftBound = bounds[0].Value;
             n.RightBound = bounds[1].Value;
         });
@@ -165,7 +156,11 @@ internal class Program
         {
             if (prims.Length <= 0)
             {
-                return ref Unsafe.NullRef<LeafNode>();
+                return ref allocator.NullRef<LeafNode>();
+            }
+            if (prims.Length != 1)
+            {
+                Console.WriteLine($"invlid prims.Length {prims.Length}");
             }
             ref LeafNode node = ref allocator.Allocate<LeafNode>(32);
             node.Header.IsLeaf = true;
@@ -194,7 +189,7 @@ internal class Program
                 rightBounds.lower_z = position;
             }
         });
-        Ref<NodeHeader> root = builder.Build().Cast<NodeHeader>();
+        Ref<NodeHeader> root = builder.Build();
         sw.Stop();
         if (root.IsNull)
         {
@@ -203,7 +198,7 @@ internal class Program
         else
         {
             float sah = root.Value.Sah();
-            int nodes = root.Value.NodeCount();
+            long nodes = root.Value.NodeCount();
             Console.WriteLine($"Nodes={nodes} SAH={sah} ms={sw.ElapsedMilliseconds}");
         }
     }
