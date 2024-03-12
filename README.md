@@ -50,18 +50,6 @@ The `Script` folder contains some help scripts to package the official compiled 
 
 Loading native dynamic library of embree is complicated. Because [official release](https://github.com/embree/embree/releases) depends on TBB. P/Invoke cannot find its path automatically. There is no way to set library search path (as far as I know). So I use `System.Runtime.InteropServices.NativeLibrary.SetDllImportResolver` to custom loading logic.
 
-### 
-
-## Limitation
-
-Cannot use all APIs related to SYCL.
-
-## TODO
-
-I will provide more safe functions for C# wrapper. But limited by language difference, It is almost impossible to have both performance and safety.
-
-If you have any idea, welcome issues and pull requests
-
 ### Shared Buffer
 
 The memory for shared buffer is managed by user.
@@ -74,11 +62,21 @@ This is a lifecycle problem.
 
 Currently, I provide `EmbreeSharp.ISharedBufferAllocation` as buffer allocator. It ensures that the allocated buffer address is available until it is released. `EmbreeSharp.ISharedBufferAllocation` as allocate result. It provides the buffer address and length.
 
-The most crucial part is ` EmbreeSharp.SharedBufferHandle`. It inherits from `System.Runtime.InteropServices.SafeHandle`. The original purpose of SafeHandle was to serve as a secure native handle when interacting with C. It has built-in reference counting function. Therefore, here we borrow its reference count function.
+The most crucial part is ` EmbreeSharp.SharedBufferHandle`. It inherits from `System.Runtime.InteropServices.SafeHandle`. The original purpose of `SafeHandle` was serve as a secure native handle when interop with C API. It has built-in reference counting function. Therefore, here we borrow its reference count function.
 
 `SharedBufferHandle` is used to manage the lifecycle of `ISharedBufferAllocation`. For example, pass it to construct `EmbreeSharpEmbreeSharedBuffer`. It will increase the reference count. Due to `EmbreeSharedBuffer` implements the dispose pattern, GC will use finalizer when the user forgets to release it. At the same time decrease the reference count. When the reference count returns to zero, it will free shared buffer
 
 Ideally, it can avoid memory leaks caused by users forgetting to free. But it has not been tested
+
+## Limitation
+
+Cannot use all APIs related to SYCL.
+
+## TODO
+
+I will provide more safe functions for C# wrapper. But limited by language difference, It is almost impossible to have both performance and safety.
+
+If you have any idea, welcome issues and pull requests
 
 ### SetGeometry[Intersect/Occluded/Bounds]Function
 
