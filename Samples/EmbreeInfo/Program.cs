@@ -2,9 +2,9 @@
 
 internal class Program
 {
-    private static unsafe void Main(string[] args)
+    private static void Main(string[] args)
     {
         string config = "verbose=3";
-        using RtcDevice _ = new(config);
+        using EmbreeDevice _ = new(config);
     }
 }

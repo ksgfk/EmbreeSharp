@@ -24,7 +24,7 @@ namespace EmbreeSharp
         private bool _disposedValue;
 
         private GCHandle _gcHandle;
-        private readonly RTCBVH _bvh;
+        private RTCBVHHandle _bvh;
 
         protected RTCBuildQuality _buildQuality;
         protected RTCBuildFlags _buildFlags;
@@ -38,13 +38,14 @@ namespace EmbreeSharp
         protected RTCBuildPrimitive[]? _prims;
 
         public bool IsDisposed => _disposedValue;
-        public RTCBVH NativeBVH => _bvh;
+        public RTCBVH NativeBVH => new RTCBVH() { Ptr = _bvh.DangerousGetHandle() };
         internal GCHandle Gc => _gcHandle;
 
         public EmbreeBuilder(EmbreeDevice device)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            _bvh = EmbreeNative.rtcNewBVH(device.NativeDevice);
+            var bvh = EmbreeNative.rtcNewBVH(device.NativeDevice);
+            _bvh = new RTCBVHHandle(bvh);
             _buildQuality = RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM;
             _buildFlags = RTCBuildFlags.RTC_BUILD_FLAG_NONE;
             _maxBranchingFactor = 2;
@@ -72,6 +73,7 @@ namespace EmbreeSharp
                 _gcHandle.Free();
                 _gcHandle = default;
                 _bvh.Dispose();
+                _bvh = null!;
                 _disposedValue = true;
             }
         }
@@ -408,7 +410,7 @@ namespace EmbreeSharp
                     maxLeafSize = _maxLeafSize,
                     traversalCost = _traversalCost,
                     intersectionCost = _intersectionCost,
-                    bvh = NativeBVH.DangerousGetHandle(),
+                    bvh = NativeBVH,
                     primitives = primitives,
                     primitiveCount = primitiveCount,
                     primitiveArrayCapacity = primitiveArrayCapacity,
@@ -451,7 +453,7 @@ namespace EmbreeSharp
         private SplitPrimitiveFunction? _splitPrimitive;
         private ProgressMonitorFunction? _progressMonitor;
 
-        public ref TNode Result => ref _result.Value;
+        public Ref<TNode> Result => _result;
 
         public EmbreeBuilder(EmbreeDevice device) : base(device) { }
 
@@ -611,7 +613,7 @@ namespace EmbreeSharp
             return builder._progressMonitor?.Invoke(n) ?? true;
         }
 
-        public unsafe ref TNode Build()
+        public unsafe Ref<TNode> Build()
         {
             if (IsDisposed) { ThrowUtility.ObjectDisposed(); }
             if (_prims == null) { ThrowUtility.InvalidOperation("primitives cannot be null"); }
@@ -655,7 +657,7 @@ namespace EmbreeSharp
                     maxLeafSize = _maxLeafSize,
                     traversalCost = _traversalCost,
                     intersectionCost = _intersectionCost,
-                    bvh = NativeBVH.DangerousGetHandle(),
+                    bvh = NativeBVH,
                     primitives = primitives,
                     primitiveCount = primitiveCount,
                     primitiveArrayCapacity = primitiveArrayCapacity,
@@ -675,7 +677,7 @@ namespace EmbreeSharp
                 GC.KeepAlive(nCreateLeaf);
                 GC.KeepAlive(nSplitPrim);
                 GC.KeepAlive(nProgMonitor);
-                return ref _result.Value;
+                return _result;
             }
             finally
             {

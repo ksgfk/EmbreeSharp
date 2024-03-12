@@ -3,16 +3,25 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public class RTCBuffer : SafeHandle
+    public struct RTCBuffer
+    {
+        public nint Ptr;
+    }
+
+    public class RTCBufferHandle : SafeHandle
     {
         public override bool IsInvalid => handle == nint.Zero;
-        public RTCBuffer() : base(0, true) { }
+        public RTCBufferHandle(RTCBuffer buffer) : base(0, true)
+        {
+            handle = buffer.Ptr;
+        }
 
         protected override bool ReleaseHandle()
         {
             try
             {
-                EmbreeNative.rtcReleaseBuffer(this);
+                EmbreeNative.rtcReleaseBuffer(new RTCBuffer() { Ptr = handle });
+                handle = 0;
                 return true;
             }
             catch (Exception)

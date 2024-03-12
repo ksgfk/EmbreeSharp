@@ -6,7 +6,7 @@ namespace EmbreeSharp
 {
     public class EmbreeBuffer : IDisposable
     {
-        private readonly RTCBuffer _buffer;
+        private RTCBufferHandle _buffer;
         private readonly nuint _byteSize;
         private bool _disposedValue = false;
 
@@ -18,7 +18,7 @@ namespace EmbreeSharp
                 {
                     ThrowUtility.ObjectDisposed();
                 }
-                return _buffer;
+                return new RTCBuffer() { Ptr = _buffer.DangerousGetHandle() };
             }
         }
         public nuint ByteSize => _byteSize;
@@ -28,7 +28,7 @@ namespace EmbreeSharp
 
         protected EmbreeBuffer(RTCBuffer rtcBuffer, nuint byteSize)
         {
-            _buffer = rtcBuffer;
+            _buffer = new RTCBufferHandle(rtcBuffer);
             _byteSize = byteSize;
         }
 
@@ -42,6 +42,7 @@ namespace EmbreeSharp
             if (!_disposedValue)
             {
                 _buffer.Dispose();
+                _buffer = null!;
                 _disposedValue = true;
             }
         }
@@ -60,7 +61,7 @@ namespace EmbreeSharp
             }
             unsafe
             {
-                void* dst = EmbreeNative.rtcGetBufferData(_buffer);
+                void* dst = EmbreeNative.rtcGetBufferData(NativeBuffer);
                 return new NativeMemoryView<byte>(dst, _byteSize);
             }
         }
@@ -74,7 +75,7 @@ namespace EmbreeSharp
             var count = _byteSize / (nuint)Unsafe.SizeOf<T>();
             unsafe
             {
-                void* dst = EmbreeNative.rtcGetBufferData(_buffer);
+                void* dst = EmbreeNative.rtcGetBufferData(NativeBuffer);
                 return new NativeMemoryView<T>(dst, count);
             }
         }

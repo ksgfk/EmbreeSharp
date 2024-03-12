@@ -6,6 +6,8 @@ namespace EmbreeSharp
     {
         public readonly void* Ptr;
 
+        public readonly bool IsNull => Ptr == null;
+
         internal RTCThreadLocalAllocation(void* ptr)
         {
             Ptr = ptr;

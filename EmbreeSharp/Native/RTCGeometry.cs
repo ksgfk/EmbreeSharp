@@ -3,16 +3,25 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public class RTCScene : SafeHandle
+    public struct RTCScene
+    {
+        public nint Ptr;
+    }
+
+    public class RTCSceneHandle : SafeHandle
     {
         public override bool IsInvalid => handle == nint.Zero;
-        public RTCScene() : base(0, true) { }
+        public RTCSceneHandle(RTCScene scene) : base(0, true)
+        {
+            handle = scene.Ptr;
+        }
 
         protected override bool ReleaseHandle()
         {
             try
             {
-                EmbreeNative.rtcReleaseScene(this);
+                EmbreeNative.rtcReleaseScene(new RTCScene() { Ptr = handle });
+                handle = 0;
                 return true;
             }
             catch (Exception)
@@ -22,16 +31,25 @@ namespace EmbreeSharp.Native
         }
     }
 
-    public class RTCGeometry : SafeHandle
+    public struct RTCGeometry
+    {
+        public nint Ptr;
+    }
+
+    public class RTCGeometryHandle : SafeHandle
     {
         public override bool IsInvalid => handle == nint.Zero;
-        public RTCGeometry() : base(0, true) { }
+        public RTCGeometryHandle(RTCGeometry geo) : base(0, true)
+        {
+            handle = geo.Ptr;
+        }
 
         protected override bool ReleaseHandle()
         {
             try
             {
-                EmbreeNative.rtcReleaseGeometry(this);
+                EmbreeNative.rtcReleaseGeometry(new RTCGeometry() { Ptr = handle });
+                handle = 0;
                 return true;
             }
             catch (Exception)

@@ -9,7 +9,7 @@ namespace EmbreeSharp
     public class EmbreeGeometry : IDisposable
     {
         private GCHandle _gcHandle;
-        private readonly RTCGeometry _geometry;
+        private RTCGeometryHandle _geometry;
         private uint _id;
         private readonly RTCGeometryType _type;
         private bool _disposedValue;
@@ -24,7 +24,7 @@ namespace EmbreeSharp
                 {
                     ThrowUtility.ObjectDisposed();
                 }
-                return _geometry;
+                return new RTCGeometry() { Ptr = _geometry.DangerousGetHandle() };
             }
         }
         public RTCGeometryType Type => _type;
@@ -34,11 +34,12 @@ namespace EmbreeSharp
         public EmbreeGeometry(EmbreeDevice device, RTCGeometryType type)
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-            _geometry = EmbreeNative.rtcNewGeometry(device.NativeDevice, type);
+            var geo = EmbreeNative.rtcNewGeometry(device.NativeDevice, type);
+            _geometry = new RTCGeometryHandle(geo);
             _type = type;
             unsafe
             {
-                EmbreeNative.rtcSetGeometryUserData(_geometry, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+                EmbreeNative.rtcSetGeometryUserData(NativeGeometry, GCHandle.ToIntPtr(_gcHandle).ToPointer());
             }
         }
 
@@ -61,11 +62,12 @@ namespace EmbreeSharp
                 _attachedEmbreeBuffers.Clear();
                 unsafe
                 {
-                    EmbreeNative.rtcSetGeometryUserData(_geometry, null);
+                    EmbreeNative.rtcSetGeometryUserData(NativeGeometry, null);
                 }
                 _gcHandle.Free();
                 _gcHandle = default;
                 _geometry.Dispose();
+                _geometry = null!;
                 _disposedValue = true;
             }
         }
@@ -87,7 +89,7 @@ namespace EmbreeSharp
                 ThrowUtility.ArgumentOutOfRange();
             }
             TryRemoveSharedBufferInSlotAndRelease(slot);
-            EmbreeNative.rtcSetGeometryBuffer(_geometry, type, slot, format, buffer.NativeBuffer, byteOffset, byteStride, itemCount);
+            EmbreeNative.rtcSetGeometryBuffer(NativeGeometry, type, slot, format, buffer.NativeBuffer, byteOffset, byteStride, itemCount);
             _attachedEmbreeBuffers[slot] = buffer;
         }
 
@@ -98,7 +100,7 @@ namespace EmbreeSharp
                 ThrowUtility.ObjectDisposed();
             }
             TryRemoveSharedBufferInSlotAndRelease(slot);
-            void* ptr = EmbreeNative.rtcSetNewGeometryBuffer(_geometry, type, slot, format, byteStride, itemCount);
+            void* ptr = EmbreeNative.rtcSetNewGeometryBuffer(NativeGeometry, type, slot, format, byteStride, itemCount);
             nuint byteCount = byteStride * itemCount;
             _attachedEmbreeBuffers.Remove(slot);
             return new NativeMemoryView<byte>(ptr, byteCount);
@@ -122,7 +124,7 @@ namespace EmbreeSharp
             }
             TryRemoveSharedBufferInSlotAndRelease(slot);
             _attachedSharedBuffer.Add(slot, handle);
-            EmbreeNative.rtcSetSharedGeometryBuffer(_geometry, type, slot, format, handle.Buffer.View.UnsafePtr.ToPointer(), byteOffset, byteStride, itemCount);
+            EmbreeNative.rtcSetSharedGeometryBuffer(NativeGeometry, type, slot, format, handle.Buffer.View.UnsafePtr.ToPointer(), byteOffset, byteStride, itemCount);
             _attachedEmbreeBuffers.Remove(slot);
         }
 
@@ -142,7 +144,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcUpdateGeometryBuffer(_geometry, type, slot);
+            EmbreeNative.rtcUpdateGeometryBuffer(NativeGeometry, type, slot);
         }
 
         public void Commit()
@@ -151,7 +153,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcCommitGeometry(_geometry);
+            EmbreeNative.rtcCommitGeometry(NativeGeometry);
         }
 
         public void Enable()
@@ -160,7 +162,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcEnableGeometry(_geometry);
+            EmbreeNative.rtcEnableGeometry(NativeGeometry);
         }
 
         public void Disable()
@@ -169,7 +171,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcDisableGeometry(_geometry);
+            EmbreeNative.rtcDisableGeometry(NativeGeometry);
         }
 
         public void SetTimeStepCount(uint timeStepCount)
@@ -178,7 +180,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcSetGeometryTimeStepCount(_geometry, timeStepCount);
+            EmbreeNative.rtcSetGeometryTimeStepCount(NativeGeometry, timeStepCount);
         }
 
         public void SetTimeRange(float startTime, float endTime)
@@ -187,7 +189,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcSetGeometryTimeRange(_geometry, startTime, endTime);
+            EmbreeNative.rtcSetGeometryTimeRange(NativeGeometry, startTime, endTime);
         }
 
         public void SetVertexAttributeCount(uint vertexAttributeCount)
@@ -196,7 +198,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcSetGeometryVertexAttributeCount(_geometry, vertexAttributeCount);
+            EmbreeNative.rtcSetGeometryVertexAttributeCount(NativeGeometry, vertexAttributeCount);
         }
 
         public void SetMask(uint mask)
@@ -205,7 +207,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcSetGeometryMask(_geometry, mask);
+            EmbreeNative.rtcSetGeometryMask(NativeGeometry, mask);
         }
 
         public void SetBuildQuality(RTCBuildQuality quality)
@@ -214,7 +216,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcSetGeometryBuildQuality(_geometry, quality);
+            EmbreeNative.rtcSetGeometryBuildQuality(NativeGeometry, quality);
         }
 
         public void SetMaxRadiusScale(float maxRadiusScale)
@@ -223,7 +225,7 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            EmbreeNative.rtcSetGeometryMaxRadiusScale(_geometry, maxRadiusScale);
+            EmbreeNative.rtcSetGeometryMaxRadiusScale(NativeGeometry, maxRadiusScale);
         }
 
         public void SetInstancedScene(EmbreeScene scene)
@@ -233,7 +235,7 @@ namespace EmbreeSharp
                 ThrowUtility.ObjectDisposed();
             }
             RTCScene s = scene.NativeScene;
-            EmbreeNative.rtcSetGeometryInstancedScene(_geometry, s);
+            EmbreeNative.rtcSetGeometryInstancedScene(NativeGeometry, s);
         }
 
         public unsafe Matrix4x4 GetTransform4x4(float time)
@@ -245,7 +247,7 @@ namespace EmbreeSharp
             Span<float> mat = stackalloc float[16];
             fixed (float* ptr = mat)
             {
-                EmbreeNative.rtcGetGeometryTransform(_geometry, time, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
+                EmbreeNative.rtcGetGeometryTransform(NativeGeometry, time, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
             }
             // C# matrix is row-major
             return new Matrix4x4(
@@ -262,7 +264,7 @@ namespace EmbreeSharp
                 ThrowUtility.ObjectDisposed();
             }
             Matrix4x4 column = Matrix4x4.Transpose(mat);
-            EmbreeNative.rtcSetGeometryTransform(_geometry, timeStep, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &column);
+            EmbreeNative.rtcSetGeometryTransform(NativeGeometry, timeStep, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &column);
         }
 
         public unsafe void SetTransformQuaternion(uint timeStep, ref readonly RTCQuaternionDecomposition quat)
@@ -273,7 +275,7 @@ namespace EmbreeSharp
             }
             fixed (RTCQuaternionDecomposition* ptr = &quat)
             {
-                EmbreeNative.rtcSetGeometryTransformQuaternion(_geometry, timeStep, ptr);
+                EmbreeNative.rtcSetGeometryTransformQuaternion(NativeGeometry, timeStep, ptr);
             }
         }
     }

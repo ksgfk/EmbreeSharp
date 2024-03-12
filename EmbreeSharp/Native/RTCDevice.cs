@@ -3,16 +3,25 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public class RTCDevice : SafeHandle
+    public struct RTCDevice
+    {
+        public nint Ptr;
+    }
+
+    public class RTCDeviceHandle : SafeHandle
     {
         public override bool IsInvalid => handle == nint.Zero;
-        public RTCDevice() : base(0, true) { }
+        public RTCDeviceHandle(RTCDevice device) : base(0, true)
+        {
+            handle = device.Ptr;
+        }
 
         protected override bool ReleaseHandle()
         {
             try
             {
-                EmbreeNative.rtcReleaseDevice(this);
+                EmbreeNative.rtcReleaseDevice(new RTCDevice() { Ptr = handle });
+                handle = 0;
                 return true;
             }
             catch (Exception)

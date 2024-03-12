@@ -3,16 +3,25 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
-    public class RTCBVH : SafeHandle
+    public struct RTCBVH
+    {
+        public nint Ptr;
+    }
+
+    public class RTCBVHHandle : SafeHandle
     {
         public override bool IsInvalid => handle == nint.Zero;
-        public RTCBVH() : base(0, true) { }
+        public RTCBVHHandle(RTCBVH bvh) : base(0, true)
+        {
+            handle = bvh.Ptr;
+        }
 
         protected override bool ReleaseHandle()
         {
             try
             {
-                EmbreeNative.rtcReleaseBVH(this);
+                EmbreeNative.rtcReleaseBVH(new RTCBVH() { Ptr = handle });
+                handle = 0;
                 return true;
             }
             catch (Exception)
@@ -97,7 +106,7 @@ namespace EmbreeSharp.Native
         public float traversalCost;
         public float intersectionCost;
 
-        [NativeType("RTCBVH")] public IntPtr bvh;
+        public RTCBVH bvh;
         [NativeType("struct RTCBuildPrimitive*")] public RTCBuildPrimitive* primitives;
         [NativeType("size_t")] public nuint primitiveCount;
         [NativeType("size_t")] public nuint primitiveArrayCapacity;
