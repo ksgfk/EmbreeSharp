@@ -72,9 +72,13 @@ Accouding to the API reference: [rtcSetSharedGeometryBuffer](https://github.com/
 
 This is a lifecycle problem.
 
-I think reference count or reference tracing is the way to solve it. Because memory should know if there is a buffer in use. This can avoid dangling pointer. If the memory is not used. We can free memory proactively and safely.
+Currently, I provide `EmbreeSharp.ISharedBufferAllocation` as buffer allocator. It ensures that the allocated buffer address is available until it is released. `EmbreeSharp.ISharedBufferAllocation` as allocate result. It provides the buffer address and length.
 
-Or, determined by GC. Yes, we can let buffer reference memory. When all buffers are released. Memory will only be freed when all buffers are released. But I think this is a backup option.
+The most crucial part is ` EmbreeSharp.SharedBufferHandle`. It inherits from `System.Runtime.InteropServices.SafeHandle`. The original purpose of SafeHandle was to serve as a secure native handle when interacting with C. It has built-in reference counting function. Therefore, here we borrow its reference count function.
+
+`SharedBufferHandle` is used to manage the lifecycle of `ISharedBufferAllocation`. For example, pass it to construct `EmbreeSharpEmbreeSharedBuffer`. It will increase the reference count. Due to `EmbreeSharedBuffer` implements the dispose pattern, GC will use finalizer when the user forgets to release it. At the same time decrease the reference count. When the reference count returns to zero, it will free shared buffer
+
+Ideally, it can avoid memory leaks caused by users forgetting to free. But it has not been tested
 
 ### SetGeometry[Intersect/Occluded/Bounds]Function
 

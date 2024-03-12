@@ -16,6 +16,7 @@ namespace EmbreeSharp
         public nuint Length => _length;
         public unsafe nuint ByteCount => _length * (nuint)sizeof(T);
         public bool IsEmpty => _length == 0;
+        public nuint UnsafePtr => _ptr;
 
         public unsafe ref T this[nuint index]
         {

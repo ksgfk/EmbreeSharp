@@ -24,9 +24,11 @@ namespace EmbreeSharp
         public nuint ByteSize => _byteSize;
         public bool IsDisposed => _disposedValue;
 
-        public EmbreeBuffer(EmbreeDevice device, nuint byteSize)
+        public EmbreeBuffer(EmbreeDevice device, nuint byteSize) : this(EmbreeNative.rtcNewBuffer(device.NativeDevice, byteSize), byteSize) { }
+
+        protected EmbreeBuffer(RTCBuffer rtcBuffer, nuint byteSize)
         {
-            _buffer = EmbreeNative.rtcNewBuffer(device.NativeDevice, byteSize);
+            _buffer = rtcBuffer;
             _byteSize = byteSize;
         }
 
@@ -35,11 +37,10 @@ namespace EmbreeSharp
             Dispose(disposing: false);
         }
 
-        protected void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
-                // if (disposing) { }
                 _buffer.Dispose();
                 _disposedValue = true;
             }
