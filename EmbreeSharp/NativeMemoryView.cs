@@ -8,7 +8,7 @@ namespace EmbreeSharp
     /// This struct only used for unmanaged memory. Please do not use it in managed memory. This is not safe
     /// This struct does not manage memory. Only user guarantees that the lifecycle of memory is longer than this view
     /// </summary>
-    public readonly ref struct NativeMemoryView<T> where T : unmanaged
+    public readonly struct NativeMemoryView<T> where T : unmanaged
     {
         internal readonly nuint _ptr;
         private readonly nuint _length;

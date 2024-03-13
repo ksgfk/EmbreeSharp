@@ -16,7 +16,7 @@ internal class Program
             return IsLeaf ? Unsafe.As<NodeHeader, LeafNode>(ref this).NodeCount() : Unsafe.As<NodeHeader, InnerNode>(ref this).NodeCount();
         }
 
-        public float Sah()
+        public double Sah()
         {
             return IsLeaf ? Unsafe.As<NodeHeader, LeafNode>(ref this).Sah() : Unsafe.As<NodeHeader, InnerNode>(ref this).Sah();
         }
@@ -26,60 +26,69 @@ internal class Program
     struct InnerNode
     {
         public NodeHeader Header;
-        public RTCBounds LeftBound;
-        public RTCBounds RightBound;
-        public Ref<NodeHeader> LeftNode;
-        public Ref<NodeHeader> RightNode;
+        public NativeMemoryView<Ref<NodeHeader>> Childrens;
+        public NativeMemoryView<RTCBounds> Bounds;
 
         public readonly long NodeCount()
         {
-            long leftCnt = 0;
-            if (!LeftNode.IsNull)
+            long cnt = 0;
+            foreach (var i in Childrens)
             {
-                leftCnt = LeftNode.Value.IsLeaf ? LeftNode.Cast<LeafNode>().Value.NodeCount() : LeftNode.Cast<InnerNode>().Value.NodeCount();
+                ref readonly var c = ref i.Value;
+                cnt += c.IsLeaf ? i.Cast<LeafNode>().Value.NodeCount() : i.Cast<InnerNode>().Value.NodeCount();
             }
-            long rightCnt = 0;
-            if (!RightNode.IsNull)
-            {
-                rightCnt = RightNode.Value.IsLeaf ? RightNode.Cast<LeafNode>().Value.NodeCount() : RightNode.Cast<InnerNode>().Value.NodeCount();
-            }
-            return 1 + leftCnt + rightCnt;
+            return cnt;
         }
 
-        public readonly float Sah()
+        public readonly double Sah()
         {
-            RTCBounds holeBound = LeftBound.Union(in RightBound);
-            float holeArea = holeBound.SurfaceArea();
-            float leftArea = LeftBound.SurfaceArea();
-            float rightArea = RightBound.SurfaceArea();
-            float leftSah = 0;
-            if (!LeftNode.IsNull)
+            if (Bounds.Length <= 0)
             {
-                leftSah = LeftNode.Value.IsLeaf ? LeftNode.Cast<LeafNode>().Value.Sah() : LeftNode.Cast<InnerNode>().Value.Sah();
+                return 0;
             }
-            float rightSah = 0;
-            if (!RightNode.IsNull)
+            RTCBounds holeBound = Bounds[0];
+            double holeSah = 0;
+            for (nuint i = 0; i < Childrens.Length; i++)
             {
-                rightSah = RightNode.Value.IsLeaf ? RightNode.Cast<LeafNode>().Value.Sah() : RightNode.Cast<InnerNode>().Value.Sah();
+                ref readonly var b = ref Bounds[i];
+                var childRef = Childrens[i];
+                ref readonly var c = ref childRef.Value;
+                holeBound = holeBound.Union(in b);
+                var sah = c.IsLeaf ? childRef.Cast<LeafNode>().Value.Sah() : childRef.Cast<InnerNode>().Value.Sah();
+                var t = sah * b.SurfaceArea();
+                holeSah += t;
             }
-            return 1 + (leftArea * leftSah + rightArea * rightSah) / holeArea;
+            return 1 + holeSah / holeBound.SurfaceArea();
         }
+    }
+
+    struct Prims
+    {
+        public RTCBounds Bounds;
+        public uint PrimId;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     struct LeafNode
     {
         public NodeHeader Header;
-        public RTCBounds Bounds;
-        public uint PrimId;
+        public NativeMemoryView<Prims> Prims;
 
-        public long NodeCount() => 1;
-        public float Sah() => 1;
+        public readonly long NodeCount() => 1;
+        public readonly double Sah()
+        {
+            double hole = 0;
+            foreach (ref readonly var i in Prims)
+            {
+                hole += i.Bounds.SurfaceArea();
+            }
+            return hole;
+        }
     }
 
     private static void Main(string[] args)
     {
-        const int N = 10000;
+        const int N = 10000000;
         RTCBuildPrimitive[] prims = new RTCBuildPrimitive[N];
         Random rand = new();
         float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
@@ -108,11 +117,12 @@ internal class Program
         string config = "verbose=3";
         using EmbreeDevice device = new(config);
         device.SetErrorFunction((code, str) => Console.WriteLine($"error {code}, {str}"));
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 10; i++)
         {
             Build(device, RTCBuildQuality.RTC_BUILD_QUALITY_LOW, prims);
             Build(device, RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM, prims);
             Build(device, RTCBuildQuality.RTC_BUILD_QUALITY_HIGH, prims);
+            Console.WriteLine();
         }
     }
 
@@ -121,36 +131,28 @@ internal class Program
         Stopwatch sw = Stopwatch.StartNew();
         using EmbreeBuilder<NodeHeader, InnerNode, LeafNode> builder = new(device);
         builder.SetBuildQuality(quality);
-        builder.SetMaxDepth(1024);
-        builder.SetMaxLeafSize(1);
         builder.SetBuildPrimitive(prims);
         builder.SetCreateNodeFunction((allocator, childCount) =>
         {
-            if (childCount != 2)
-            {
-                Console.WriteLine($"invlid childCount {childCount}");
-            }
             ref InnerNode node = ref allocator.Allocate<InnerNode>(32);
             node.Header.IsLeaf = false;
+            node.Childrens = new NativeMemoryView<Ref<NodeHeader>>(ref allocator.Allocate<Ref<NodeHeader>>(childCount, 32), childCount);
+            node.Bounds = new NativeMemoryView<RTCBounds>(ref allocator.Allocate<RTCBounds>(childCount, 32), childCount);
             return ref node;
         });
         builder.SetSetNodeChildrenFunction((ref InnerNode n, NativeMemoryView<Ref<NodeHeader>> children) =>
         {
-            if (children.Length != 2)
+            for (nuint i = 0; i < children.Length; i++)
             {
-                Console.WriteLine($"invlid children.Length {children.Length}");
+                n.Childrens[i] = children[i];
             }
-            n.LeftNode = children[0];
-            n.RightNode = children[1];
         });
         builder.SetSetNodeBoundsFunction((ref InnerNode n, NativeMemoryView<Ref<RTCBounds>> bounds) =>
         {
-            if (bounds.Length != 2)
+            for (nuint i = 0; i < bounds.Length; i++)
             {
-                Console.WriteLine($"invlid bounds.Length {bounds.Length}");
+                n.Bounds[i] = bounds[i].Value;
             }
-            n.LeftBound = bounds[0].Value;
-            n.RightBound = bounds[1].Value;
         });
         builder.SetCreateLeafFunction((allocator, prims) =>
         {
@@ -158,36 +160,24 @@ internal class Program
             {
                 return ref allocator.NullRef<LeafNode>();
             }
-            if (prims.Length != 1)
-            {
-                Console.WriteLine($"invlid prims.Length {prims.Length}");
-            }
             ref LeafNode node = ref allocator.Allocate<LeafNode>(32);
             node.Header.IsLeaf = true;
-            ref var prim = ref prims[0];
-            node.Bounds = prim.GetBounds();
-            node.PrimId = prim.primID;
+            node.Prims = new NativeMemoryView<Prims>(ref allocator.Allocate<Prims>(prims.Length, 32), prims.Length);
+            for (nuint i = 0; i < prims.Length; i++)
+            {
+                ref var prim = ref prims[i];
+                ref var my = ref node.Prims[i];
+                my.Bounds = prim.GetBounds();
+                my.PrimId = prim.primID;
+            }
             return ref node;
         });
         builder.SetSplitPrimitiveFunction((ref readonly RTCBuildPrimitive primitive, uint dimension, float position, ref RTCBounds leftBounds, ref RTCBounds rightBounds) =>
         {
             leftBounds = primitive.GetBounds();
             rightBounds = primitive.GetBounds();
-            if (dimension == 0)
-            {
-                leftBounds.upper_x = position;
-                rightBounds.lower_x = position;
-            }
-            if (dimension == 1)
-            {
-                leftBounds.upper_y = position;
-                rightBounds.lower_y = position;
-            }
-            if (dimension == 2)
-            {
-                leftBounds.upper_z = position;
-                rightBounds.lower_z = position;
-            }
+            leftBounds.SetUpperDimension((int)dimension, position);
+            rightBounds.SetLowerDimension((int)dimension, position);
         });
         Ref<NodeHeader> root = builder.Build();
         sw.Stop();
@@ -197,7 +187,7 @@ internal class Program
         }
         else
         {
-            float sah = root.Value.Sah();
+            double sah = root.Value.Sah();
             long nodes = root.Value.NodeCount();
             Console.WriteLine($"Nodes={nodes} SAH={sah} ms={sw.ElapsedMilliseconds}");
         }

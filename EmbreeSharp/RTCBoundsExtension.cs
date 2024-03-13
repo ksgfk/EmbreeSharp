@@ -1,5 +1,6 @@
 ﻿using EmbreeSharp.Native;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace EmbreeSharp
 {
@@ -27,6 +28,42 @@ namespace EmbreeSharp
             bounds.upper_x = v.X;
             bounds.upper_y = v.Y;
             bounds.upper_z = v.Z;
+        }
+
+        public static float GetLowerDimension(ref readonly this RTCBounds bounds, int dimension)
+        {
+            if (((uint)dimension) > 2)
+            {
+                ThrowUtility.ArgumentOutOfRange(nameof(dimension));
+            }
+            return Unsafe.Add(ref Unsafe.AsRef(in bounds.lower_x), dimension);
+        }
+
+        public static float GetUpperDimension(ref readonly this RTCBounds bounds, int dimension)
+        {
+            if (((uint)dimension) > 2)
+            {
+                ThrowUtility.ArgumentOutOfRange(nameof(dimension));
+            }
+            return Unsafe.Add(ref Unsafe.AsRef(in bounds.upper_x), dimension);
+        }
+
+        public static void SetLowerDimension(ref this RTCBounds bounds, int dimension, float value)
+        {
+            if (((uint)dimension) > 2)
+            {
+                ThrowUtility.ArgumentOutOfRange(nameof(dimension));
+            }
+            Unsafe.Add(ref bounds.lower_x, dimension) = value;
+        }
+
+        public static void SetUpperDimension(ref this RTCBounds bounds, int dimension, float value)
+        {
+            if (((uint)dimension) > 2)
+            {
+                ThrowUtility.ArgumentOutOfRange(nameof(dimension));
+            }
+            Unsafe.Add(ref bounds.upper_x, dimension) = value;
         }
 
         public static float SurfaceArea(ref readonly this RTCBounds bounds)
