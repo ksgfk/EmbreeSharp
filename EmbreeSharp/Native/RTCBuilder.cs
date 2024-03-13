@@ -24,8 +24,9 @@ namespace EmbreeSharp.Native
                 handle = 0;
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.Error.WriteLine("cannot release RTCBVH, exception: {0}\n  at:\n{1}", e.Message, e.StackTrace);
                 return false;
             }
         }
