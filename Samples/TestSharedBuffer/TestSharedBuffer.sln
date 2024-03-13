@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp", "..\..\EmbreeSharp\EmbreeSharp.csproj", "{2FF00927-A36A-44A5-A4C9-C7DC521139A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSharedBuffer", "TestSharedBuffer.csproj", "{B758C02C-1789-49A8-9D6A-4B7463E027BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2FF00927-A36A-44A5-A4C9-C7DC521139A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FF00927-A36A-44A5-A4C9-C7DC521139A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FF00927-A36A-44A5-A4C9-C7DC521139A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FF00927-A36A-44A5-A4C9-C7DC521139A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B758C02C-1789-49A8-9D6A-4B7463E027BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B758C02C-1789-49A8-9D6A-4B7463E027BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B758C02C-1789-49A8-9D6A-4B7463E027BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B758C02C-1789-49A8-9D6A-4B7463E027BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

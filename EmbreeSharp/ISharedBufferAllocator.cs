@@ -23,7 +23,7 @@ namespace EmbreeSharp
         public unsafe SharedBufferHandle Allocate(nuint size, nuint alignment)
         {
             void* ptr = NativeMemory.AlignedAlloc(size, alignment);
-            Allocation alloc = new(this, ptr, alignment);
+            Allocation alloc = new(this, ptr, size);
             return new SharedBufferHandle(alloc);
         }
 

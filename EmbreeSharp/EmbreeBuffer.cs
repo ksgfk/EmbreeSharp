@@ -30,6 +30,7 @@ namespace EmbreeSharp
         {
             _buffer = new RTCBufferHandle(rtcBuffer);
             _byteSize = byteSize;
+            GC.AddMemoryPressure((long)_byteSize);
         }
 
         ~EmbreeBuffer()
@@ -43,6 +44,7 @@ namespace EmbreeSharp
             {
                 _buffer.Dispose();
                 _buffer = null!;
+                GC.RemoveMemoryPressure((long)_byteSize);
                 _disposedValue = true;
             }
         }

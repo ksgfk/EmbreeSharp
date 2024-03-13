@@ -6,7 +6,7 @@ namespace EmbreeSharp
     {
         private SharedBufferHandle _bufferHandle;
 
-        public EmbreeSharedBuffer(RTCDevice device, SharedBufferHandle handle) : base(CreateRTCBuffer(device, handle), handle.Buffer.View.Length)
+        public EmbreeSharedBuffer(EmbreeDevice device, SharedBufferHandle handle) : base(CreateRTCBuffer(device, handle), handle.Buffer.View.Length)
         {
             _bufferHandle = handle;
             bool isSucc = false;
@@ -17,14 +17,14 @@ namespace EmbreeSharp
             }
         }
 
-        private static unsafe RTCBuffer CreateRTCBuffer(RTCDevice device, SharedBufferHandle handle)
+        private static unsafe RTCBuffer CreateRTCBuffer(EmbreeDevice device, SharedBufferHandle handle)
         {
             if (handle.IsClosed || handle.IsInvalid)
             {
                 ThrowUtility.ObjectDisposed(nameof(handle));
             }
             NativeMemoryView<byte> buffer = handle.Buffer.View;
-            RTCBuffer result = EmbreeNative.rtcNewSharedBuffer(device, buffer.UnsafePtr.ToPointer(), buffer.Length);
+            RTCBuffer result = EmbreeNative.rtcNewSharedBuffer(device.NativeDevice, buffer.UnsafePtr.ToPointer(), buffer.Length);
             return result;
         }
 
