@@ -526,6 +526,90 @@ namespace EmbreeSharp.Native
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial void rtcInterpolate([NativeType("const struct RTCInterpolateArguments*")] RTCInterpolateArguments* args);
+
+        /// <summary>
+        /// Interpolates vertex data to some u/v location.
+        /// </summary>
+        public static void rtcInterpolate0(RTCGeometry geometry, uint primID, float u, float v, RTCBufferType bufferType, uint bufferSlot, float* P, uint valueCount)
+        {
+            RTCInterpolateArguments args = new()
+            {
+                geometry = geometry.Ptr,
+                primID = primID,
+                u = u,
+                v = v,
+                bufferType = bufferType,
+                bufferSlot = bufferSlot,
+                P = P,
+                dPdu = null,
+                dPdv = null,
+                ddPdudu = null,
+                ddPdvdv = null,
+                ddPdudv = null,
+                valueCount = valueCount
+            };
+            rtcInterpolate(&args);
+        }
+
+        /// <summary>
+        /// Interpolates vertex data to some u/v location and calculates first order derivatives.
+        /// </summary>
+        public static void rtcInterpolate1(
+            RTCGeometry geometry,
+            uint primID,
+            float u, float v,
+            RTCBufferType bufferType, uint bufferSlot,
+            float* P, float* dPdu, float* dPdv,
+            uint valueCount)
+        {
+            RTCInterpolateArguments args = new()
+            {
+                geometry = geometry.Ptr,
+                primID = primID,
+                u = u,
+                v = v,
+                bufferType = bufferType,
+                bufferSlot = bufferSlot,
+                P = P,
+                dPdu = dPdu,
+                dPdv = dPdv,
+                ddPdudu = null,
+                ddPdvdv = null,
+                ddPdudv = null,
+                valueCount = valueCount
+            };
+            rtcInterpolate(&args);
+        }
+
+        /// <summary>
+        /// Interpolates vertex data to some u/v location and calculates first and second order derivatives.
+        /// </summary>
+        public static void rtcInterpolate2(
+            RTCGeometry geometry,
+            uint primID,
+            float u, float v,
+            RTCBufferType bufferType, uint bufferSlot,
+            float* P, float* dPdu, float* dPdv, float* ddPdudu, float* ddPdvdv, float* ddPdudv,
+            uint valueCount)
+        {
+            RTCInterpolateArguments args = new()
+            {
+                geometry = geometry.Ptr,
+                primID = primID,
+                u = u,
+                v = v,
+                bufferType = bufferType,
+                bufferSlot = bufferSlot,
+                P = P,
+                dPdu = dPdu,
+                dPdv = dPdv,
+                ddPdudu = ddPdudu,
+                ddPdvdv = ddPdvdv,
+                ddPdudv = ddPdudv,
+                valueCount = valueCount
+            };
+            rtcInterpolate(&args);
+        }
     }
 
     /// <summary>

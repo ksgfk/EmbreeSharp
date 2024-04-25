@@ -337,6 +337,21 @@ namespace EmbreeSharp.Native
         public fixed uint instPrimID[EmbreeNative.RTC_MAX_INSTANCE_LEVEL_COUNT];
     }
 
+    public static unsafe partial class EmbreeNative
+    {
+        /// <summary>
+        /// Initializes an ray query context.
+        /// </summary>
+        public static void rtcInitRayQueryContext(RTCRayQueryContext* context)
+        {
+            for (int l = 0; l < RTC_MAX_INSTANCE_LEVEL_COUNT; l++)
+            {
+                context->instID[l] = RTC_INVALID_GEOMETRY_ID;
+                context->instPrimID[l] = RTC_INVALID_GEOMETRY_ID;
+            }
+        }
+    }
+
     /// <summary>
     /// Point query structure for closest point query
     /// </summary>
@@ -494,6 +509,22 @@ namespace EmbreeSharp.Native
         /// number of instances currently on the stack.
         /// </summary>
         public uint instStackSize;
+    }
+
+    public static unsafe partial class EmbreeNative
+    {
+        /// <summary>
+        /// Initializes an ray query context.
+        /// </summary>
+        public static void rtcInitPointQueryContext(RTCPointQueryContext* context)
+        {
+            context->instStackSize = 0;
+            for (int l = 0; l < RTC_MAX_INSTANCE_LEVEL_COUNT; ++l)
+            {
+                context->instID[l] = RTC_INVALID_GEOMETRY_ID;
+                context->instPrimID[l] = RTC_INVALID_GEOMETRY_ID;
+            }
+        }
     }
 
     [RTCAlign(Alignment)]

@@ -64,7 +64,7 @@ Currently, I provide `EmbreeSharp.ISharedBufferAllocation` as buffer allocator. 
 
 The most crucial part is ` EmbreeSharp.SharedBufferHandle`. It inherits from `System.Runtime.InteropServices.SafeHandle`. The original purpose of `SafeHandle` was serve as a secure native handle when interop with C API. It has built-in reference counting function. Therefore, here we borrow its reference count function.
 
-`SharedBufferHandle` is used to manage the lifecycle of `ISharedBufferAllocation`. For example, pass it to construct `EmbreeSharpEmbreeSharedBuffer`. It will increase the reference count. Due to `EmbreeSharedBuffer` implements the dispose pattern, GC will use finalizer when the user forgets to release it. At the same time decrease the reference count. When the reference count returns to zero, it will free shared buffer
+`SharedBufferHandle` is used to manage the lifecycle of `ISharedBufferAllocation`. For example, pass it to construct `EmbreeSharp.EmbreeSharedBuffer`. It will increase the reference count. Due to `EmbreeSharedBuffer` implements the dispose pattern, GC will use finalizer when the user forgets to release it. At the same time decrease the reference count. When the reference count returns to zero, it will free shared buffer
 
 Ideally, it can avoid memory leaks caused by users forgetting to free. But it has not been tested
 
@@ -91,6 +91,10 @@ This is x86-64 instruction. C# API does not provide them.
 Make a native library and use P/Invoke?
 
 Hmm...maybe we can use OS api. Write binary code to memory and call OS api to set memory as executable such as `VirtualProtectEx` on win32.
+
+### Add more samples
+
+same as title. like path tracer?
 
 ## License
 

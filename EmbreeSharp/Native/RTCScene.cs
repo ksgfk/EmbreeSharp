@@ -44,6 +44,21 @@ namespace EmbreeSharp.Native
         [NativeType("RTCIntersectFunctionN")] public IntPtr intersect;
     }
 
+    public static unsafe partial class EmbreeNative
+    {
+        /// <summary>
+        /// Initializes intersection arguments.
+        /// </summary>
+        public static void rtcInitIntersectArguments(RTCIntersectArguments* args)
+        {
+            args->flags = RTCRayQueryFlags.RTC_RAY_QUERY_FLAG_INCOHERENT;
+            args->feature_mask = RTCFeatureFlags.RTC_FEATURE_FLAG_ALL;
+            args->context = null;
+            args->filter = nint.Zero;
+            args->intersect = nint.Zero;
+        }
+    }
+
     /// <summary>
     /// Additional arguments for rtcOccluded1/4/8/16 calls
     /// </summary>
@@ -74,6 +89,18 @@ namespace EmbreeSharp.Native
 
     public static unsafe partial class EmbreeNative
     {
+        /// <summary>
+        /// Initializes an intersection arguments.
+        /// </summary>
+        public static void rtcInitOccludedArguments(RTCOccludedArguments* args)
+        {
+            args->flags = RTCRayQueryFlags.RTC_RAY_QUERY_FLAG_INCOHERENT;
+            args->feature_mask = RTCFeatureFlags.RTC_FEATURE_FLAG_ALL;
+            args->context = null;
+            args->filter = nint.Zero;
+            args->occluded = nint.Zero;
+        }
+
         /// <summary>
         /// Creates a new scene.
         /// </summary>

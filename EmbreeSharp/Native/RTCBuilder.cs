@@ -124,6 +124,37 @@ namespace EmbreeSharp.Native
     public static unsafe partial class EmbreeNative
     {
         /// <summary>
+        /// Returns the default build settings.
+        /// </summary>
+        public static RTCBuildArguments rtcDefaultBuildArguments()
+        {
+            return new()
+            {
+                byteSize = (nuint)sizeof(RTCBuildArguments),
+                buildQuality = RTCBuildQuality.RTC_BUILD_QUALITY_MEDIUM,
+                buildFlags = RTCBuildFlags.RTC_BUILD_FLAG_NONE,
+                maxBranchingFactor = 2,
+                maxDepth = 32,
+                sahBlockSize = 1,
+                minLeafSize = 1,
+                maxLeafSize = (uint)RTCBuildConstants.RTC_BUILD_MAX_PRIMITIVES_PER_LEAF,
+                traversalCost = 1.0f,
+                intersectionCost = 1.0f,
+                bvh = new RTCBVH() { Ptr = nint.Zero },
+                primitives = null,
+                primitiveCount = 0,
+                primitiveArrayCapacity = 0,
+                createNode = nint.Zero,
+                setNodeChildren = nint.Zero,
+                setNodeBounds = nint.Zero,
+                createLeaf = nint.Zero,
+                splitPrimitive = nint.Zero,
+                buildProgress = nint.Zero,
+                userPtr = null
+            };
+        }
+
+        /// <summary>
         /// Creates a new BVH.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]

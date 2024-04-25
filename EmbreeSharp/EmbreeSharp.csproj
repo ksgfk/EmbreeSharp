@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <AssemblyVersion>0.6.2</AssemblyVersion>
-    <FileVersion>0.6.2</FileVersion>
+    <AssemblyVersion>0.6.3</AssemblyVersion>
+    <FileVersion>0.6.3</FileVersion>
     <RepositoryType>git</RepositoryType>
     <Description>Embree C# Low-level binding</Description>
     <Company>ksgfk</Company>
@@ -15,9 +15,9 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/ksgfk/EmbreeSharp</RepositoryUrl>
     <PackageTags>embree;wrapper</PackageTags>
-    <PackageReleaseNotes>fix shared buffer handle</PackageReleaseNotes>
+    <PackageReleaseNotes>add helper func</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.6.2</Version>
+    <Version>0.6.3</Version>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <DebugType>embedded</DebugType>
