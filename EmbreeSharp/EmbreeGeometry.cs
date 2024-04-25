@@ -52,7 +52,6 @@ namespace EmbreeSharp
         {
             if (!_disposedValue)
             {
-                //if (disposing) { }
                 foreach (var i in _attachedSharedBuffer.Values)
                 {
                     i.DangerousRelease();
@@ -65,9 +64,12 @@ namespace EmbreeSharp
                     EmbreeNative.rtcSetGeometryUserData(NativeGeometry, null);
                 }
                 _gcHandle.Free();
-                _gcHandle = default;
                 _geometry.Dispose();
-                _geometry = null!;
+                if (disposing)
+                {
+                    _gcHandle = default;
+                    _geometry = null!;
+                }
                 _disposedValue = true;
             }
         }

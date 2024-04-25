@@ -72,9 +72,12 @@ namespace EmbreeSharp
                     EmbreeNative.rtcSetDeviceMemoryMonitorFunction(NativeDevice, null, null);
                 }
                 _gcHandle.Free();
-                _gcHandle = default;
                 _device.Dispose();
-                _device = null!;
+                if (disposing)
+                {
+                    _gcHandle = default;
+                    _device = null!;
+                }
                 _disposedValue = true;
             }
         }

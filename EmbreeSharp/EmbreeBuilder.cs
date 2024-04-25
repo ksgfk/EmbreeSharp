@@ -71,9 +71,12 @@ namespace EmbreeSharp
                     _prims = null;
                 }
                 _gcHandle.Free();
-                _gcHandle = default;
                 _bvh.Dispose();
-                _bvh = null!;
+                if (disposing)
+                {
+                    _gcHandle = default;
+                    _bvh = null!;
+                }
                 _disposedValue = true;
             }
         }

@@ -53,9 +53,12 @@ namespace EmbreeSharp
                     EmbreeNative.rtcSetSceneProgressMonitorFunction(NativeScene, null, null);
                 }
                 _gcHandle.Free();
-                _gcHandle = default;
                 _scene.Dispose();
-                _scene = null!;
+                if (disposing)
+                {
+                    _gcHandle = default;
+                    _scene = null!;
+                }
                 _disposedValue = true;
             }
         }

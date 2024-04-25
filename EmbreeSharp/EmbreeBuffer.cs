@@ -43,7 +43,10 @@ namespace EmbreeSharp
             if (!_disposedValue)
             {
                 _buffer.Dispose();
-                _buffer = null!;
+                if (disposing)
+                {
+                    _buffer = null!;
+                }
                 GC.RemoveMemoryPressure((long)_byteSize);
                 _disposedValue = true;
             }
