@@ -8,7 +8,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
@@ -21,4 +21,4 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore
+      run: dotnet test --configuration Release --no-restore
