@@ -13,7 +13,8 @@ namespace EmbreeSharp.Native
         RTC_SCENE_FLAG_DYNAMIC = (1 << 0),
         RTC_SCENE_FLAG_COMPACT = (1 << 1),
         RTC_SCENE_FLAG_ROBUST = (1 << 2),
-        RTC_SCENE_FLAG_FILTER_FUNCTION_IN_ARGUMENTS = (1 << 3)
+        RTC_SCENE_FLAG_FILTER_FUNCTION_IN_ARGUMENTS = (1 << 3),
+        RTC_SCENE_FLAG_PREFETCH_USM_SHARED_ON_GPU = (1 << 4),
     }
 
     /// <summary>
