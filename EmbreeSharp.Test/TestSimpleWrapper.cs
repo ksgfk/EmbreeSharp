@@ -44,6 +44,40 @@ namespace EmbreeSharp.Test
                 scene.Intersect(ref rayHit);
                 Assert.IsFalse(rayHit.IsHit());
             }
+            {
+                RTCRay ray = new()
+                {
+                    org_x = 0,
+                    org_y = -1,
+                    org_z = 0,
+                    dir_x = 0,
+                    dir_y = 1,
+                    dir_z = 0,
+                    tnear = 0,
+                    tfar = float.PositiveInfinity,
+                    flags = 0,
+                    mask = unchecked((uint)-1)
+                };
+                scene.Occluded(ref ray);
+                Assert.AreEqual(float.NegativeInfinity, ray.tfar);
+            }
+            {
+                RTCRay ray = new()
+                {
+                    org_x = -10,
+                    org_y = 10,
+                    org_z = 0,
+                    dir_x = 1,
+                    dir_y = 0,
+                    dir_z = 0,
+                    tnear = 0,
+                    tfar = float.PositiveInfinity,
+                    flags = 0,
+                    mask = unchecked((uint)-1)
+                };
+                scene.Occluded(ref ray);
+                Assert.AreEqual(float.PositiveInfinity, ray.tfar);
+            }
         }
     }
 }

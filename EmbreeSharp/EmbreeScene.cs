@@ -268,6 +268,79 @@ namespace EmbreeSharp
             rayHit = rayHitAligned;
         }
 
+        public unsafe void Occluded(ref RTCRay ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            Span<byte> stack = stackalloc byte[sizeof(RTCRay) + RTCRay.Alignment];
+            ref RTCRay rayAligned = ref InteropUtility.StackAllocAligned<RTCRay>(stack, RTCRay.Alignment);
+            rayAligned = ray;
+            EmbreeNative.rtcOccluded1(NativeScene, (RTCRay*)Unsafe.AsPointer(ref rayAligned), null);
+            ray = rayAligned;
+        }
+
+        public unsafe void Occluded(Span<int> valid, ref RTCRay4 ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 4)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            Span<byte> stack = stackalloc byte[sizeof(RTCRay4) + RTCRay4.Alignment];
+            ref RTCRay4 rayAligned = ref InteropUtility.StackAllocAligned<RTCRay4>(stack, RTCRay4.Alignment);
+            rayAligned = ray;
+            fixed (int* validPtr = valid)
+            {
+                EmbreeNative.rtcOccluded4(validPtr, NativeScene, (RTCRay4*)Unsafe.AsPointer(ref rayAligned), null);
+            }
+            ray = rayAligned;
+        }
+
+        public unsafe void Occluded(Span<int> valid, ref RTCRay8 ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 8)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            Span<byte> stack = stackalloc byte[sizeof(RTCRay8) + RTCRay8.Alignment];
+            ref RTCRay8 rayAligned = ref InteropUtility.StackAllocAligned<RTCRay8>(stack, RTCRay8.Alignment);
+            rayAligned = ray;
+            fixed (int* validPtr = valid)
+            {
+                EmbreeNative.rtcOccluded8(validPtr, NativeScene, (RTCRay8*)Unsafe.AsPointer(ref rayAligned), null);
+            }
+            ray = rayAligned;
+        }
+
+        public unsafe void Occluded(Span<int> valid, ref RTCRay16 ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 16)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            Span<byte> stack = stackalloc byte[sizeof(RTCRay16) + RTCRay16.Alignment];
+            ref RTCRay16 rayAligned = ref InteropUtility.StackAllocAligned<RTCRay16>(stack, RTCRay16.Alignment);
+            rayAligned = ray;
+            fixed (int* validPtr = valid)
+            {
+                EmbreeNative.rtcOccluded16(validPtr, NativeScene, (RTCRay16*)Unsafe.AsPointer(ref rayAligned), null);
+            }
+            ray = rayAligned;
+        }
+
         public unsafe Matrix4x4 GetGeometryTransform4x4(uint geomID, float time)
         {
             if (IsDisposed)
