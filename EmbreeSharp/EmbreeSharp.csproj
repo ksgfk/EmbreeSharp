@@ -15,7 +15,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/ksgfk/EmbreeSharp</RepositoryUrl>
     <PackageTags>embree;wrapper</PackageTags>
-    <PackageReleaseNotes>add helper func</PackageReleaseNotes>
+    <PackageReleaseNotes>update embree</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>0.6.5</Version>
 

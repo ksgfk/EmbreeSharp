@@ -115,15 +115,30 @@ namespace EmbreeSharp.Native
         RTC_ERROR_OUT_OF_MEMORY = 4,
         RTC_ERROR_UNSUPPORTED_CPU = 5,
         RTC_ERROR_CANCELLED = 6,
+        RTC_ERROR_LEVEL_ZERO_RAYTRACING_SUPPORT_MISSING = 7,
     }
 
     public static unsafe partial class EmbreeNative
     {
         /// <summary>
+        /// Returns the string representation for the error code. For example, for RTC_ERROR_UNKNOWN the string "RTC_ERROR_UNKNOWN" will be returned.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial byte* rtcGetErrorString(RTCError error);
+
+        /// <summary>
         /// Returns the error code.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial RTCError rtcGetDeviceError(RTCDevice device);
+
+        /// <summary>
+        /// Returns a message corresponding to the last error code (returned by rtcGetDeviceError) which provides details about the error that happened.
+        /// The same message will be written to console when verbosity is > 0 or when an error callback function is set for the device.
+        /// However, when device creation itself fails this is the only way to get additional information about the error.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial byte* rtcGetDeviceLastErrorMessage(RTCDevice device);
     }
 
     /// <summary>
