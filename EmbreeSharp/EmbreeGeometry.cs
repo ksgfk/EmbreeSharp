@@ -1,11 +1,20 @@
-using EmbreeSharp.Native;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using EmbreeSharp.Native;
 
 namespace EmbreeSharp
 {
+    public delegate void GeometryFilterFunctionN(ref readonly RTCFilterFunctionNArguments args);
+    public delegate void GeometryIntersectFunctionN(ref readonly RTCIntersectFunctionNArguments args);
+    public delegate bool GeometryPointQueryFunction(ref readonly RTCPointQueryFunctionArguments args);
+    public delegate void GeometryBoundsFunction(ref readonly RTCBoundsFunctionArguments args);
+    public delegate void GeometryOccludedFunctionN(ref readonly RTCOccludedFunctionNArguments args);
+    public delegate void GeometryDisplacementFunctionN(ref readonly RTCDisplacementFunctionNArguments args);
+
     public class EmbreeGeometry : IDisposable
     {
         private GCHandle _gcHandle;
@@ -15,6 +24,13 @@ namespace EmbreeSharp
         private bool _disposedValue;
         private readonly Dictionary<uint, EmbreeBuffer> _attachedEmbreeBuffers = [];
         private readonly Dictionary<uint, SharedBufferHandle> _attachedSharedBuffer = [];
+        private GeometryFilterFunctionN? _intersectFilterFunc;
+        private GeometryFilterFunctionN? _occludedFilterFunc;
+        private GeometryPointQueryFunction? _pointQueryFunc;
+        private GeometryIntersectFunctionN? _intersectFunc;
+        private GeometryBoundsFunction? _boundsFunc;
+        private GeometryOccludedFunctionN? _occludedFunc;
+        private GeometryDisplacementFunctionN? _displacementFunc;
 
         public RTCGeometry NativeGeometry
         {
@@ -251,12 +267,21 @@ namespace EmbreeSharp
             {
                 EmbreeNative.rtcGetGeometryTransform(NativeGeometry, time, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
             }
-            // C# matrix is row-major
-            return new Matrix4x4(
-                mat[0], mat[4], mat[8], mat[12],
-                mat[1], mat[5], mat[9], mat[13],
-                mat[2], mat[6], mat[10], mat[14],
-                mat[3], mat[7], mat[11], mat[15]);
+            return InteropUtility.RTCFloat4x4ToMatrix4x4ColumnMajor(mat);
+        }
+
+        public unsafe Matrix4x4 GetTransform4x4Ex(uint instPrimID, float time)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            Span<float> mat = stackalloc float[16];
+            fixed (float* ptr = mat)
+            {
+                EmbreeNative.rtcGetGeometryTransformEx(NativeGeometry, instPrimID, time, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
+            }
+            return InteropUtility.RTCFloat4x4ToMatrix4x4ColumnMajor(mat);
         }
 
         public unsafe void SetTransform4x4(uint timeStep, Matrix4x4 mat)
@@ -265,8 +290,12 @@ namespace EmbreeSharp
             {
                 ThrowUtility.ObjectDisposed();
             }
-            Matrix4x4 column = Matrix4x4.Transpose(mat);
-            EmbreeNative.rtcSetGeometryTransform(NativeGeometry, timeStep, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &column);
+            Span<float> v = stackalloc float[16];
+            InteropUtility.Matrix4x4ToRTCFloat4x4ColumnMajor(mat, v);
+            fixed (float* ptr = v)
+            {
+                EmbreeNative.rtcSetGeometryTransform(NativeGeometry, timeStep, RTCFormat.RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, ptr);
+            }
         }
 
         public unsafe void SetTransformQuaternion(uint timeStep, ref readonly RTCQuaternionDecomposition quat)
@@ -279,6 +308,313 @@ namespace EmbreeSharp
             {
                 EmbreeNative.rtcSetGeometryTransformQuaternion(NativeGeometry, timeStep, ptr);
             }
+        }
+
+        private static unsafe EmbreeGeometry? GetThisFromUserPtr(void* userPtr)
+        {
+            GCHandle gcHandle = GCHandle.FromIntPtr(new nint(userPtr));
+            if (!gcHandle.IsAllocated)
+            {
+                return null;
+            }
+            return gcHandle.Target == null ? null : (EmbreeGeometry)gcHandle.Target;
+        }
+
+        private static unsafe void IntersectFilterFunctionNImpl(RTCFilterFunctionNArguments* args)
+        {
+            EmbreeGeometry? that = GetThisFromUserPtr(args->geometryUserPtr);
+            if (that == null)
+            {
+                return;
+            }
+            that._intersectFilterFunc?.Invoke(ref Unsafe.AsRef<RTCFilterFunctionNArguments>(args));
+        }
+
+        private static unsafe void OccludedFilterFunctionNImpl(RTCFilterFunctionNArguments* args)
+        {
+            EmbreeGeometry? that = GetThisFromUserPtr(args->geometryUserPtr);
+            if (that == null)
+            {
+                return;
+            }
+            that._occludedFilterFunc?.Invoke(ref Unsafe.AsRef<RTCFilterFunctionNArguments>(args));
+        }
+
+        private static unsafe void IntersectFunctionNImpl(RTCIntersectFunctionNArguments* args)
+        {
+            EmbreeGeometry? that = GetThisFromUserPtr(args->geometryUserPtr);
+            if (that == null)
+            {
+                return;
+            }
+            that._intersectFunc?.Invoke(ref Unsafe.AsRef<RTCIntersectFunctionNArguments>(args));
+        }
+
+        private static unsafe bool PointQueryFunctionImpl(RTCPointQueryFunctionArguments* args)
+        {
+            EmbreeGeometry? that = GetThisFromUserPtr(args->userPtr);
+            if (that == null)
+            {
+                return false;
+            }
+            return that._pointQueryFunc?.Invoke(ref Unsafe.AsRef<RTCPointQueryFunctionArguments>(args)) ?? false;
+        }
+
+        private static unsafe void BoundsFunctionImpl(RTCBoundsFunctionArguments* args)
+        {
+            EmbreeGeometry? that = GetThisFromUserPtr(args->geometryUserPtr);
+            if (that == null)
+            {
+                return;
+            }
+            that._boundsFunc?.Invoke(ref Unsafe.AsRef<RTCBoundsFunctionArguments>(args));
+        }
+
+        private static unsafe void OccludedFunctionNImpl(RTCOccludedFunctionNArguments* args)
+        {
+            EmbreeGeometry? that = GetThisFromUserPtr(args->geometryUserPtr);
+            if (that == null)
+            {
+                return;
+            }
+            that._occludedFunc?.Invoke(ref Unsafe.AsRef<RTCOccludedFunctionNArguments>(args));
+        }
+
+        private static unsafe void DisplacementFunctionNImpl(RTCDisplacementFunctionNArguments* args)
+        {
+            EmbreeGeometry? that = GetThisFromUserPtr(args->geometryUserPtr);
+            if (that == null)
+            {
+                return;
+            }
+            that._displacementFunc?.Invoke(ref Unsafe.AsRef<RTCDisplacementFunctionNArguments>(args));
+        }
+
+        public unsafe void SetIntersectFilterFunction(GeometryFilterFunctionN? func)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            _intersectFilterFunc = func;
+            if (func == null)
+            {
+                EmbreeNative.rtcSetGeometryIntersectFilterFunction(NativeGeometry, null);
+            }
+            else
+            {
+                EmbreeNative.rtcSetGeometryIntersectFilterFunction(NativeGeometry, IntersectFilterFunctionNImpl);
+            }
+        }
+
+        public unsafe void SetOccludedFilterFunction(GeometryFilterFunctionN? func)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            _occludedFilterFunc = func;
+            if (func == null)
+            {
+                EmbreeNative.rtcSetGeometryOccludedFilterFunction(NativeGeometry, null);
+            }
+            else
+            {
+                EmbreeNative.rtcSetGeometryOccludedFilterFunction(NativeGeometry, OccludedFilterFunctionNImpl);
+            }
+        }
+
+        public void SetEnableFilterFunctionFromArguments(bool enable)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            EmbreeNative.rtcSetGeometryEnableFilterFunctionFromArguments(NativeGeometry, enable);
+        }
+
+        public unsafe void SetPointQueryFunction(GeometryPointQueryFunction? func)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            _pointQueryFunc = func;
+            if (func == null)
+            {
+                EmbreeNative.rtcSetGeometryPointQueryFunction(NativeGeometry, null);
+            }
+            else
+            {
+                EmbreeNative.rtcSetGeometryPointQueryFunction(NativeGeometry, PointQueryFunctionImpl);
+            }
+        }
+
+        public void SetUserPrimitiveCount(uint userPrimitiveCount)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            EmbreeNative.rtcSetGeometryUserPrimitiveCount(NativeGeometry, userPrimitiveCount);
+        }
+
+        public unsafe void SetBoundsFunction(GeometryBoundsFunction? func)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            _boundsFunc = func;
+            if (func == null)
+            {
+                EmbreeNative.rtcSetGeometryBoundsFunction(NativeGeometry, null, null);
+            }
+            else
+            {
+                EmbreeNative.rtcSetGeometryBoundsFunction(NativeGeometry, BoundsFunctionImpl, GCHandle.ToIntPtr(_gcHandle).ToPointer());
+            }
+        }
+
+        public unsafe void SetIntersectFunction(GeometryIntersectFunctionN? func)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            _intersectFunc = func;
+            if (func == null)
+            {
+                EmbreeNative.rtcSetGeometryIntersectFunction(NativeGeometry, null);
+            }
+            else
+            {
+                EmbreeNative.rtcSetGeometryIntersectFunction(NativeGeometry, IntersectFunctionNImpl);
+            }
+        }
+
+        public unsafe void SetOccludedFunction(GeometryOccludedFunctionN? func)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            _occludedFunc = func;
+            if (func == null)
+            {
+                EmbreeNative.rtcSetGeometryOccludedFunction(NativeGeometry, null);
+            }
+            else
+            {
+                EmbreeNative.rtcSetGeometryOccludedFunction(NativeGeometry, OccludedFunctionNImpl);
+            }
+        }
+
+        public unsafe void SetInstancedScenes(IEnumerable<EmbreeScene> scenes)
+        {
+            RTCScene[] e = [.. scenes.Select(i => i.NativeScene)];
+            fixed (RTCScene* ptr = e)
+            {
+                EmbreeNative.rtcSetGeometryInstancedScenes(NativeGeometry, ptr, (nuint)e.Length);
+            }
+        }
+
+        public void SetTessellationRate(float tessellationRate)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            EmbreeNative.rtcSetGeometryTessellationRate(NativeGeometry, tessellationRate);
+        }
+
+        public void SetTopologyCount(uint topologyCount)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            EmbreeNative.rtcSetGeometryTopologyCount(NativeGeometry, topologyCount);
+        }
+
+        public void SetSubdivisionMode(uint topologyID, RTCSubdivisionMode mode)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            EmbreeNative.rtcSetGeometrySubdivisionMode(NativeGeometry, topologyID, mode);
+        }
+
+        public void SetVertexAttributeTopology(uint vertexAttributeID, uint topologyID)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            EmbreeNative.rtcSetGeometryVertexAttributeTopology(NativeGeometry, vertexAttributeID, topologyID);
+        }
+
+        public unsafe void SetDisplacementFunction(GeometryDisplacementFunctionN? func)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            _displacementFunc = func;
+            if (func == null)
+            {
+                EmbreeNative.rtcSetGeometryDisplacementFunction(NativeGeometry, null);
+            }
+            else
+            {
+                EmbreeNative.rtcSetGeometryDisplacementFunction(NativeGeometry, DisplacementFunctionNImpl);
+            }
+        }
+
+        public uint GetFirstHalfEdge(uint faceID)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            return EmbreeNative.rtcGetGeometryFirstHalfEdge(NativeGeometry, faceID);
+        }
+
+        public uint GetFace(uint edgeID)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            return EmbreeNative.rtcGetGeometryFace(NativeGeometry, edgeID);
+        }
+
+        public uint GetNextHalfEdge(uint edgeID)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            return EmbreeNative.rtcGetGeometryNextHalfEdge(NativeGeometry, edgeID);
+        }
+
+        public uint GetPreviousHalfEdge(uint edgeID)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            return EmbreeNative.rtcGetGeometryPreviousHalfEdge(NativeGeometry, edgeID);
+        }
+
+        public uint GetOppositeHalfEdge(uint topologyID, uint edgeID)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            return EmbreeNative.rtcGetGeometryOppositeHalfEdge(NativeGeometry, topologyID, edgeID);
         }
     }
 }

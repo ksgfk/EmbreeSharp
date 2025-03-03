@@ -357,17 +357,17 @@ namespace EmbreeSharp.Native
         /// Sets the intersection filter callback function of the geometry.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryIntersectFilterFunction(RTCGeometry geometry, RTCFilterFunctionN filter);
+        public static partial void rtcSetGeometryIntersectFilterFunction(RTCGeometry geometry, RTCFilterFunctionN? filter);
         /// <summary>
         /// Sets the occlusion filter callback function of the geometry.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryOccludedFilterFunction(RTCGeometry geometry, RTCFilterFunctionN filter);
+        public static partial void rtcSetGeometryOccludedFilterFunction(RTCGeometry geometry, RTCFilterFunctionN? filter);
         /// <summary>
         /// Enables argument version of intersection or occlusion filter function.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryEnableFilterFunctionFromArguments(RTCGeometry geometry, [MarshalAs(UnmanagedType.Bool)] bool enable);
+        public static partial void rtcSetGeometryEnableFilterFunctionFromArguments(RTCGeometry geometry, [MarshalAs(UnmanagedType.I1)] bool enable);
         /// <summary>
         /// Sets the user-defined data pointer of the geometry.
         /// </summary>
@@ -382,7 +382,7 @@ namespace EmbreeSharp.Native
         /// Set the point query callback function of a geometry.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryPointQueryFunction(RTCGeometry geometry, RTCPointQueryFunction pointQuery);
+        public static partial void rtcSetGeometryPointQueryFunction(RTCGeometry geometry, RTCPointQueryFunction? pointQuery);
         /// <summary>
         /// Sets the number of primitives of a user geometry.
         /// </summary>
@@ -392,17 +392,17 @@ namespace EmbreeSharp.Native
         /// Sets the bounding callback function to calculate bounding boxes for user primitives.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryBoundsFunction(RTCGeometry geometry, RTCBoundsFunction bounds, void* userPtr);
+        public static partial void rtcSetGeometryBoundsFunction(RTCGeometry geometry, RTCBoundsFunction? bounds, void* userPtr);
         /// <summary>
         /// Set the intersect callback function of a user geometry.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryIntersectFunction(RTCGeometry geometry, RTCIntersectFunctionN intersect);
+        public static partial void rtcSetGeometryIntersectFunction(RTCGeometry geometry, RTCIntersectFunctionN? intersect);
         /// <summary>
         /// Set the occlusion callback function of a user geometry.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryOccludedFunction(RTCGeometry geometry, RTCOccludedFunctionN occluded);
+        public static partial void rtcSetGeometryOccludedFunction(RTCGeometry geometry, RTCOccludedFunctionN? occluded);
         /// <summary>
         /// Invokes the intersection filter from the intersection callback function.
         /// </summary>
@@ -422,7 +422,7 @@ namespace EmbreeSharp.Native
         /// Sets the instanced scenes of an instance array geometry.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryInstancedScenes(RTCGeometry geometry, [NativeType("RTCScene*")] nint* scenes, [NativeType("size_t")] nuint numScenes);
+        public static partial void rtcSetGeometryInstancedScenes(RTCGeometry geometry, [NativeType("RTCScene*")] RTCScene* scenes, [NativeType("size_t")] nuint numScenes);
         /// <summary>
         /// Sets the transformation of an instance for the specified time step.
         /// </summary>
@@ -470,7 +470,7 @@ namespace EmbreeSharp.Native
         /// Sets the displacement callback function of a subdivision surface.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcSetGeometryDisplacementFunction(RTCGeometry geometry, RTCDisplacementFunctionN displacement);
+        public static partial void rtcSetGeometryDisplacementFunction(RTCGeometry geometry, RTCDisplacementFunctionN? displacement);
         /// <summary>
         /// Returns the first half edge of a face.
         /// </summary>

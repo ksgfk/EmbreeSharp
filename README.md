@@ -68,6 +68,14 @@ The most crucial part is ` EmbreeSharp.SharedBufferHandle`. It inherits from `Sy
 
 Ideally, it can avoid memory leaks caused by users forgetting to free. But it has not been tested
 
+### MXCSR control and status register
+
+[link](https://github.com/embree/embree#mxcsr-control-and-status-register)
+
+This is x86-64 instruction. C# API does not provide them.
+
+You can call `SseUtility.EmbreeMxcsrRegisterControl` to enable `Flush to Zero` and `Denormals are Zero` mode for pre thread.
+
 ## Limitation
 
 Cannot use all APIs related to SYCL.
@@ -78,19 +86,9 @@ I will provide more safe functions for C# wrapper. But limited by language diffe
 
 If you have any idea, welcome issues and pull requests
 
-### SetGeometry[Intersect/Occluded/Bounds]Function
+### Add more tests
 
-Just provide safe API
-
-### MXCSR control and status register
-
-[link](https://github.com/embree/embree#mxcsr-control-and-status-register)
-
-This is x86-64 instruction. C# API does not provide them.
-
-Make a native library and use P/Invoke?
-
-Hmm...maybe we can use OS api. Write binary code to memory and call OS api to set memory as executable such as `VirtualProtectEx` on win32.
+no test no life
 
 ### Add more samples
 

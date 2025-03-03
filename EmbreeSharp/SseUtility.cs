@@ -28,7 +28,7 @@ namespace EmbreeSharp
         private const int PROT_EXEC = 0x4;
 
         private const int MAP_PRIVATE = 0x2;
-        private const int MAP_ANONYMOUS = 0x100000;
+        private const int MAP_ANONYMOUS = 0x20;
 
         private const int MAP_FAILED = -1;
 

@@ -5,23 +5,25 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <AssemblyVersion>0.6.5</AssemblyVersion>
-    <FileVersion>0.6.5</FileVersion>
+    <AssemblyVersion>0.6.6</AssemblyVersion>
+    <FileVersion>0.6.6</FileVersion>
     <RepositoryType>git</RepositoryType>
     <Description>Embree C# Low-level binding</Description>
     <Company>ksgfk</Company>
     <Authors>ksgfk</Authors>
-    <Copyright>Copyright (c) 2024 ksgfk</Copyright>
+    <Copyright>Copyright (c) 2024 - 2025 ksgfk</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/ksgfk/EmbreeSharp</RepositoryUrl>
     <PackageTags>embree;wrapper</PackageTags>
     <PackageReleaseNotes>update embree</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.6.5</Version>
+    <Version>0.6.6</Version>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
+
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
