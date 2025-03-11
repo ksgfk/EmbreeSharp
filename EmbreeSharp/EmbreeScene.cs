@@ -208,6 +208,18 @@ namespace EmbreeSharp
             rayHit = rayHitAligned;
         }
 
+        public unsafe void IntersectAligned(ref RTCRayHit rayHit)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+                fixed (RTCRayHit* rayHitPtr = &rayHit)
+                {
+                    EmbreeNative.rtcIntersect1(NativeScene, rayHitPtr, null);
+                }
+            }
+        }
+
         public unsafe void Intersect(Span<int> valid, ref RTCRayHit4 rayHit)
         {
             if (IsDisposed)
@@ -226,6 +238,25 @@ namespace EmbreeSharp
                 EmbreeNative.rtcIntersect4(validPtr, NativeScene, (RTCRayHit4*)Unsafe.AsPointer(ref rayHitAligned), null);
             }
             rayHit = rayHitAligned;
+        }
+
+        public unsafe void IntersectAligned(Span<int> valid, ref RTCRayHit4 rayHit)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 4)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            fixed (int* validPtr = valid)
+            {
+                fixed (RTCRayHit4* rayHitPtr = &rayHit)
+                {
+                    EmbreeNative.rtcIntersect4(validPtr, NativeScene, rayHitPtr, null);
+                }
+            }
         }
 
         public unsafe void Intersect(Span<int> valid, ref RTCRayHit8 rayHit)
@@ -248,6 +279,25 @@ namespace EmbreeSharp
             rayHit = rayHitAligned;
         }
 
+        public unsafe void IntersectAligned(Span<int> valid, ref RTCRayHit8 rayHit)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 8)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            fixed (int* validPtr = valid)
+            {
+                fixed (RTCRayHit8* rayHitPtr = &rayHit)
+                {
+                    EmbreeNative.rtcIntersect8(validPtr, NativeScene, rayHitPtr, null);
+                }
+            }
+        }
+
         public unsafe void Intersect(Span<int> valid, ref RTCRayHit16 rayHit)
         {
             if (IsDisposed)
@@ -268,6 +318,25 @@ namespace EmbreeSharp
             rayHit = rayHitAligned;
         }
 
+        public unsafe void IntersectAligned(Span<int> valid, ref RTCRayHit16 rayHit)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 16)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            fixed (int* validPtr = valid)
+            {
+                fixed (RTCRayHit16* rayHitPtr = &rayHit)
+                {
+                    EmbreeNative.rtcIntersect16(validPtr, NativeScene, rayHitPtr, null);
+                }
+            }
+        }
+
         public unsafe void Occluded(ref RTCRay ray)
         {
             if (IsDisposed)
@@ -279,6 +348,18 @@ namespace EmbreeSharp
             rayAligned = ray;
             EmbreeNative.rtcOccluded1(NativeScene, (RTCRay*)Unsafe.AsPointer(ref rayAligned), null);
             ray = rayAligned;
+        }
+
+        public unsafe void OccludedAligned(ref RTCRay ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            fixed (RTCRay* rayPtr = &ray)
+            {
+                EmbreeNative.rtcOccluded1(NativeScene, rayPtr, null);
+            }
         }
 
         public unsafe void Occluded(Span<int> valid, ref RTCRay4 ray)
@@ -301,6 +382,25 @@ namespace EmbreeSharp
             ray = rayAligned;
         }
 
+        public unsafe void OccludedAligned(Span<int> valid, ref RTCRay4 ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 4)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            fixed (int* validPtr = valid)
+            {
+                fixed (RTCRay4* rayPtr = &ray)
+                {
+                    EmbreeNative.rtcOccluded4(validPtr, NativeScene, rayPtr, null);
+                }
+            }
+        }
+
         public unsafe void Occluded(Span<int> valid, ref RTCRay8 ray)
         {
             if (IsDisposed)
@@ -321,6 +421,25 @@ namespace EmbreeSharp
             ray = rayAligned;
         }
 
+        public unsafe void OccludedAligned(Span<int> valid, ref RTCRay8 ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 8)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            fixed (int* validPtr = valid)
+            {
+                fixed (RTCRay8* rayPtr = &ray)
+                {
+                    EmbreeNative.rtcOccluded8(validPtr, NativeScene, rayPtr, null);
+                }
+            }
+        }
+
         public unsafe void Occluded(Span<int> valid, ref RTCRay16 ray)
         {
             if (IsDisposed)
@@ -339,6 +458,25 @@ namespace EmbreeSharp
                 EmbreeNative.rtcOccluded16(validPtr, NativeScene, (RTCRay16*)Unsafe.AsPointer(ref rayAligned), null);
             }
             ray = rayAligned;
+        }
+
+        public unsafe void OccludedAligned(Span<int> valid, ref RTCRay16 ray)
+        {
+            if (IsDisposed)
+            {
+                ThrowUtility.ObjectDisposed();
+            }
+            if (valid.Length != 16)
+            {
+                ThrowUtility.ArgumentOutOfRange();
+            }
+            fixed (int* validPtr = valid)
+            {
+                fixed (RTCRay16* rayPtr = &ray)
+                {
+                    EmbreeNative.rtcOccluded16(validPtr, NativeScene, rayPtr, null);
+                }
+            }
         }
 
         public unsafe Matrix4x4 GetGeometryTransform4x4(uint geomID, float time)

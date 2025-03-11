@@ -20,6 +20,7 @@ namespace EmbreeSharp
         /// <summary>
         /// Hepler function to alloc memory aligned on stack
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T StackAllocAligned<T>(Span<byte> stack, nuint alignment) where T : unmanaged
         {
             return ref Unsafe.AsRef<T>((void*)(((nint)Unsafe.AsPointer(ref MemoryMarshal.GetReference(stack)) + ((nint)alignment - 1)) & ~(nint)(alignment - 1)));
