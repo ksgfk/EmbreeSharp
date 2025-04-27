@@ -338,15 +338,32 @@ namespace EmbreeSharp.Native
         [LibraryImport(DynamicLibraryName)]
         public static partial void rtcSetSharedGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, [NativeType("const void*")] void* ptr, [NativeType("size_t")] nuint byteOffset, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
         /// <summary>
+        /// Sets a shared host/device geometry buffer pair.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetSharedGeometryBufferHostDevice(RTCGeometry geometry, RTCBufferType bufferType, uint slot, RTCFormat format, [NativeType("const void*")] void* ptr, [NativeType("size_t")] void* dptr, [NativeType("size_t")] nuint byteOffset, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
+        /// <summary>
         /// Creates and sets a new geometry buffer.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial void* rtcSetNewGeometryBuffer(RTCGeometry geometry, RTCBufferType type, uint slot, RTCFormat format, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount);
         /// <summary>
+        /// Creates and sets a new host/device geometry buffer pair.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcSetNewGeometryBufferHostDevice(RTCGeometry geometry, RTCBufferType bufferType, uint slot, RTCFormat format, [NativeType("size_t")] nuint byteStride, [NativeType("size_t")] nuint itemCount, void** ptr, void** dptr);
+        /// <summary>
         /// Returns the pointer to the data of a buffer.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial void* rtcGetGeometryBufferData(RTCGeometry geometry, RTCBufferType type, uint slot);
+        /// <summary>
+        /// Returns a pointer to the buffer data on the device. Returns the same pointer as
+        /// rtcGetGeometryBufferData if the device is no SYCL device or if Embree is executed on a
+        /// system with unified memory (e.g., iGPUs).
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcGetGeometryBufferDataDevice(RTCGeometry geometry, RTCBufferType type, uint slot);
         /// <summary>
         /// Updates a geometry buffer.
         /// </summary>

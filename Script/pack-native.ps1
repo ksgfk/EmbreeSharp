@@ -1,4 +1,4 @@
-$EmbreeVersion = "4.3.3"
+$EmbreeVersion = "4.4.0"
 $OutputDir = "build"
 $NugetUri = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
 $NugetExe = "$OutputDir/nuget.exe"

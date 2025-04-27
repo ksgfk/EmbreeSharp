@@ -3,6 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace EmbreeSharp.Native
 {
+    public struct RTCTraversable
+    {
+        public nint Ptr;
+    }
+
     /// <summary>
     /// Scene flags
     /// </summary>
@@ -123,7 +128,11 @@ namespace EmbreeSharp.Native
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial void rtcReleaseScene(RTCScene scene);
-
+        /// <summary>
+        /// Returns the traversable object of the scene which can be passed to ray queries.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial RTCTraversable rtcGetSceneTraversable(RTCScene scene);
         /// <summary>
         /// Attaches the geometry to a scene.
         /// </summary>
@@ -149,16 +158,6 @@ namespace EmbreeSharp.Native
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial RTCGeometry rtcGetGeometryThreadSafe(RTCScene scene, uint geomID);
-        /// <summary>
-        /// Gets the user-defined data pointer of the geometry. This function is not thread safe and should get used during rendering.
-        /// </summary>
-        [LibraryImport(DynamicLibraryName)]
-        public static partial void* rtcGetGeometryUserDataFromScene(RTCScene scene, uint geomID);
-        /// <summary>
-        /// Returns the interpolated transformation of an instance for the specified time.
-        /// </summary>
-        [LibraryImport(DynamicLibraryName)]
-        public static partial void rtcGetGeometryTransformFromScene(RTCScene scene, uint geomID, float time, RTCFormat format, void* xfm);
 
         /// <summary>
         /// Commits the scene.
@@ -209,6 +208,17 @@ namespace EmbreeSharp.Native
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial void rtcGetSceneLinearBounds(RTCScene scene, [NativeType("struct RTCLinearBounds*")] RTCLinearBounds* bounds_o);
+
+        /// <summary>
+        /// Gets the user-defined data pointer of the geometry. This function is not thread safe and should get used during rendering.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcGetGeometryUserDataFromScene(RTCScene scene, uint geomID);
+        /// <summary>
+        /// Returns the interpolated transformation of an instance for the specified time.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcGetGeometryTransformFromScene(RTCScene scene, uint geomID, float time, RTCFormat format, void* xfm);
 
         /// <summary>
         /// Perform a closest point query of the scene.
@@ -358,6 +368,157 @@ namespace EmbreeSharp.Native
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial void rtcForwardOccluded16Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCScene scene, [NativeType("struct RTCRay16*")] RTCRay16* ray, uint instID, uint instPrimID);
+
+        /// <summary>
+        /// Gets the user-defined data pointer of the geometry. This function is not thread safe and should get used during rendering.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcGetGeometryUserDataFromTraversable(RTCTraversable traversable, uint geomID);
+        /// <summary>
+        /// Returns the interpolated transformation of an instance for the specified time.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcGetGeometryTransformFromTraversable(RTCTraversable traversable, uint geomID, float time, RTCFormat format, void* xfm);
+        /// <summary>
+        /// Perform a closest point query of the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial bool rtcTraversablePointQuery(RTCTraversable traversable, RTCPointQuery* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void* userPtr);
+        /// <summary>
+        /// Perform a closest point query with a packet of 4 points with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial bool rtcTraversablePointQuery4([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCPointQuery4* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void** userPtr);
+        /// <summary>
+        /// Perform a closest point query with a packet of 8 points with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial bool rtcTraversablePointQuery8([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCPointQuery8* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void** userPtr);
+        /// <summary>
+        /// Perform a closest point query with a packet of 16 points with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial bool rtcTraversablePointQuery16([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCPointQuery16* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void** userPtr);
+        /// <summary>
+        /// Intersects a single ray with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableIntersect1(RTCTraversable traversable, RTCRayHit* rayhit, RTCIntersectArguments* args = null);
+        /// <summary>
+        /// Intersects a packet of 4 rays with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableIntersect4([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCRayHit4* rayhit, RTCIntersectArguments* args = null);
+        /// <summary>
+        /// Intersects a packet of 8 rays with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableIntersect8([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCRayHit8* rayhit, RTCIntersectArguments* args = null);
+        /// <summary>
+        /// Intersects a packet of 16 rays with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableIntersect16([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCRayHit16* rayhit, RTCIntersectArguments* args = null);
+        /// <summary>
+        /// Forwards ray inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect1([NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay* ray, uint instID);
+        /// <summary>
+        /// Forwards ray inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect1Ex([NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay* ray, uint instID, uint instPrimID);
+        /// <summary>
+        /// Forwards ray packet of size 4 inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect4([NativeType("const int*")] int* valid, [NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay4* ray, uint instID);
+        /// <summary>
+        /// Forwards ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect4Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay4* ray, uint instID, uint instPrimID);
+        /// <summary>
+        /// Forwards ray packet of size 8 inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect8([NativeType("const int*")] int* valid, [NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay8* ray, uint instID);
+        /// <summary>
+        /// Forwards ray packet of size 8 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect8Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay8* ray, uint instID, uint instPrimID);
+        /// <summary>
+        /// Forwards ray packet of size 16 inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect16([NativeType("const int*")] int* valid, [NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay16* ray, uint instID);
+        /// <summary>
+        /// Forwards ray packet of size 16 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardIntersect16Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCIntersectFunctionNArguments*")] RTCIntersectFunctionNArguments* args, RTCTraversable traversable, RTCRay16* ray, uint instID, uint instPrimID);
+        /// <summary>
+        /// Tests a single ray for occlusion with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableOccluded1(RTCTraversable traversable, RTCRay* ray, RTCOccludedArguments* args = null);
+        /// <summary>
+        /// Tests a packet of 4 rays for occlusion occluded with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableOccluded4([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCRay4* ray, RTCOccludedArguments* args = null);
+        /// <summary>
+        /// Tests a packet of 8 rays for occlusion occluded with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableOccluded8([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCRay8* ray, RTCOccludedArguments* args = null);
+        /// <summary>
+        /// Tests a packet of 16 rays for occlusion occluded with the scene.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableOccluded16([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCRay16* ray, RTCOccludedArguments* args = null);
+        /// <summary>
+        /// Forwards single occlusion ray inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded1([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay* ray, uint instID);
+        /// <summary>
+        /// Forwards single occlusion ray inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded1Ex([NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay* ray, uint instID, uint instPrimID);
+        /// <summary>
+        /// Forwards occlusion ray packet of size 4 inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded4([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay4* ray, uint instID);
+        /// <summary>
+        /// Forwards occlusion ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded4Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay4* ray, uint instID, uint instPrimID);
+        /// <summary>
+        /// Forwards occlusion ray packet of size 4 inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded8([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay8* ray, uint instID);
+        /// <summary>
+        /// Forwards occlusion ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded8Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay8* ray, uint instID, uint instPrimID);
+        /// <summary>
+        /// Forwards occlusion ray packet of size 4 inside user geometry callback.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded16([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay16* ray, uint instID);
+        /// <summary>
+        /// Forwards occlusion ray packet of size 4 inside user geometry callback. Extended to handle instance arrays using instPrimID parameter.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcTraversableForwardOccluded16Ex([NativeType("const int*")] int* valid, [NativeType("const struct RTCOccludedFunctionNArguments*")] RTCOccludedFunctionNArguments* args, RTCTraversable traversable, RTCRay16* ray, uint instID, uint instPrimID);
     }
 
     /// <summary>

@@ -67,15 +67,37 @@ namespace EmbreeSharp.Native
         [LibraryImport(DynamicLibraryName)]
         public static partial RTCBuffer rtcNewBuffer(RTCDevice device, [NativeType("size_t")] nuint byteSize);
         /// <summary>
+        /// Creates a new buffer using explicit host device memory.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial RTCBuffer rtcNewBufferHostDevice(RTCDevice device, [NativeType("size_t")] nuint byteSize);
+        /// <summary>
         /// Creates a new shared buffer.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial RTCBuffer rtcNewSharedBuffer(RTCDevice device, void* ptr, [NativeType("size_t")] nuint byteSize);
         /// <summary>
+        /// Creates a new shared buffer using explicit host device memory.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial RTCBuffer rtcNewSharedBufferHostDevice(RTCDevice device, void* ptr, [NativeType("size_t")] nuint byteSize);
+        /// <summary>
+        /// Synchronize host and device memory by copying data from host to device.
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void rtcCommitBuffer(RTCBuffer buffer);
+        /// <summary>
         /// Returns a pointer to the buffer data.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
         public static partial void* rtcGetBufferData(RTCBuffer buffer);
+        /// <summary>
+        /// Returns a pointer to the buffer data on the device. Returns the same pointer as
+        /// rtcGetBufferData if the device is no SYCL device or if Embree is executed on a
+        /// system with unified memory (e.g., iGPUs).
+        /// </summary>
+        [LibraryImport(DynamicLibraryName)]
+        public static partial void* rtcGetBufferDataDevice(RTCBuffer buffer);
         /// <summary>
         /// Retains the buffer (increments the reference count).
         /// </summary>
