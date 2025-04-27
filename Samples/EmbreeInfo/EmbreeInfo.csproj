@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="embree-osx-arm64" Version="4.3.3" />
-    <PackageReference Include="embree-win-x64" Version="4.3.3" />
-    <PackageReference Include="embree-linux-x64" Version="4.3.3" />
-    <PackageReference Include="embree-osx-x64" Version="4.3.3" />
+    <PackageReference Include="embree-osx-arm64" Version="4.4.0" />
+    <PackageReference Include="embree-win-x64" Version="4.4.0" />
+    <PackageReference Include="embree-linux-x64" Version="4.4.0" />
+    <PackageReference Include="embree-osx-x64" Version="4.4.0" />
     <ProjectReference Include="..\..\EmbreeSharp\EmbreeSharp.csproj" />
   </ItemGroup>
 

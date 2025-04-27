@@ -5,6 +5,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
+        SseUtility.EmbreeMxcsrRegisterControl();
         float[] data = new float[1024 * 1024 * 32];
         foreach (ref var i in data.AsSpan())
         {
@@ -20,14 +21,14 @@ internal class Program
         DefaultSharedBufferAllocator allocator = new();
         for (int i = 0; i < 1000; i++)
         {
-            //TestEmbreeSharedBuffer(device, allocator, data);
-            //TestEmbreeSharedBufferForgetRelease(device, allocator, data);
+            TestEmbreeSharedBuffer(device, allocator, data);
+            TestEmbreeSharedBufferForgetRelease(device, allocator, data);
         }
 
         for (int i = 0; i < 1000000; i++)
         {
-            //TestGeo(device, allocator, data, intd);
-            //TestGeoMultiSet(device, allocator, data, intd);
+            TestGeo(device, allocator, data, intd);
+            TestGeoMultiSet(device, allocator, data, intd);
         }
     }
 

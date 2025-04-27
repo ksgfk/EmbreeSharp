@@ -88,6 +88,7 @@ internal class Program
 
     private static void Main(string[] args)
     {
+        SseUtility.EmbreeMxcsrRegisterControl();
         const int N = 10000000;
         RTCBuildPrimitive[] prims = new RTCBuildPrimitive[N];
         Random rand = new();
