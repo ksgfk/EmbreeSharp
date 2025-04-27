@@ -383,21 +383,25 @@ namespace EmbreeSharp.Native
         /// Perform a closest point query of the scene.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static partial bool rtcTraversablePointQuery(RTCTraversable traversable, RTCPointQuery* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void* userPtr);
         /// <summary>
         /// Perform a closest point query with a packet of 4 points with the scene.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static partial bool rtcTraversablePointQuery4([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCPointQuery4* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void** userPtr);
         /// <summary>
         /// Perform a closest point query with a packet of 8 points with the scene.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static partial bool rtcTraversablePointQuery8([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCPointQuery8* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void** userPtr);
         /// <summary>
         /// Perform a closest point query with a packet of 16 points with the scene.
         /// </summary>
         [LibraryImport(DynamicLibraryName)]
+        [return: MarshalAs(UnmanagedType.I1)]
         public static partial bool rtcTraversablePointQuery16([NativeType("const int*")] int* valid, RTCTraversable traversable, RTCPointQuery16* query, RTCPointQueryContext* context, RTCPointQueryFunction queryFunc, void** userPtr);
         /// <summary>
         /// Intersects a single ray with the scene.

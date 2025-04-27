@@ -158,7 +158,8 @@ namespace EmbreeSharp.Native
     /// <summary>
     /// Memory monitor callback function
     /// </summary>
-    public unsafe delegate bool RTCMemoryMonitorFunction(void* ptr, [NativeType("ssize_t")] nint bytes, bool post);
+    [return: MarshalAs(UnmanagedType.I1)]
+    public unsafe delegate bool RTCMemoryMonitorFunction(void* ptr, [NativeType("ssize_t")] nint bytes, [MarshalAs(UnmanagedType.I1)] bool post);
 
     public static unsafe partial class EmbreeNative
     {
