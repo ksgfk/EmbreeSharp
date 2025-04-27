@@ -24,6 +24,9 @@
     <DebugSymbols>true</DebugSymbols>
 
     <IsAotCompatible>true</IsAotCompatible>
+
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>F:\csharp\ksgfk.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
