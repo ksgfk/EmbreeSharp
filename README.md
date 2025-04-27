@@ -12,7 +12,7 @@ This project is still under development. API are not stable.
 
 ## Use
 
-Now target embree version is `v4.3.3`
+Now target embree version is `v4.4.0`
 
 Install this package from nuget.
 
