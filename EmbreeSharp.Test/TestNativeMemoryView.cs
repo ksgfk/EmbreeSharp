@@ -168,7 +168,7 @@ namespace EmbreeSharp.Test
             }
             {
                 Span<int> sp = src.AsSpan(4, 1);
-                Assert.AreEqual(sp.Length, 1);
+                Assert.AreEqual(1, sp.Length);
                 Assert.AreEqual(_data[4], sp[0]);
             }
             {
