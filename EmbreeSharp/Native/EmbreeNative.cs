@@ -9,9 +9,9 @@ namespace EmbreeSharp.Native
     {
         public const int RTC_VERSION_MAJOR = 4;
         public const int RTC_VERSION_MINOR = 4;
-        public const int RTC_VERSION_PATCH = 0;
-        public const int RTC_VERSION = 40400;
-        public const string RTC_VERSION_STRING = "4.4.0";
+        public const int RTC_VERSION_PATCH = 1;
+        public const int RTC_VERSION = 40401;
+        public const string RTC_VERSION_STRING = "4.4.1";
         public const int RTC_MAX_INSTANCE_LEVEL_COUNT = 1;
         public const uint RTC_INVALID_GEOMETRY_ID = unchecked((uint)-1);
         public const string DynamicLibraryName = "embree4";
