@@ -1,26 +1,36 @@
 param($EmbreeVersion, $OutputDir, $NugetExe)
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+. (Join-Path $PSScriptRoot "pack-native-common.ps1")
+
 $TFM = "linux-x64"
+$ExtractDir = Join-Path $OutputDir $TFM
+$StageDir = Join-Path $OutputDir "$TFM-lib"
 
 Write-Host "download embree $TFM v$EmbreeVersion"
 Invoke-WebRequest -Uri "https://github.com/embree/embree/releases/download/v$EmbreeVersion/embree-$EmbreeVersion.x86_64.linux.tar.gz" -OutFile "$OutputDir/$TFM.tar.gz"
 
 Write-Host "unzip"
-7z x "$OutputDir/$TFM.tar.gz" -o"$OutputDir" -aoa
-7z x "$OutputDir/$TFM.tar" -o"$OutputDir/$TFM" -aoa
+Invoke-NativeCommand -FilePath "7z" -ArgumentList @("x", "$OutputDir/$TFM.tar.gz", "-o$OutputDir", "-aoa")
+Invoke-NativeCommand -FilePath "7z" -ArgumentList @("x", "$OutputDir/$TFM.tar", "-o$ExtractDir", "-aoa")
 
 "copy libs"
-If(Test-Path "$OutputDir/$TFM-lib")
-{
-    Remove-Item "$OutputDir/$TFM-lib/*" -Recurse
+$PackageRoot = Get-EmbreePackageRoot -ExtractDir $ExtractDir
+$LibDir = Join-Path $PackageRoot "lib64"
+if (-not (Test-Path -LiteralPath $LibDir)) {
+    $LibDir = Join-Path $PackageRoot "lib"
 }
-Else
-{
-    New-Item -ItemType Directory -Force -Path "$OutputDir/$TFM-lib"
+
+if (-not (Test-Path -LiteralPath $LibDir)) {
+    throw "Cannot locate linux library directory under '$PackageRoot'."
 }
-Copy-Item "$OutputDir/$TFM/lib/libembree4.so" -Destination "$OutputDir/$TFM-lib"
-Copy-Item "$OutputDir/$TFM/lib/libtbb.so" -Destination "$OutputDir/$TFM-lib"
-Copy-Item "$OutputDir/$TFM/lib/libtbbmalloc.so" -Destination "$OutputDir/$TFM-lib"
+
+Clear-DirectoryContents -Path $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $LibDir "libembree4.so") -DestinationDirectory $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $LibDir "libtbb.so") -DestinationDirectory $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $LibDir "libtbbmalloc.so") -DestinationDirectory $StageDir
 
 Write-Host "package"
 @"
@@ -45,4 +55,4 @@ Write-Host "package"
     </files>
 </package>
 "@ | Out-File -FilePath "$OutputDir/$TFM.nuspec"
-Start-Process -FilePath $NugetExe -ArgumentList "pack $OutputDir/$TFM.nuspec -OutputDirectory $OutputDir" -Wait -NoNewWindow
+Invoke-NativeCommand -FilePath $NugetExe -ArgumentList @("pack", "$OutputDir/$TFM.nuspec", "-OutputDirectory", $OutputDir)

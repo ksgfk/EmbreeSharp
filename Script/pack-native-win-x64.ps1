@@ -1,12 +1,27 @@
 param($EmbreeVersion, $OutputDir, $NugetExe)
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+. (Join-Path $PSScriptRoot "pack-native-common.ps1")
+
 $TFM = "win-x64"
+$ExtractDir = Join-Path $OutputDir $TFM
+$StageDir = Join-Path $OutputDir "$TFM-lib"
 
 Write-Host "download embree win-x64 v$EmbreeVersion"
 Invoke-WebRequest -Uri "https://github.com/embree/embree/releases/download/v$EmbreeVersion/embree-$EmbreeVersion.x64.windows.zip" -OutFile "$OutputDir/$TFM.zip"
 
 Write-Host "unzip"
-Expand-Archive -Path "$OutputDir/$TFM.zip" -DestinationPath "$OutputDir/$TFM"
+Expand-Archive -Path "$OutputDir/$TFM.zip" -DestinationPath $ExtractDir -Force
+
+$PackageRoot = Get-EmbreePackageRoot -ExtractDir $ExtractDir
+$BinDir = Join-Path $PackageRoot "bin"
+
+Clear-DirectoryContents -Path $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $BinDir "embree4.dll") -DestinationDirectory $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $BinDir "tbb12.dll") -DestinationDirectory $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $BinDir "tbbmalloc.dll") -DestinationDirectory $StageDir
 
 Write-Host "package"
 @"
@@ -26,9 +41,9 @@ Write-Host "package"
     </metadata>
     <!-- Optional 'files' node -->
     <files>
-        <file src="$TFM\bin\*.dll" target="runtimes\$TFM\native" />
+        <file src="$TFM-lib\*.dll" target="runtimes\$TFM\native" />
         <file src="..\..\README.md" target="\" />
     </files>
 </package>
 "@ | Out-File -FilePath "$OutputDir/$TFM.nuspec"
-Start-Process -FilePath $NugetExe -ArgumentList "pack $OutputDir/$TFM.nuspec -OutputDirectory $OutputDir" -Wait -NoNewWindow
+Invoke-NativeCommand -FilePath $NugetExe -ArgumentList @("pack", "$OutputDir/$TFM.nuspec", "-OutputDirectory", $OutputDir)

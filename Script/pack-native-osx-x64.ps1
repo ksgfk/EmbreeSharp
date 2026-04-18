@@ -1,24 +1,30 @@
 param($EmbreeVersion, $OutputDir, $NugetExe)
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+. (Join-Path $PSScriptRoot "pack-native-common.ps1")
+
 $TFM = "osx-x64"
+$ExtractDir = Join-Path $OutputDir $TFM
+$StageDir = Join-Path $OutputDir "$TFM-lib"
 
 Write-Host "download embree $TFM v$EmbreeVersion"
 Invoke-WebRequest -Uri "https://github.com/embree/embree/releases/download/v$EmbreeVersion/embree-$EmbreeVersion.x86_64.macosx.zip" -OutFile "$OutputDir/$TFM.zip"
 
 Write-Host "unzip"
-7z x "$OutputDir/$TFM.zip" -o"$OutputDir/$TFM" -aoa
+Expand-Archive -Path "$OutputDir/$TFM.zip" -DestinationPath $ExtractDir -Force
 
 "copy libs"
-If(Test-Path "$OutputDir/$TFM-lib")
-{
-    Remove-Item "$OutputDir/$TFM-lib/*" -Recurse
+$PackageRoot = Get-EmbreePackageRoot -ExtractDir $ExtractDir
+$LibDir = Join-Path $PackageRoot "lib"
+if (-not (Test-Path -LiteralPath $LibDir)) {
+    throw "Cannot locate macOS library directory under '$PackageRoot'."
 }
-Else
-{
-    New-Item -ItemType Directory -Force -Path "$OutputDir/$TFM-lib"
-}
-Copy-Item "$OutputDir/$TFM/lib/libembree4.dylib" -Destination "$OutputDir/$TFM-lib"
-Copy-Item "$OutputDir/$TFM/lib/libtbb.dylib" -Destination "$OutputDir/$TFM-lib"
+
+Clear-DirectoryContents -Path $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $LibDir "libembree4.dylib") -DestinationDirectory $StageDir
+Copy-ResolvedFile -SourcePath (Join-Path $LibDir "libtbb.dylib") -DestinationDirectory $StageDir
 
 Write-Host "package"
 @"
@@ -43,4 +49,4 @@ Write-Host "package"
     </files>
 </package>
 "@ | Out-File -FilePath "$OutputDir/$TFM.nuspec"
-Start-Process -FilePath $NugetExe -ArgumentList "pack $OutputDir/$TFM.nuspec -OutputDirectory $OutputDir" -Wait -NoNewWindow
+Invoke-NativeCommand -FilePath $NugetExe -ArgumentList @("pack", "$OutputDir/$TFM.nuspec", "-OutputDirectory", $OutputDir)
