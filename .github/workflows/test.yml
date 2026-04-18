@@ -15,10 +15,10 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x
+        dotnet-version: 10.x
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore -p:SignAssembly=false
     - name: Test
-      run: dotnet test --configuration Release --no-restore
+      run: dotnet test --configuration Release --no-build -p:SignAssembly=false
