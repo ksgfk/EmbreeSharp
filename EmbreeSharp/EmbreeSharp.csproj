@@ -1,23 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <AssemblyVersion>0.6.6</AssemblyVersion>
-    <FileVersion>0.6.6</FileVersion>
+    <AssemblyVersion>0.6.7</AssemblyVersion>
+    <FileVersion>0.6.7</FileVersion>
     <RepositoryType>git</RepositoryType>
     <Description>Embree C# Low-level binding</Description>
     <Company>ksgfk</Company>
     <Authors>ksgfk</Authors>
-    <Copyright>Copyright (c) 2024 - 2025 ksgfk</Copyright>
+    <Copyright>Copyright (c) 2024 - 2026 ksgfk</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/ksgfk/EmbreeSharp</RepositoryUrl>
     <PackageTags>embree;wrapper</PackageTags>
     <PackageReleaseNotes>update embree</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.6.6</Version>
+    <Version>0.6.7</Version>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <DebugType>embedded</DebugType>
@@ -25,8 +25,8 @@
 
     <IsAotCompatible>true</IsAotCompatible>
 
-    <!-- <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>F:\csharp\ksgfk.snk</AssemblyOriginatorKeyFile> -->
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>F:\csharp\ksgfk.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -52,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.202" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

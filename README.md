@@ -6,13 +6,13 @@ EmbreeSharp is an unofficial C# low-level binding for [embree](https://github.co
 
 Provide a tiny safe wrapper in C#
 
-Target framework is `net8.0`
+Target framework is `net8.0/net10.0`
 
 This project is still under development. API are not stable.
 
 ## Use
 
-Now target embree version is `v4.4.0`
+Now target embree version is `v4.4.1`
 
 Install this package from nuget.
 
