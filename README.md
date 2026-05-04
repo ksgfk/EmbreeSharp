@@ -80,19 +80,24 @@ You can call `SseUtility.EmbreeMxcsrRegisterControl` to enable `Flush to Zero` a
 
 Cannot use all APIs related to SYCL.
 
-## TODO
+## About EmbreeSharp.SIMD
 
-I will provide more safe functions for C# wrapper. But limited by language difference, It is almost impossible to have both performance and safety.
+`EmbreeSharp.SIMD` is an experimental SIMD abstraction library. The original goal was to build a close-to-zero-cost C# abstraction where the same generic algorithm could be statically dispatched to different ISA backends, such as SSE, AVX, NEON, and an explicit scalar fallback.
 
-If you have any idea, welcome issues and pull requests
+In practice, C# and the .NET compilation model make this extremely hard. Almost impossible, at least as of .NET 10. The current library shows the pain pretty clearly:
 
-### Add more tests
+1. C# has no associated types. Every abstraction has to spell out all the types it may depend on. A primitive packet only needs `TSelf`, `TScalar`, and `TMask`, but a vector built on top of that packet needs `TSelf`, `TPacket`, `TScalar`, `TVectorMask`, and `TPacketMask`. A matrix grows again into `TSelf`, `TVector`, `TPacket`, `TScalar`, `TMatrixMask`, `TVectorMask`, and `TPacketMask`. These relationships should belong to the backend itself, but instead they have to be repeated through every interface, every constraint, and every generic algorithm.
+2. C# does not have const generics in a form that helps here. Lane count, vector dimension, and matrix dimension should really be type-level constants. Right now they are expressed through `static abstract int LaneCount` plus hand-written families such as `Vector2`, `Vector3`, `Vector4`, `Matrix2`, `Matrix3`, and `Matrix4`. That means 2/3/4D vectors and 2x2/3x3/4x4 matrices cannot share enough structure, so a lot of APIs are copied by hand.
+3. Static abstract interface members make the API expressible, but they do not guarantee zero cost. Whether a generic call is fully inlined, whether the abstraction disappears, and whether the generated code gets the register allocation and instruction selection you hoped for is up to the JIT or AOT compiler. The library cannot make that a stable contract. Change the runtime version, target platform, or call shape, and the generated code may change with it.
+4. C# hardware intrinsics are concrete ISA APIs, not a composable portable SIMD backend. SSE, AVX, and NEON differ in register width, available instructions, mask representation, comparison results, and load/store rules. To present one `Packet...` API, every backend needs a lot of glue code. Some operations also have no exact hardware instruction, so they have to be approximated, built from several instructions, or moved back to scalar code.
+5. Masks become a second type system. Packet masks, vector masks, and matrix masks grow together with primitives, vectors, and matrices. `Select`, `All`, `Any`, `None`, `AndNot`, bool span load/store, and bitwise mask behavior all have to stay consistent across backends, even though the native mask semantics are not the same across ISAs. This produces a lot of code, and it is easy for small semantic differences to sneak in.
+6. Composite types multiply the backend count. There are primitive families such as float32, float64, int32, and uint32. Each of those can have SSE, AVX, NEON, and Scalar backends. On top of that come vector2/3/4, matrix2/3/4, quaternion, and all their masks. Adding one primitive operation or one backend usually does not mean touching one file; it means updating a whole set of implementations, tests, and docs.
+7. Math functions do not have one shared low-level contract. APIs like `Sin`, `Cos`, `SinCos`, `Reciprocal`, `ReciprocalSqrt`, and `FusedMultiplyAdd` have different costs and precision stories on different ISAs. Some ISAs do not have matching instructions at all, so the implementation has to use approximations. Some operations need their own precision contract. The more uniform the abstraction looks, the easier it is to hide these backend differences.
+8. Source generators reduce boilerplate, but they do not change the language. They can generate repeated code, but they cannot add associated types, const generics, reliable cross-ISA specialization, or proof that the JIT will treat the generated code as zero-cost abstraction. The maintainer still has to understand and validate every generated backend.
+9. The testing cost is almost as high as the implementation cost. This library has to test not only numeric results, but also mask rules, lane behavior, load/store paths, aligned and unsafe variants, matrix row/transform semantics, backend consistency, and error bounds for approximate math. Many bugs will not show up as compile errors. They show up as a tiny difference in one ISA, one lane, or one matrix convention.
+10. In the end, it is very hard for this to become the foundation for Embree-style kernels. Embree's SIMD layer relies on C++ templates, target-specific object code, compiler inlining, and a mature low-level codebase. C# can wrap Embree, and it can be used for local SIMD experiments, but rebuilding an equally expressive, equally controllable, equally maintainable SIMD abstraction in C# is not realistic today.
 
-no test no life
-
-### Add more samples
-
-same as title. like path tracer?
+So the more honest role for `EmbreeSharp.SIMD` is as a research project and a correctness playground. `Scalar...` types can be an explicitly selected fallback and test baseline. Some `Packet...` types can explore the edge of .NET intrinsics. But this should not pretend to be an automatic runtime-dispatched SIMD layer, and it should not promise to replace Embree's native vectorized kernels. If C# or .NET eventually gets associated types, const generics, stronger specialization/AOT control, and a more stable portable SIMD model, the interface and test experience from this experiment may still be useful for a cleaner design.
 
 ## License
 

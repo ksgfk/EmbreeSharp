@@ -1,4 +1,4 @@
-﻿using EmbreeSharp;
+using EmbreeSharp;
 using EmbreeSharp.Native;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;

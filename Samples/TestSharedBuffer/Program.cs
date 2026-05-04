@@ -1,4 +1,4 @@
-﻿using EmbreeSharp;
+using EmbreeSharp;
 using EmbreeSharp.Native;
 
 internal class Program

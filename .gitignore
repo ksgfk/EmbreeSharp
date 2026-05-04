@@ -7,6 +7,7 @@ out
 
 obj
 bin
+BenchmarkDotNet.Artifacts
 
 *.dll
 *.dylib

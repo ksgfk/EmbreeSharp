@@ -1,4 +1,4 @@
-﻿using EmbreeSharp.Native;
+using EmbreeSharp.Native;
 
 namespace EmbreeSharp
 {

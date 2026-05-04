@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="SignAssembly">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
@@ -25,8 +25,9 @@
 
     <IsAotCompatible>true</IsAotCompatible>
 
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>F:\csharp\ksgfk.snk</AssemblyOriginatorKeyFile>
+    <EmbreeSharpSignAssembly Condition="'$(EmbreeSharpSignAssembly)' == '' and '$(SignAssembly)' == 'true'">true</EmbreeSharpSignAssembly>
+    <EmbreeSharpSignAssembly Condition="'$(EmbreeSharpSignAssembly)' == ''">false</EmbreeSharpSignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -34,6 +35,11 @@
     <Deterministic>true</Deterministic>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(EmbreeSharpSignAssembly)' == 'true'">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>F:\csharp\ksgfk.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -52,7 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.202" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.203" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace EmbreeSharp.Test
+namespace EmbreeSharp.Test
 {
     [TestClass]
     public class TestMXCSR

@@ -1,4 +1,4 @@
-﻿using EmbreeSharp;
+using EmbreeSharp;
 
 internal class Program
 {

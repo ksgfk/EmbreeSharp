@@ -1,19 +1,23 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11723.231 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp", "EmbreeSharp\EmbreeSharp.csproj", "{F85C8CBA-88F2-4B90-B4BE-5FA173CAEAFB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp.Test", "EmbreeSharp.Test\EmbreeSharp.Test.csproj", "{06A03D0C-C8AD-4EBD-9578-648748BBC44C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp.SIMD", "EmbreeSharp.SIMD\EmbreeSharp.SIMD.csproj", "{2FB5EBAD-31CB-439D-96B8-CDD94CCB3AED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp.SIMD.Test", "EmbreeSharp.SIMD.Test\EmbreeSharp.SIMD.Test.csproj", "{B4424272-3DDF-4E1D-9CC6-4871F5A1E02D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp.SIMD.Benchmark", "EmbreeSharp.SIMD.Benchmark\EmbreeSharp.SIMD.Benchmark.csproj", "{769B11F2-297F-4829-B89B-8031D3D44096}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbreeSharp.SIMD.SourceGeneration", "EmbreeSharp.SIMD.SourceGeneration\EmbreeSharp.SIMD.SourceGeneration.csproj", "{58FFDF48-5FDE-1878-6F0B-3F034819AC58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F85C8CBA-88F2-4B90-B4BE-5FA173CAEAFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -24,5 +28,27 @@ Global
 		{06A03D0C-C8AD-4EBD-9578-648748BBC44C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06A03D0C-C8AD-4EBD-9578-648748BBC44C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06A03D0C-C8AD-4EBD-9578-648748BBC44C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FB5EBAD-31CB-439D-96B8-CDD94CCB3AED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FB5EBAD-31CB-439D-96B8-CDD94CCB3AED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FB5EBAD-31CB-439D-96B8-CDD94CCB3AED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FB5EBAD-31CB-439D-96B8-CDD94CCB3AED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4424272-3DDF-4E1D-9CC6-4871F5A1E02D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4424272-3DDF-4E1D-9CC6-4871F5A1E02D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4424272-3DDF-4E1D-9CC6-4871F5A1E02D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4424272-3DDF-4E1D-9CC6-4871F5A1E02D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769B11F2-297F-4829-B89B-8031D3D44096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769B11F2-297F-4829-B89B-8031D3D44096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{769B11F2-297F-4829-B89B-8031D3D44096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{769B11F2-297F-4829-B89B-8031D3D44096}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58FFDF48-5FDE-1878-6F0B-3F034819AC58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58FFDF48-5FDE-1878-6F0B-3F034819AC58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58FFDF48-5FDE-1878-6F0B-3F034819AC58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58FFDF48-5FDE-1878-6F0B-3F034819AC58}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2DFF7B2D-51C9-4A15-B0CE-FFF25F8569DD}
 	EndGlobalSection
 EndGlobal
